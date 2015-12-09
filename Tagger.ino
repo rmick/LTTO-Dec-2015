@@ -16,7 +16,6 @@ bool Shields;
 void TaggerMode()
 { 
   char Action = GetButtonPress();
-  //Serial.println(Action);   // Feeds lots of blank lines.........
   if      (Action == '1' && Shields == False)   SendIR('T', B0000000);
   else if (Action == '2' && Shields == False)   SendIR('T', B0000001);
   else if (Action == '3' && Shields == False)   SendIR('T', B0000010);
@@ -25,7 +24,6 @@ void TaggerMode()
   else if (Action == 'S') Shields = !Shields;
   else if (Action == 'R') ;                                 // TODO: Reload ammo
   else if (Action == 'E') state = PinCode;
-  //if (GetTouch) delay (200);  //delay to stop repeat buttons presses 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,14 +31,8 @@ char GetButtonPress()
 {
   if (GetTouch(0))
   {
-    if (deBug)
-    {
-      Serial.print(F("gbpTouch:"));
-      Serial.print(TouchX);
-      Serial.print(F(", "));
-      Serial.println(TouchY);
-    }
-    delay (200);
+    delay (200);  //TODO: fix the debounce properly.
+    
     // Match it to a button
     byte row = 0;
     for (row=0; row<13; row++) 
@@ -49,10 +41,6 @@ char GetButtonPress()
       {
         if (TouchY > Buttons [row] [1] && TouchY < Buttons [row] [3])
         {
-          Serial.print(F("Button #: "));
-          Serial.println(row);
-          Serial.print(F("Which is button - "));
-          Serial.print(ButtonPressed [row]);
           return ButtonPressed [row];
         }
       }
@@ -74,7 +62,6 @@ bool GetTouch(bool Touched)
   TouchY = map(p.y, MinValTouchY, MaxValTouchY, 0, tft.height());
   
   if (p.z >10) Touched = True;
-  //Serial.print(Touched);
   return Touched;
 }
 
@@ -149,7 +136,6 @@ void DrawTaggerScreen()
   DrawButton(135,  40,  100, 55, BLACK,  "ReLoad",  2, WHITE);
   DrawButton(135, 220,  100, 55, RED,    "Shields", 2, GREEN);
   DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",    2, BLACK);
-  if (deBug) PrintButtonArray();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -201,6 +187,7 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
 
 void PrintButtonArray()
 {
+  return;
   byte Row;
   byte Column;
   for (Row=0; Row<12; Row++)

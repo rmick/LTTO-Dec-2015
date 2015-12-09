@@ -106,7 +106,7 @@ void setup()
 ISR(TIMER1_OVF_vect)          // interrrupt service routine
   {
     // if (deBug) Serial.println(" Tick");
-    digitalWrite(13, !digitalRead(13));
+    digitalWrite(12, !digitalRead(12));
     TCNT1 = timer1counter;    //re-preload the timer
   }
 //////////////////////MAIN LOOP//////////////////////////////////
@@ -153,8 +153,9 @@ void loop()
     {
       if (deBug) Serial.println(F("Config-Mode"));
       lastState = Config;
-      SetUp();
+      DrawConfigScreen();
     }
+    ConfigMode();
   }
   else
   {
