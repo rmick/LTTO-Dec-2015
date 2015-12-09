@@ -51,15 +51,11 @@ char GetButtonPress()
         {
           Serial.print(F("Button #: "));
           Serial.println(row);
+          Serial.print(F("Which is button - "));
+          Serial.print(ButtonPressed [row]);
+          return ButtonPressed [row];
         }
       }
-    }
-    if (deBug)
-    {
-      Serial.print(F("Which is button - "));
-      Serial.print(ButtonPressed [row]);
-      Serial.println(".");
-    return ButtonPressed [row];
     }
   }  
 }
