@@ -16,13 +16,14 @@ bool Shields;
 void TaggerMode()
 { 
   char Action = GetButtonPress();
+  //Serial.println(Action);   // Feeds lots of blank lines.........
   if      (Action == '1' && Shields == False)   SendIR('T', B0000000);
   else if (Action == '2' && Shields == False)   SendIR('T', B0000001);
   else if (Action == '3' && Shields == False)   SendIR('T', B0000010);
   else if (Action == '4' && Shields == False)   SendIR('T', B0000011);
-  // Adjust ammo : tft.fillScreen(YELLOW);
+  // TODO: Adjust ammo : tft.fillScreen(YELLOW);
   else if (Action == 'S') Shields = !Shields;
-  else if (Action == 'R') ;// Reload ammo
+  else if (Action == 'R') ;                                 // TODO: Reload ammo
   else if (Action == 'E') state = PinCode;
   //if (GetTouch) delay (200);  //delay to stop repeat buttons presses 
 }
@@ -56,7 +57,8 @@ char GetButtonPress()
     if (deBug)
     {
       Serial.print(F("Which is button - "));
-      Serial.println(ButtonPressed [row]);
+      Serial.print(ButtonPressed [row]);
+      Serial.println(".");
     return ButtonPressed [row];
     }
   }  
@@ -194,7 +196,7 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
   Buttons[ButtonCount] [1]= (PosY);
   Buttons[ButtonCount] [2]= (PosX+Width);
   Buttons[ButtonCount] [3]= (PosY+Height);
-  ButtonPressed [ButtonCount] = Text.charAt(1);
+  ButtonPressed [ButtonCount] = Text.charAt(0);
   ButtonCount++;
 }
 
@@ -203,7 +205,6 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
 
 void PrintButtonArray()
 {
-  return;
   byte Row;
   byte Column;
   for (Row=0; Row<12; Row++)
