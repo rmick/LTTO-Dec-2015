@@ -40,7 +40,7 @@ const bool False = 0;
 int numLives = EEPROM.read(0);
 int chargeDelay = EEPROM.read(2);   // TODO : can be changed via config screen - need to store in Flash.        
 bool touchGood = 0;
-bool keyNumNew = 0;
+bool keyNumNew = 0;   //TODO: Remove this once PinPad uses the screen_touch routines.
 
 const byte IrLED = 13;
 const byte IrReceivePin = 11;
@@ -61,6 +61,10 @@ char state = PinCode;
 char lastState = Null;
 
 byte ButtonCount;
+
+byte TeamID = 0;
+byte PlayerID = 1;
+
   
 ///////////////////////////////////////////////////////////////
 
@@ -69,7 +73,7 @@ void setup()
   if (deBug) Serial.begin(250000);
   pinMode (IrLED, OUTPUT);
   pinMode (IrReceivePin, INPUT_PULLUP);
-//  attachInterrupt(digitalPinToInterrupt(IrReceivePin), ISRpulse, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(IrReceivePin), ISRpulse, CHANGE);
   
   /////////////////Setup the LCD screen////////////////////////
   tft.reset();
@@ -123,7 +127,7 @@ void loop()
       lastState = Medic;
       DrawMedicScreen();
     }
-    ReadMedicScreen();
+    MedicScreen();
   }
   else if (state == PinCode)
   {
@@ -132,8 +136,9 @@ void loop()
     {
       if (deBug) Serial.println(F("PinCode-Mode"));
       lastState = PinCode;
-      PinPadScreen();
+      DrawPinPadScreen();
     }
+    PinPadScreen();
   }
   else if (state == Tagger)
   {
@@ -146,17 +151,8 @@ void loop()
     }
     TaggerMode();
   }
-  else if (state == Config)
-  {
-    // Run the setup screen code
-    if (lastState != Config)
-    {
-      if (deBug) Serial.println(F("Config-Mode"));
-      lastState = Config;
-      DrawConfigScreen();
-    }
-    ConfigMode();
-  }
+  else if (state == Config)        ConfigMode();
+  
   else
   {
     Serial.println(F("How did we get here? State is not valid !"));

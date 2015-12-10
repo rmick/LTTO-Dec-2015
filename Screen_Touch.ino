@@ -1,6 +1,7 @@
 // char Get ButtonPress()
 // bool GetTouch()
 // void DrawButton (PosX, PosY, Width, Height, BoxColour(uint16_t), Text(string), TextSize, TextColour(uint16_t) )
+// void DrawScreen(char* Label, uint16_t BackColour, uint16_t TextColour)
 // void PrintButtonArray()      - for deBug only
 
 static int TouchX;
@@ -12,7 +13,7 @@ char* ButtonPressed [12];
 ///////////////////////////////////////////////////////////////////////////////
 char* GetButtonPress()
 {
-  if (GetTouch(0))
+  if (GetTouch(False))
   {
     delay (200);  //TODO: fix the debounce properly.
 
@@ -25,6 +26,11 @@ char* GetButtonPress()
         if (TouchY > Buttons [row] [1] && TouchY < Buttons [row] [3])
         {
           return ButtonPressed [row];
+          if (deBug)
+          {
+            Serial.print(F("Button Pressed: "));
+            Serial.println(ButtonPressed [row]);
+          }
         }
       }
     }
@@ -35,8 +41,6 @@ char* GetButtonPress()
 
 bool GetTouch(bool Touched)
 { 
-  Touched = False;
-  
   TSPoint p = ts.getPoint();
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
@@ -112,7 +116,6 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
   // Centre the text on the button
   uint16_t CtrY = PosY+(Height/2)-(7*TextSize/2);                     // characters are 7 pixels high
   uint16_t TextWidth = (strlen(Text)*5)+(strlen(Text)-1);           // characters are 5 pixels wide + 1 pixel space
-  Serial.println(strlen(Text));
   uint16_t CtrX = PosX+(Width/2) - ((TextWidth*TextSize)/2);  
   tft.setCursor(CtrX, CtrY);
   tft.println(Text);
@@ -144,10 +147,26 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+void DrawScreen(char Title, char* Label, uint16_t BackColour, uint16_t TextColour)
+{
+      tft.fillScreen(BackColour);
+  
+      uint16_t TextWidth = (strlen(Label)*5)+(strlen(Label)-1);           // characters are 5 pixels wide + 1 pixel space
+      uint16_t CtrX = (240/2) - ((TextWidth*3)/2);  
+  
+      tft.setCursor(CtrX, 10);
+      tft.setTextColor(TextColour);
+      tft.setTextSize(3);
+      tft.println(Label);
+      ButtonCount = 0;
+      //lastState = Title;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void PrintButtonArray()
 {
-  return;
+  //return;
   byte Row;
   byte Column;
   for (Row=0; Row<12; Row++)
@@ -159,9 +178,9 @@ void PrintButtonArray()
     }
     Serial.println();
   }
-  for (Column=0; Column<12; Column++)
+  for (Row=0; Row<12; Row++)
   {
-    Serial.print (ButtonPressed [Column]);
+    Serial.print (ButtonPressed [Row]);
     Serial.print (F(", "));
   }
   Serial.println();
