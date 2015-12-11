@@ -37,10 +37,13 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 const bool True = 1;
 const bool False = 0;
 
-int numLives = EEPROM.read(0);
-int chargeDelay = EEPROM.read(2);   // TODO : can be changed via config screen - need to store in Flash.        
-bool touchGood = 0;
-bool keyNumNew = 0;   //TODO: Remove this once PinPad uses the screen_touch routines.
+byte numLives =   EEPROM.read(0);
+byte MedicDelay = EEPROM.read(2); 
+byte TeamID =     EEPROM.read(4);         
+byte PlayerID =   EEPROM.read(6);
+
+       
+
 
 const byte IrLED = 13;
 const byte IrReceivePin = 11;
@@ -51,19 +54,24 @@ const bool deBug = 1;
 
 int timer1counter;
 
-const char Medic = 'm';
-const char PinCode = 'p';
-const char Tagger = 't';
-const char Config = 'c';
-const char Null = 'n';
+const char MEDIC            = 'm';
+const char PINPAD           = 'p';
+const char TAGGER           = 't';
+const char CONFIG           = 'c';
+const char NONE             = 'n';
+const char SET_TEAM         = 'i';
+const char SET_MEDIC_DELAY  = 'd';
+const char SET_HOSTILE      = 'h';
+const char CLEAR_SCORE      = 'r';
 
-char state = PinCode;
-char lastState = Null;
+char state = PINPAD;
+char lastState = NONE;
 
 byte ButtonCount;
+bool touchGood = 0;
 
-byte TeamID = 0;
-byte PlayerID = 1;
+
+
 
   
 ///////////////////////////////////////////////////////////////
@@ -73,113 +81,29 @@ void setup()
   if (deBug) Serial.begin(250000);
   pinMode (IrLED, OUTPUT);
   pinMode (IrReceivePin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(IrReceivePin), ISRpulse, CHANGE);
+//  attachInterrupt(digitalPinToInterrupt(IrReceivePin), ISRpulse, CHANGE);
   
   /////////////////Setup the LCD screen////////////////////////
   tft.reset();
   uint16_t identifier = tft.readID();
-  if (deBug) Serial.println(identifier);
+  //if (deBug) Serial.println(identifier);
   tft.begin(identifier); 
   //tft.setRotation(0);
   tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
-
-                chargeDelay = 2;     /////////////////////////////////////////////////////////////////////////TEMPORARY
-
-//////////////////////TIMER 1 INTERUPT///////////////////////////
-
-  // initiliase timer1
-  noInterrupts();
-  TCCR1A = 0;               // clear the TCCR1A register (known starting point)
-  TCCR1B = 0;               // clear the TCCR1A register (known starting point)
-
-  // set Timer1counter to the correct value for the interrupt interval
-  //timer1counter = 64911; //preload timer 65536-16MHz/256/100Hz
-  //timer1counter = 64286; //preload timer 65536-16MHz/256/50Hz
-  //timer1counter = 34286; //preload timer 65536-16MHz/256/2Hz
-  timer1counter = 1; 
-
-  TCNT1 = timer1counter;                              // preload timer
-  TCCR1B |= (1 << CS12);                              // 256 prescaler
-  //TCCR1B |= (1 << CS12); TCCR1B |= (1 << CS10);     // 1024 prescaler
-  TIMSK1 |= (1 << TOIE1);     // enable timer overflow interupt     
-  interrupts();
-
 }
 
-
-ISR(TIMER1_OVF_vect)          // interrrupt service routine
-  {
-    // if (deBug) Serial.println(" Tick");
-    digitalWrite(12, !digitalRead(12));
-    TCNT1 = timer1counter;    //re-preload the timer
-  }
-//////////////////////MAIN LOOP//////////////////////////////////
-
+////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////
 
 void loop()
 {
-  if (state == Medic)
-  {
-    // Run the medic screen code
-    if (lastState != Medic)
-    {
-      if (deBug) Serial.println(F("Medic-Mode"));
-      lastState = Medic;
-      DrawMedicScreen();
-    }
-    MedicScreen();
-  }
-  else if (state == PinCode)
-  {
-    // Run the pinpad code
-    if (lastState != PinCode)
-    {
-      if (deBug) Serial.println(F("PinCode-Mode"));
-      lastState = PinCode;
-      DrawPinPadScreen();
-    }
-    PinPadScreen();
-  }
-  else if (state == Tagger)
-  {
-    // Run the Tagger mode code
-    if (lastState != Tagger)
-    {
-      if (deBug) Serial.println(F("Tagger-Mode"));
-      lastState = Tagger;
-      DrawTaggerScreen();
-    }
-    TaggerMode();
-  }
-  else if (state == Config)        ConfigMode();
-  
-  else
-  {
-    Serial.println(F("How did we get here? State is not valid !"));
-  }
-    
-  ///////////////////////////////////
-
+  if      (state == MEDIC)            MedicMode();
+  else if (state == PINPAD)           PinPadMode();
+  else if (state == TAGGER)           TaggerMode();
+  else if (state == CONFIG)           ConfigMode();
+  else if (state == SET_TEAM)         SetTeam();
+  else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
+  else if (state == SET_HOSTILE)    SetHostile();
+  else if (state == CLEAR_SCORE)    ClearScore();
 }
 
-void GetTouchInput()
-{
-  touchGood = 0;
-  TSPoint p = ts.getPoint();
-  // Sharing pins, so we need to reset the directions of the touchscreen pins
-  pinMode(XM, OUTPUT);
-  pinMode(YP, OUTPUT);
-  if (p.z > 10 && p.z <1000) touchGood = 1;      // z = pressure
-  //return touchGood;
-}
-
-int CountDigits(int num)
-{
-  int count=0;
-  while(num)
-  {
-    num=num/10;
-    count++;
-  }
-  return count;
-}
+////////////////////// END MAIN LOOP//////////////////////////////////////////////////////////////////// END MAIN LOOP //////////////////////

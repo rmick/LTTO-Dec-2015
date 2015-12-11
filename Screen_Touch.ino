@@ -1,8 +1,9 @@
-// char Get ButtonPress()
-// bool GetTouch()
-// void DrawButton (PosX, PosY, Width, Height, BoxColour(uint16_t), Text(string), TextSize, TextColour(uint16_t) )
-// void DrawScreen(char* Label, uint16_t BackColour, uint16_t TextColour)
-// void PrintButtonArray()      - for deBug only
+//  char Get ButtonPress()
+//  bool GetTouch()
+//  void DrawButton (PosX, PosY, Width, Height, BoxColour(uint16_t), Text(string), TextSize, TextColour(uint16_t) )
+//  void DrawScreen(char* Label, uint16_t BackColour, uint16_t TextColour)
+//  void PrintButtonArray()      - for deBug only
+//  int CountDigits(int num)
 
 static int TouchX;
 static int TouchY;
@@ -147,19 +148,19 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void DrawScreen(char Title, char* Label, uint16_t BackColour, uint16_t TextColour)
+void DrawScreen(char Title, char* Label, uint16_t BackColour, uint16_t TextColour, uint8_t TextSize)
 {
-      tft.fillScreen(BackColour);
+  tft.fillScreen(BackColour);
   
-      uint16_t TextWidth = (strlen(Label)*5)+(strlen(Label)-1);           // characters are 5 pixels wide + 1 pixel space
-      uint16_t CtrX = (240/2) - ((TextWidth*3)/2);  
-  
-      tft.setCursor(CtrX, 10);
-      tft.setTextColor(TextColour);
-      tft.setTextSize(3);
-      tft.println(Label);
-      ButtonCount = 0;
-      //lastState = Title;
+  uint16_t TextWidth = (strlen(Label)*5)+(strlen(Label)-1);           // characters are 5 pixels wide + 1 pixel space
+  uint16_t CtrX = (240/2) - ((TextWidth*TextSize)/2);
+  tft.setCursor(CtrX, 5);
+  tft.setTextColor(TextColour);
+  tft.setTextSize(TextSize);
+  tft.println(Label);
+ 
+  ButtonCount = 0;
+  lastState = state;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -186,3 +187,15 @@ void PrintButtonArray()
   Serial.println();
 }
 
+////////////////////////////////////////////////////////////////////////
+
+int CountDigits(int num)
+{
+  int count=0;
+  while(num)
+  {
+    num=num/10;
+    count++;
+  }
+  return count;
+}

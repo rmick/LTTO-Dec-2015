@@ -1,4 +1,5 @@
 
+/*
 
 unsigned long pinChangeTime;
 bool newPulse;
@@ -56,6 +57,7 @@ If all data is good, store array and set flag for action
 Have a beer.
 */
 
+/*
   if (markLength >2500 & markLength <3500 & startBit !=1)        // Found a start bit
   {
     startBit = 1;
@@ -186,4 +188,4 @@ void ISRpulse()
 /////////////////////////////////////////////////////////////////////////////
 
 
-
+*/
