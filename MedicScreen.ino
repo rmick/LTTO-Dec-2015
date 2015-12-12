@@ -8,11 +8,20 @@
 void MedicMode()
 {
   DrawMedicScreen();   
-
+  static int count;
   char* Action = GetButtonPress();
-  if      (Action == "Heal")   ReCharge(MedicDelay);
+  if      (Action == "Heal")   ReCharge(medicDelay);
   else if (Action == "EXIT")   state = PINPAD;
+
+  count++;
  
+  if (count == 1000 && hostile)
+  {
+    if (teamID == 1)  SendIR ('T', B0100011);
+    if (teamID == 2)  SendIR ('T', B1000011);
+    if (teamID == 3)  SendIR ('T', B1100011);
+    count = 0;
+  }
 }
 
 
@@ -29,7 +38,7 @@ void DrawMedicScreen()
     tft.fillRect(100,  40,  40, 160, RED);
     DrawButton  (100, 310,  40,   5, CYAN,  "EXIT", 1, CYAN);
     
-    ///////////////////////// Draw the Bottom part of the screen with the Recharge Info ///////////////
+    // Draw the Bottom part of the screen with the Recharge Info
     tft.setTextColor(MAGENTA);
     tft.setCursor(10, 240);
     tft.setTextSize(4);
@@ -46,12 +55,11 @@ void DrawMedicScreen()
   }
 }
 
-
-///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 
 void ReCharge(int timer)
 {
-  /////////////////////////// Countdown Timer
+  // Countdown Timer
   while (timer >0)
   {
     int numWidth = CountDigits(timer)*(5*4);
@@ -63,14 +71,23 @@ void ReCharge(int timer)
     tft.fillRect(40, 100, 160, 40, RED);
     timer--;
   }
-  /////////////////////////// Counter Update
+  SendBeacon();
   numLives++;
   EEPROM.write(0, numLives);
-  /////////////////////////// Send the ReCharge Beacon
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+void SendBeacon()         // Medic beacon is B0000011 (no team). Bits 2+3 alter for TeamID.
+{
+  int bitShiftTeamID = teamID << 2;
+  Serial.println(bitShiftTeamID, BIN);
+  int beaconSignal = bitShiftTeamID + 3;
+  Serial.println(beaconSignal, BIN);
   tft.fillScreen(GREEN);
   for (int repeat = 1; repeat <=5; repeat++)
   {
-    SendIR('B', B0000011);      // Send a beacon with the message 00011 (DEC 3)           // This is a non-team beacon
+    SendIR('B', beaconSignal);      // Send a beacon with the message 00011 (DEC 3)           // This is a non-team beacon
     if (deBug) Serial.println(F("Beacon Sent"));
   }
   lastState = NONE;

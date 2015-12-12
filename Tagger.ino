@@ -1,22 +1,23 @@
 //  void TaggerMode()
 //  void FireLaser(byte megaTag)
 //  void SetShields()
-
-//  DrawTaggerScreen
+//  void Reload()
+//  void DrawTaggerScreen()
+//  void DrawTaggerScreenShieldsUp()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Shields = False;
+bool Shields = FALSE;
 
 void TaggerMode()
 { 
   DrawTaggerScreen();
   
   char* Action = GetButtonPress();
-  if      (Action == "Tag 1" && Shields == False)   FireLaser(B000000);
-  else if (Action == "Tag 2" && Shields == False)   FireLaser(B0000001);
-  else if (Action == "Tag 3" && Shields == False)   FireLaser(B0000010);
-  else if (Action == "Tag 4" && Shields == False)   FireLaser(B0000011);
+  if      (Action == "Tag 1" && Shields == FALSE)   FireLaser(B0000000);
+  else if (Action == "Tag 2" && Shields == FALSE)   FireLaser(B0000001);
+  else if (Action == "Tag 3" && Shields == FALSE)   FireLaser(B0000010);
+  else if (Action == "Tag 4" && Shields == FALSE)   FireLaser(B0000011);
   else if (Action == "Shields")                     SetShields();
   else if (Action == "ReLoad")                      Reload();                    
   else if (Action == "EXIT")                        state = PINPAD;

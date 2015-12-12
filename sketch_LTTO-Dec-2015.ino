@@ -1,8 +1,11 @@
+
+
 //////////////////////Include libraries////////////////////////
 #include <Adafruit_GFX.h>
 #include <SWTFT.h>
 #include <TouchScreen.h>
 #include <EEPROM.h>
+//#include <EnableInterrupt.h>
 
 //////////////////////Setup Touchscreen///////////////////////
 #define YP A1
@@ -34,19 +37,19 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 ////////////////////My Variables //////////////////////////////
 
-const bool True = 1;
-const bool False = 0;
+const bool TRUE =  1;
+const bool FALSE = 0;
 
 byte numLives =   EEPROM.read(0);
-byte MedicDelay = EEPROM.read(2); 
-byte TeamID =     EEPROM.read(4);         
-byte PlayerID =   EEPROM.read(6);
-
+byte medicDelay = EEPROM.read(2); 
+byte teamID =     EEPROM.read(4);         
+byte playerID =   EEPROM.read(6);
+bool hostile =    EEPROM.read(8);
        
 
 
-const byte IrLED = 13;
-const byte IrReceivePin = 11;
+const byte IR_LED = 13;
+const byte IR_RECEIVE_PIN = 11;
 
 //DeBug use only
 unsigned long irTime;
@@ -67,7 +70,7 @@ const char CLEAR_SCORE      = 'r';
 char state = PINPAD;
 char lastState = NONE;
 
-byte ButtonCount;
+byte buttonCount;
 bool touchGood = 0;
 
 
@@ -79,9 +82,9 @@ bool touchGood = 0;
 void setup()
 {
   if (deBug) Serial.begin(250000);
-  pinMode (IrLED, OUTPUT);
-  pinMode (IrReceivePin, INPUT_PULLUP);
-//  attachInterrupt(digitalPinToInterrupt(IrReceivePin), ISRpulse, CHANGE);
+  pinMode (IR_LED, OUTPUT);
+  pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(IR_RECEIVE_PIN), ISRpulse, CHANGE);
   
   /////////////////Setup the LCD screen////////////////////////
   tft.reset();
@@ -95,7 +98,7 @@ void setup()
 ////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////
 
 void loop()
-{
+{ 
   if      (state == MEDIC)            MedicMode();
   else if (state == PINPAD)           PinPadMode();
   else if (state == TAGGER)           TaggerMode();

@@ -1,7 +1,7 @@
-// SendIR(type, message)
-// PulseIR (mSec)
-// DeBug (string)
-// print_binary (number, number of places(8))
+// void SendIR(char type, unsigned int message)
+// void PulseIR(int mSec)
+// void DeBug(String data)
+// void print_binary(int v, int num_places)
 
 
 //////////////////////////////////////////////////////////////////////
@@ -62,10 +62,8 @@ void SendIR(char type, unsigned int message)
      }
 
   delay(interDelay);                                 
-  if (deBug) Serial.println(F("IR Sent! "));
-  
+  if (deBug) Serial.println(F("IR Sent! "));  
 }
-
 
 ///////////////////////////////////////////////////////////////
 
@@ -74,17 +72,17 @@ void PulseIR(int mSec)
   unsigned long pulseStartTime = micros();
   unsigned long pulseLength = mSec*1000;
   unsigned long pulseEndTime = pulseStartTime + pulseLength - 24;
-  //unsigned long pulseEndTime = micros() + (mSec*1000);
   while (pulseEndTime >micros() )
   {
-    digitalWrite(IrLED, HIGH);
+    digitalWrite(IR_LED, HIGH);
     delayMicroseconds(12);
-    digitalWrite(IrLED, LOW);
+    digitalWrite(IR_LED, LOW);
     delayMicroseconds(12);
   }
 }
 
 /////////////////////////////////////////////////////////////
+
 void DeBug(String data)
 {
   return;                             //Comment out to Enable DeBug messages
@@ -94,36 +92,33 @@ void DeBug(String data)
   irTime = micros();
 }
 
-
-
 ////////////////////////////////////////////////////////////
+
 void print_binary(int v, int num_places)
 {
-    int mask=0, n;
-
-    for (n=1; n<=num_places; n++)
+  int mask=0, n;
+  for (n=1; n<=num_places; n++)
+  {
+    mask = (mask << 1) | 0x0001;
+  }
+  v = v & mask;  // truncate v to specified number of places
+  
+  while(num_places)
+  {
+    if (v & (0x0001 << num_places-1))
     {
-        mask = (mask << 1) | 0x0001;
+      Serial.print("1");
     }
-    v = v & mask;  // truncate v to specified number of places
-
-    while(num_places)
+    else
     {
-
-        if (v & (0x0001 << num_places-1))
-        {
-             Serial.print("1");
-        }
-        else
-        {
-             Serial.print("0");
-        }
-
-        --num_places;
-        if(((num_places%4) == 0) && (num_places != 0))
-        {
-            Serial.print("_");
-        }
+      Serial.print("0");
     }
+    
+    --num_places;
+    if(((num_places%4) == 0) && (num_places != 0))
+    {
+      Serial.print("_");
+    }
+  }
 }
 

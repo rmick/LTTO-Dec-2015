@@ -1,5 +1,4 @@
 
-/*
 
 unsigned long pinChangeTime;
 bool newPulse;
@@ -24,7 +23,7 @@ void GetIR()
 
   if (deBug) Serial.println(), Serial.print(F("GetIR-pass#")), Serial.print(pass), Serial.print(F("-> "));
 
-  bool pinState = digitalRead(IrReceivePin);
+  bool pinState = digitalRead(IR_RECEIVE_PIN);
  
   if (pinState)                                           // We have the start of a Break (inverted)
   {
@@ -57,7 +56,7 @@ If all data is good, store array and set flag for action
 Have a beer.
 */
 
-/*
+
   if (markLength >2500 & markLength <3500 & startBit !=1)        // Found a start bit
   {
     startBit = 1;
@@ -172,10 +171,7 @@ Have a beer.
       }       
 
  // Do I need to check for a valid 3mS mark, in case it appears mid data stream?
-
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -185,7 +181,4 @@ void ISRpulse()
   newPulse = 1;                          // Set flag to true so that GetIR() will be triggered from Void Loop
 }
 
-/////////////////////////////////////////////////////////////////////////////
 
-
-*/

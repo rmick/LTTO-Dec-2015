@@ -9,12 +9,12 @@ static int TouchX;
 static int TouchY;
 
 int Buttons [12] [4];
-char* ButtonPressed [12];
+char* buttonPressed [12];
 
 ///////////////////////////////////////////////////////////////////////////////
 char* GetButtonPress()
 {
-  if (GetTouch(False))
+  if (GetTouch(FALSE))
   {
     delay (200);  //TODO: fix the debounce properly.
 
@@ -26,11 +26,11 @@ char* GetButtonPress()
       {
         if (TouchY > Buttons [row] [1] && TouchY < Buttons [row] [3])
         {
-          return ButtonPressed [row];
+          return buttonPressed [row];
           if (deBug)
           {
             Serial.print(F("Button Pressed: "));
-            Serial.println(ButtonPressed [row]);
+            Serial.println(buttonPressed [row]);
           }
         }
       }
@@ -49,7 +49,7 @@ bool GetTouch(bool Touched)
   TouchX = map(p.x, MinValTouchX, MaxValTouchX, 0, tft.width() );
   TouchY = map(p.y, MinValTouchY, MaxValTouchY, 0, tft.height());
   
-  if (p.z >10) Touched = True;
+  if (p.z >10) Touched = TRUE;
   return Touched;
 }
 
@@ -122,28 +122,28 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
   tft.println(Text);
 
   //  Create an Array that contains a list of all the buttons and their locations.
-  if (ButtonCount == 0)          //Clear the array
+  if (buttonCount == 0)          //Clear the array
   {
-    byte Row;
-    byte Column;
-    for (Row=0; Row<12; Row++)
+    byte row;
+    byte column;
+    for (row=0; row<12; row++)
     {
-      for (Column=0; Column<4; Column++)
+      for (column=0; column<4; column++)
       {
-        Buttons [Row] [Column] = 0;
+        Buttons [row] [column] = 0;
       }
     }
-    for (Row=0; Row<12; Row++)
+    for (row=0; row<12; row++)
     {
-      ButtonPressed [Row] = "";
+      buttonPressed [row] = "";
     }
   }
-  Buttons[ButtonCount] [0]= (PosX);
-  Buttons[ButtonCount] [1]= (PosY);
-  Buttons[ButtonCount] [2]= (PosX+Width);
-  Buttons[ButtonCount] [3]= (PosY+Height);
-  ButtonPressed [ButtonCount] = Text;
-  ButtonCount++;
+  Buttons[buttonCount] [0]= (PosX);
+  Buttons[buttonCount] [1]= (PosY);
+  Buttons[buttonCount] [2]= (PosX+Width);
+  Buttons[buttonCount] [3]= (PosY+Height);
+  buttonPressed [buttonCount] = Text;
+  buttonCount++;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ void DrawScreen(char Title, char* Label, uint16_t BackColour, uint16_t TextColou
   tft.setTextSize(TextSize);
   tft.println(Label);
  
-  ButtonCount = 0;
+  buttonCount = 0;
   lastState = state;
 }
 
@@ -181,7 +181,7 @@ void PrintButtonArray()
   }
   for (Row=0; Row<12; Row++)
   {
-    Serial.print (ButtonPressed [Row]);
+    Serial.print (buttonPressed [Row]);
     Serial.print (F(", "));
   }
   Serial.println();
