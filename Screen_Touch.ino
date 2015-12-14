@@ -11,7 +11,31 @@ static int TouchY;
 int Buttons [12] [4];
 char* buttonPressed [12];
 
+
 ///////////////////////////////////////////////////////////////////////////////
+
+void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
+                String Text, byte TextSize, uint16_t TextColour, uint8_t MaxCharacters) 
+{
+  // Calculate values if 0 is passed.
+  if (CursorX == 0) CursorX = (240-((Text.length()*5)+Text.length()-1)*TextSize)/2;
+    //CursorX = (240-TextWidth)/2;
+  if (BoxColour == 0) BoxColour = tft.readPixel(CursorX, CursorY);
+  if (MaxCharacters == 0) MaxCharacters = Text.length();
+  
+  // Draw the box
+  int BoxWidth = ((MaxCharacters*5)+(MaxCharacters-1))*TextSize;
+  tft.fillRect( (240-BoxWidth)/2, CursorY-1, BoxWidth, (TextSize*7)+2, BoxColour);
+  
+  // Set the text size & colour
+  tft.setTextColor(TextColour);
+  tft.setTextSize(TextSize);
+  tft.setCursor(CursorX, CursorY);
+  tft.println(Text);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 char* GetButtonPress()
 {
   if (GetTouch(FALSE))
@@ -99,7 +123,6 @@ TSPoint getPressPosition()
   pinMode(YP, OUTPUT);
  
    return p;
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

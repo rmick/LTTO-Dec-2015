@@ -45,8 +45,8 @@ void SetMedicDelay()
   DrawMedicDelay();
   
   char* Action = GetButtonPress();
-  if      (Action == "Up")      { medicDelay++; UpdateMedicDelay(); }   // lastState = NONE; }
-  else if (Action == "Down")    { medicDelay--; UpdateMedicDelay(); }   // lastState = NONE; }
+  if      (Action == "Up")      { medicDelay++; DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3); }
+  else if (Action == "Down")    { medicDelay--; DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3); }
   else if (Action == "EXIT")    { EEPROM.write(2, medicDelay); state = CONFIG; }
 }
 
@@ -61,15 +61,16 @@ void DrawMedicDelay()
     DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
     if (deBug) PrintButtonArray();
     
-    //char&showDelay = String(MedicDelay);
-    //DrawButton( 80, 130,  80, 55, YELLOW,showDelay, 4, BLACK);    //TODO: why is (char*) printing random characters???
-    UpdateMedicDelay();
+    DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3);
+    //UpdateMedicDelay();
   }
 }
-
+/*
 void UpdateMedicDelay()
 {
   {
+    
+    return;
     Serial.print(F("MedicDelay = "));
     Serial.println(medicDelay);
     tft.fillRect(40, 135, 160, 40, MAGENTA);
@@ -80,6 +81,7 @@ void UpdateMedicDelay()
     tft.print(medicDelay);
   }
 }
+*/
 ////////////////////////////////////////////////////////////////////////////////
 
 void SetHostile()               // TODO: Send IR Tags every X seconds against other teams !

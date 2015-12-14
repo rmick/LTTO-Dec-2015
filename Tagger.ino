@@ -26,11 +26,12 @@ void TaggerMode()
 
 void FireLaser(byte megaTag)
 {
+  if (shotCount == 0) return;
   tft.fillScreen(YELLOW);
-    SendIR('T', megaTag);
-    lastState = NONE;
-    DrawTaggerScreen();
-    //TODO: Adjust AmmoCount
+  SendIR('T', megaTag);
+  shotCount = shotCount - (megaTag+1);
+  lastState = NONE;
+  DrawTaggerScreen();
 }
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +48,11 @@ void SetShields()
 
 void Reload()
 {
-  // TODO: Reload ammo
+  tft.fillScreen(BLACK);
+  delay (500);
+  shotCount = reLoadCount;
+  lastState = NONE;
+  DrawTaggerScreen();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,6 +72,9 @@ void DrawTaggerScreen()
     DrawButton(135, 220,  100, 55, RED,    "Shields", 2, GREEN);
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",    2, BLACK);
     if (deBug) PrintButtonArray();
+
+    DrawTextLabel( 150,  110, 0, String(shotCount),    3, BLACK, 3);
+    DrawTextLabel( 150,  170, 0, String(shieldsTimer), 3, BLACK, 3);
   }
 }
 

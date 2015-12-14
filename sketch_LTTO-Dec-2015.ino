@@ -1,11 +1,10 @@
 
-
 //////////////////////Include libraries////////////////////////
+#include <EnableInterrupt.h>
 #include <Adafruit_GFX.h>
 #include <SWTFT.h>
 #include <TouchScreen.h>
 #include <EEPROM.h>
-//#include <EnableInterrupt.h>
 
 //////////////////////Setup Touchscreen///////////////////////
 #define YP A1
@@ -40,12 +39,14 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 const bool TRUE =  1;
 const bool FALSE = 0;
 
-byte numLives =   EEPROM.read(0);
-byte medicDelay = EEPROM.read(2); 
-byte teamID =     EEPROM.read(4);         
-byte playerID =   EEPROM.read(6);
-bool hostile =    EEPROM.read(8);
-       
+byte numLives =     EEPROM.read(0);
+byte medicDelay =   EEPROM.read(2); 
+byte teamID =       EEPROM.read(4);         
+byte playerID =     EEPROM.read(6);
+bool hostile =      EEPROM.read(8);
+byte shotCount =    EEPROM.read(10);
+byte reLoadCount =  EEPROM.read(12);
+byte shieldsTimer = EEPROM.read(14);
 
 
 const byte IR_LED = 13;
@@ -84,7 +85,7 @@ void setup()
   if (deBug) Serial.begin(250000);
   pinMode (IR_LED, OUTPUT);
   pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(IR_RECEIVE_PIN), ISRpulse, CHANGE);
+//  attachInterrupt(digitalPinToInterrupt(IR_RECEIVE_PIN), ISRpulse, CHANGE);
   
   /////////////////Setup the LCD screen////////////////////////
   tft.reset();
@@ -93,6 +94,16 @@ void setup()
   tft.begin(identifier); 
   //tft.setRotation(0);
   tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
+
+
+
+///// TEMP ASSIGNMENTS //////////////////////
+//TODO: Get these from the Game Host      ///
+reLoadCount = 15;                         ///
+shotCount = 15;                           ///
+/////////////////////////////////////////////
+
+  
 }
 
 ////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////

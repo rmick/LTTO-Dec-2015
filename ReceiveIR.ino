@@ -175,10 +175,11 @@ Have a beer.
 
 //////////////////////////////////////////////////////////////////////////////
 
+/*
 void ISRpulse()
 {
   pinChangeTime = micros();              // Store the time that the pin changes
   newPulse = 1;                          // Set flag to true so that GetIR() will be triggered from Void Loop
 }
-
+*/
 

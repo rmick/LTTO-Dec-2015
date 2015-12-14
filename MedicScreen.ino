@@ -39,19 +39,9 @@ void DrawMedicScreen()
     DrawButton  (100, 310,  40,   5, CYAN,  "EXIT", 1, CYAN);
     
     // Draw the Bottom part of the screen with the Recharge Info
-    tft.setTextColor(MAGENTA);
-    tft.setCursor(10, 240);
-    tft.setTextSize(4);
-    tft.println("ReCharges");
-    if (numLives > 0)
-    {
-      tft.fillRect(0, 275, 240, 42, CYAN);
-      int numWidth = CountDigits(numLives)*(5*4);            // Characters are 5 by 8 pixels, x 4 (TextSize)
-      tft.setCursor((240-numWidth)/2, 283);
-      tft.setTextSize(4);
-      tft.setTextColor(MAGENTA);
-      tft.println(numLives);
-    }
+
+    DrawTextLabel  ( 0,  240, 0, "Activations", 3, MAGENTA, 0);
+    DrawTextLabel  ( 0,  280, 0, String(numLives), 4, MAGENTA, 0);
   }
 }
 
@@ -62,28 +52,25 @@ void ReCharge(int timer)
   // Countdown Timer
   while (timer >0)
   {
-    int numWidth = CountDigits(timer)*(5*4);
-    tft.setCursor((240-numWidth)/2, 105);
-    tft.setTextColor(BLUE);
-    tft.setTextSize(4);
-    tft.print(timer);
+    DrawTextLabel  ( 0,  105, 0, String(timer), 4, BLUE, 3);
     delay (1000);
-    tft.fillRect(40, 100, 160, 40, RED);
     timer--;
   }
-  SendBeacon();
   numLives++;
   EEPROM.write(0, numLives);
+  SendBeacon();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 
 void SendBeacon()         // Medic beacon is B0000011 (no team). Bits 2+3 alter for TeamID.
 {
+  //TODO: Make a function to create the data
+  // void AssembleByte(teamID, playerID, mega/beacon) 
   int bitShiftTeamID = teamID << 2;
-  Serial.println(bitShiftTeamID, BIN);
-  int beaconSignal = bitShiftTeamID + 3;
-  Serial.println(beaconSignal, BIN);
+  int bitShiftPlayerID = playerID < 5;
+  //TODO: Do a XOR merge of TeamID and PlayerID
+  int beaconSignal = bitShiftTeamID + B11;
   tft.fillScreen(GREEN);
   for (int repeat = 1; repeat <=5; repeat++)
   {
