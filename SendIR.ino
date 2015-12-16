@@ -8,6 +8,7 @@
 
 void SendIR(char type, unsigned int message)
 {
+  disableInterrupt(IR_RECEIVE_PIN);
 
   irTime = micros();          ////////// for DeBug purposes only.
   int msgLength = 0;
@@ -62,7 +63,9 @@ void SendIR(char type, unsigned int message)
      }
 
   delay(interDelay);                                 
-  if (deBug) Serial.println(F("IR Sent! "));  
+  if (deBug) Serial.println(F("IR Sent! "));
+
+  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 }
 
 ///////////////////////////////////////////////////////////////

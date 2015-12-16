@@ -2,9 +2,10 @@
 //////////////////////Include libraries////////////////////////
 #include <EnableInterrupt.h>
 #include <Adafruit_GFX.h>
-#include <SWTFT.h>
 #include <TouchScreen.h>
 #include <EEPROM.h>
+#include <SWTFT.h>
+
 
 //////////////////////Setup Touchscreen///////////////////////
 #define YP A1
@@ -39,15 +40,24 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 const bool TRUE =  1;
 const bool FALSE = 0;
 
-byte numLives =     EEPROM.read(0);
-byte medicDelay =   EEPROM.read(2); 
-byte teamID =       EEPROM.read(4);         
-byte playerID =     EEPROM.read(6);
-bool hostile =      EEPROM.read(8);
-byte shotCount =    EEPROM.read(10);
-byte reLoadCount =  EEPROM.read(12);
-byte shieldsTimer = EEPROM.read(14);
+const byte eeMEDIC_COUNT =   0;
+const byte eeMEDIC_DELAY =   2; 
+const byte eeTEAM_ID =       4;         
+const byte eePLAYER_ID =     6;
+const bool eeHOSTILE =       8;
+const byte eeRELOAD_AMOUNT = 10;
+const byte eeMAX_RELOADS =   12;
+const byte eeSHIELDS_TIMER = 14;
 
+byte medicCount =     EEPROM.read(eeMEDIC_COUNT);
+byte medicDelay =   EEPROM.read(eeMEDIC_DELAY); 
+byte teamID =       EEPROM.read(eeTEAM_ID);         
+byte playerID =     EEPROM.read(eePLAYER_ID);
+bool hostile =      EEPROM.read(eeHOSTILE);
+byte reloadAmount = EEPROM.read(eeRELOAD_AMOUNT);
+byte maxReloads =   EEPROM.read(eeMAX_RELOADS);
+byte shieldsTimer = EEPROM.read(eeSHIELDS_TIMER);
+byte shotCount = reloadAmount;
 
 const byte IR_LED = 13;
 const byte IR_RECEIVE_PIN = 11;
@@ -74,10 +84,19 @@ char lastState = NONE;
 byte buttonCount;
 bool touchGood = 0;
 
+bool newIRpulse;
+bool newIRmessage;
+uint16_t messageIR [40];
+char messageIRpin [40];
+uint16_t messageIRdelay [40];
 
+struct fireMessage
+{
+  char type;
+  byte byteMsb;
+  byte byteLsb;
+};
 
-
-  
 ///////////////////////////////////////////////////////////////
 
 void setup()
@@ -85,7 +104,7 @@ void setup()
   if (deBug) Serial.begin(250000);
   pinMode (IR_LED, OUTPUT);
   pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
-//  attachInterrupt(digitalPinToInterrupt(IR_RECEIVE_PIN), ISRpulse, CHANGE);
+  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
   
   /////////////////Setup the LCD screen////////////////////////
   tft.reset();
@@ -95,29 +114,30 @@ void setup()
   //tft.setRotation(0);
   tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
 
+//Initialises the EEPROM on first upload/run.
+if (maxReloads = 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
+if (medicDelay = 255)    { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
+if (medicCount = 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
+if (shieldsTimer = 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
+if (reloadAmount = 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); shotCount = reloadAmount; }
 
-
-///// TEMP ASSIGNMENTS //////////////////////
-//TODO: Get these from the Game Host      ///
-reLoadCount = 15;                         ///
-shotCount = 15;                           ///
-/////////////////////////////////////////////
-
-  
 }
 
 ////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////
 
 void loop()
 { 
+  if (newIRpulse) GetIR();
+  ////////////////////////
   if      (state == MEDIC)            MedicMode();
   else if (state == PINPAD)           PinPadMode();
   else if (state == TAGGER)           TaggerMode();
   else if (state == CONFIG)           ConfigMode();
   else if (state == SET_TEAM)         SetTeam();
+  else if (state == SET_HOSTILE)      SetHostile();
+  else if (state == CLEAR_SCORE)      ClearScore();
   else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
-  else if (state == SET_HOSTILE)    SetHostile();
-  else if (state == CLEAR_SCORE)    ClearScore();
+  //////////////////////////////////
 }
 
 ////////////////////// END MAIN LOOP//////////////////////////////////////////////////////////////////// END MAIN LOOP //////////////////////

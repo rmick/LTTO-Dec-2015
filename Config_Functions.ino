@@ -17,7 +17,7 @@ void SetTeam()
   else if (Action == "Team 1")   { teamID = 1; lastState = NONE; }
   else if (Action == "Team 2")   { teamID = 2; lastState = NONE; }
   else if (Action == "Team 3")   { teamID = 3; lastState = NONE; }
-  else if (Action == "EXIT")     { EEPROM.write(4, teamID); state = CONFIG; }
+  else if (Action == "EXIT")     { EEPROM.write(eeTEAM_ID, teamID); state = CONFIG; }
 }
 
 void DrawSetTeam()
@@ -47,7 +47,7 @@ void SetMedicDelay()
   char* Action = GetButtonPress();
   if      (Action == "Up")      { medicDelay++; DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3); }
   else if (Action == "Down")    { medicDelay--; DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3); }
-  else if (Action == "EXIT")    { EEPROM.write(2, medicDelay); state = CONFIG; }
+  else if (Action == "EXIT")    { EEPROM.write(eeMEDIC_DELAY, medicDelay); state = CONFIG; }
 }
 
 void DrawMedicDelay()
@@ -90,7 +90,7 @@ void SetHostile()               // TODO: Send IR Tags every X seconds against ot
   char* Action = GetButtonPress();
   if      (Action == "Yes")  { hostile =  TRUE; lastState = NONE; }
   else if (Action ==  "No")  { hostile = FALSE; lastState = NONE; } 
-  else if (Action == "EXIT") { EEPROM.write(8, hostile); state = CONFIG; }
+  else if (Action == "EXIT") { EEPROM.write(eeHOSTILE, hostile); state = CONFIG; }
 }
 
 void DrawSetHostile()
@@ -131,7 +131,7 @@ void ClearScore()
     DrawClearScore();
  
   char* Action = GetButtonPress();
-  if      (Action == "Yes")  { EEPROM.write(0, 0); numLives = 0; tft.fillScreen(BLACK); state = CONFIG; }
+  if      (Action == "Yes")  { EEPROM.write(eeMEDIC_COUNT, 0); medicCount = 0; tft.fillScreen(BLACK); state = CONFIG; }
   else if (Action == "No")   state = CONFIG;
 }
 

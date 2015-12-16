@@ -1,3 +1,4 @@
+//  void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour, String Text, byte TextSize, uint16_t TextColour, uint8_t MaxCharacters) 
 //  char Get ButtonPress()
 //  bool GetTouch()
 //  void DrawButton (PosX, PosY, Width, Height, BoxColour(uint16_t), Text(string), TextSize, TextColour(uint16_t) )
@@ -22,16 +23,26 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
     //CursorX = (240-TextWidth)/2;
   if (BoxColour == 0) BoxColour = tft.readPixel(CursorX, CursorY);
   if (MaxCharacters == 0) MaxCharacters = Text.length();
+
+  ///////////// THe problem is that Cursor X is for the text, which is centred and we need a new Variable for BoxX
+
   
   // Draw the box
-  int BoxWidth = ((MaxCharacters*5)+(MaxCharacters-1))*TextSize;
-  tft.fillRect( (240-BoxWidth)/2, CursorY-1, BoxWidth, (TextSize*7)+2, BoxColour);
+  int BoxWidth = (((MaxCharacters*5)+(MaxCharacters-1))*TextSize)+2;
+  tft.fillRect( CursorX-1, CursorY-1, BoxWidth, (TextSize*7)+2, BoxColour);
   
   // Set the text size & colour
   tft.setTextColor(TextColour);
   tft.setTextSize(TextSize);
   tft.setCursor(CursorX, CursorY);
   tft.println(Text);
+
+  Serial.print(F("DeBug DrawTextLabel - Box Width: "));
+  Serial.print (BoxWidth);
+  Serial.print(F(", Box Location: "));
+  Serial.print((240-BoxWidth)/2);
+  Serial.print(F(", "));
+  Serial.println(CursorY-1); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////

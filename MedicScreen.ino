@@ -41,7 +41,7 @@ void DrawMedicScreen()
     // Draw the Bottom part of the screen with the Recharge Info
 
     DrawTextLabel  ( 0,  240, 0, "Activations", 3, MAGENTA, 0);
-    DrawTextLabel  ( 0,  280, 0, String(numLives), 4, MAGENTA, 0);
+    DrawTextLabel  ( 0,  280, 0, String(medicCount), 4, MAGENTA, 0);
   }
 }
 
@@ -56,8 +56,8 @@ void ReCharge(int timer)
     delay (1000);
     timer--;
   }
-  numLives++;
-  EEPROM.write(0, numLives);
+  medicCount++;
+  EEPROM.write(eeMEDIC_COUNT, medicCount);
   SendBeacon();
 }
 
