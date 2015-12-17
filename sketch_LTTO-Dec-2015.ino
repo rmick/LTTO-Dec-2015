@@ -86,9 +86,9 @@ bool touchGood = 0;
 
 bool newIRpulse;
 bool newIRmessage;
-uint16_t messageIR [40];
-char messageIRpin [40];
-uint16_t messageIRdelay [40];
+uint16_t messageIR [50];
+char messageIRpin [50];
+uint16_t messageIRdelay [50];
 
 struct fireMessage
 {
