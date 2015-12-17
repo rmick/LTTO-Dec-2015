@@ -44,4 +44,5 @@ Tag Ferret - the inventor of the LTTO system, whose various blogs and websites p
 Lazerswarm - makers of a nice LTTO hosting system, whose WIKI was invaluable for this project.
 
 
+Dejan Deletic - a great software engineer who answered numerous questions and always pointed me in the right direction.
 
