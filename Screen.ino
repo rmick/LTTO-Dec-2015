@@ -24,7 +24,7 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
   if (BoxColour == 0) BoxColour = tft.readPixel(CursorX, CursorY);
   if (MaxCharacters == 0) MaxCharacters = Text.length();
 
-  ///////////// THe problem is that Cursor X is for the text, which is centred and we need a new Variable for BoxX
+  ///////////// The problem is that Cursor X is for the text, which is centred and we need a new Variable for BoxX
 
   
   // Draw the box

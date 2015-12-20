@@ -86,10 +86,10 @@ bool touchGood = 0;
 
 bool newIRpulse;
 bool newIRmessage;
-uint16_t messageIR [40];
+int16_t messageIR [40];
 char messageIRpin [40];
 uint16_t messageIRdelay [40];
-bool newPulse;        //Delete
+
 
 
 struct fireMessage
@@ -129,8 +129,6 @@ if (reloadAmount = 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15);
 
 void loop()
 { 
-  if (newIRpulse) GetIR();
-  if (newIRmessage) DecodeIR();
   ////////////////////////
   if      (state == MEDIC)            MedicMode();
   else if (state == PINPAD)           PinPadMode();
