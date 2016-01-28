@@ -3,9 +3,9 @@
 #include <EnableInterrupt.h>
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
+//#include <QueueArray.h>
 #include <EEPROM.h>
 #include <SWTFT.h>
-
 
 //////////////////////Setup Touchscreen///////////////////////
 #define YP A1
@@ -84,20 +84,20 @@ char lastState = NONE;
 byte buttonCount;
 bool touchGood = 0;
 
-bool newIRpulse;
-bool newIRmessage;
-int16_t messageIR [40];
-char messageIRpin [40];
-uint16_t messageIRdelay [40];
+const byte  ARRAY_LENGTH = 24;
+int8_t      messageIR         [ARRAY_LENGTH];
+uint16_t    messageIRpulse    [ARRAY_LENGTH];
+uint16_t    messageISRdelay   [ARRAY_LENGTH];
+uint16_t    messageISRelapsed [ARRAY_LENGTH];
 
-
-
-struct fireMessage
+struct irMessage
 {
   char type;
   byte byteMsb;
   byte byteLsb;
 };
+
+irMessage receivedIRmessage;
 
 ///////////////////////////////////////////////////////////////
 
@@ -118,17 +118,35 @@ void setup()
 
 //Initialises the EEPROM on first upload/run.
 if (maxReloads = 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
-if (medicDelay = 255)    { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
+if (medicDelay = 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
 if (medicCount = 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
 if (shieldsTimer = 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
 if (reloadAmount = 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); shotCount = reloadAmount; }
-
 }
 
 ////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////
 
 void loop()
 { 
+  static byte healthCount = 0;
+  static byte badMessageCount = 0;
+
+  if (receivedIRmessage.type != '_')
+  {
+    if (receivedIRmessage.type == 'T' && receivedIRmessage.byteMsb == 15 && receivedIRmessage.byteLsb == 7)
+    {
+      healthCount++;
+      Serial.print(F("\n ----------------------------- BANG ! - # ")); Serial.print(healthCount); Serial.println(F(" -----------------------------"));
+      Serial.println();
+    }
+    else
+    {
+      badMessageCount++;
+      Serial.print(F("\n--- bad Tag message - # "));   Serial.print(badMessageCount); Serial.println(F(" ---"));
+      Serial.println();
+    }
+    receivedIRmessage.type = '_';
+  }
   ////////////////////////
   if      (state == MEDIC)            MedicMode();
   else if (state == PINPAD)           PinPadMode();

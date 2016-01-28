@@ -52,7 +52,7 @@ void ReCharge(int timer)
   // Countdown Timer
   while (timer >0)
   {
-    DrawTextLabel  ( 0,  105, 0, String(timer), 4, BLUE, 3);
+    DrawTextLabel  ( 0,  105, YELLOW, String(timer), 4, BLUE, 3);
     delay (1000);
     timer--;
   }

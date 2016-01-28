@@ -1,76 +1,224 @@
+//  void ISRchange()
+//  void PrintIR()
+//  void clearIRarray()
 
+///////////////////////////////////////////////////////////////////////
 
-
-uint16_t pulseLength;
-uint16_t lastEdge;
-
-uint16_t pinChangeTime;
 byte countISR = 0;
 
 void ISRchange()
 {
-  pinChangeTime = micros();              // Store the time that the pin changes
-  pulseLength = pinChangeTime - lastEdge;
-  lastEdge = pinChangeTime;
+  static int16_t pulseLength;
+  static uint16_t lastEdge;
+  static uint16_t pinChangeTime;
+  static byte expectedMessageLength = 0;
+  static byte overflowISR = 0;                  // TODO: Debug, remove it!
+  uint16_t timerISR = 0;                        // TODO: Debug, remove it!
+  static uint16_t elapsedtime = 0;              // TODO: Debug, remove it!
+  static uint16_t runtime = micros();           // TODO: Debug, remove it!
+
+  // Action the Interrupt........
+  overflowISR++;
+  pinChangeTime = micros();                   // Store the time that the pin changes
+  pulseLength = pinChangeTime - lastEdge;     // Measure the elapsed time since last lastEdge
+  if (pulseLength < 500 && pulseLength > 0)
+  {
+    Serial.print("(S-");
+    Serial.print(pulseLength);
+    Serial.print("mS)");
+    overflowISR = 0;
+    return;              // exit as the pulse is too short, so probably noise
+  }
+  lastEdge = pinChangeTime;                   // Reset the lastEdge to now
+  int8_t bitLength = (pulseLength+500)/1000;
+  if (PINB & 8); else   bitLength = 0 - bitLength;    //Set a Mark as Positive and a Break as Negative.
+
+
+  // Find a Header............
+  if (bitLength == -6)                        // Look for a 6mS break
+  {
+    if (messageIR[countISR-1] == 3)           // Check that the preceding bit was 3mS Header.
+    {                                         // - we have a header so start collecting data
+      if (deBug) Serial.print("(3/6)");
+      messageIR[1] = 3;
+      countISR = 2;
+    }
+    else 
+    {
+      ClearIRarray();
+      countISR = 2;       // reset the count as this is a long break, even if the 3mS mark is missing.
+      if (deBug)
+      {
+        //return;
+        Serial.print("(");
+        Serial.print(messageIR[countISR]);
+        Serial.print("/6)");
+      }
+    }
+  }
+  
+///////////////  STOP this for now so that I can see if I am getting extra bits from noise !!
+  // Set message length based on header type
+  if        (messageIR[3] == 3)   expectedMessageLength = 18;
+  else if   (messageIR[3] == 6)   expectedMessageLength = 14;
+  //else if   (there is no header) expectedMessageLength = 2-3bytes  // TODO: how do we process packets without headers ?
+  
+  // Check for a Long Break...............
+  if (bitLength < -7 || bitLength > 7)                // This means we have an error, as max value is +/- 6
+  { 
+    if (deBug) Serial.print(">");
+    messageIR[0] = bitLength;
+    countISR = 1;
+    overflowISR = 0;
+    return;
+  }
+
+  // Check for too many bits without a header......... (stops overflow of Array variables)
+  if (countISR > (ARRAY_LENGTH-2) )
+  {
+    Serial.println("\nHouston we have a problem");
+    countISR = 0;
+  }
+
+  //Store the data to the message array
+  messageIR[countISR] = bitLength; 
+  messageIRpulse[countISR] = pulseLength;
   countISR++;
-  GetIR();
+
+    if (deBug)
+    {
+      Serial.print(".");
+      //Serial.print(countISR);
+    }
+    
+  // Look for the end of a message and process it.  
+  if (countISR == expectedMessageLength) CreateIRmessage();
+
+  // Store the time it took to process the interupt routine 
+  timerISR = micros() - pinChangeTime;
+  messageISRdelay[countISR] = timerISR;
+  messageISRelapsed [countISR] = micros();
+   
+  // Check for re-entrant ISR routine calls.
+  if (overflowISR >1)
+  {
+    Serial.print("(R-");
+    Serial.print(countISR);
+    Serial.print(")");
+  }
+  overflowISR = 0;
+
+  // End of ISR routine.
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void GetIR()
+void CreateIRmessage()
 {
-  int8_t bitLength = (pulseLength+500)/1000;
-  if (PINB & 8); else bitLength = 0 - bitLength;    //Set a Mark as Positive and a Break as Negative.
-  messageIR[countISR] = bitLength;
-  if (countISR > 17) DecodeIR();
-  //else if (pulseLength > 12000) countISR = 0;
-}
+  //if (deBug) Serial.println("\nCreating IR message");
 
-///////////////////////////////////////////////////////////////////////
+  byte dataBit;
+  if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
+  else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
+  else                          receivedIRmessage.type = 'e';
 
-void DecodeIR()
-{
-  Serial.print(F("Incoming IR message: "));
-  for (int i = 2; i<=40; i++)
+  for (int i = 5; i<=11; i=i+2)
   {
-    Serial.print(messageIR [i]);
-    Serial.print(F(", "));
-    messageIR[i] = 0;
+    if      (receivedIRmessage.byteMsb == 1) dataBit = 0;
+    else if (receivedIRmessage.byteMsb == 2) dataBit = 1;
+    fred receivedIRmessage.byteMsb = dataBit << 1;
+    receivedIRmessage.byteMsb = receivedIRmessage.byteMsb + messageIR [i];
+    
+    if (deBug)
+    {
+      //Serial.print ("\t");
+      //Serial.print (messageIR[i]);
+      //Serial.print ("-");
+      //Serial.print (receivedIRmessage.byteMsb);
+    }
+    
   }
-  Serial.println();
-  countISR = 0;
+  for (int i = 13; i<=17; i=i+2)
+  {
+    receivedIRmessage.byteLsb = receivedIRmessage.byteLsb<< 1;
+    receivedIRmessage.byteLsb = receivedIRmessage.byteLsb + messageIR [i];
+    if (deBug)
+    {
+      //Serial.print ("\t");
+      //Serial.print (messageIR[i]);
+      //Serial.print ("-");
+      //Serial.print (receivedIRmessage.byteLsb);
+    }
+  }
+//countISR = 0;                         TODO : TEMPORARY TO LOOK FOR OVERLENGTH PACKETS !!!!
+  if (deBug) PrintIR();
 }
 
+//////////////////////////////////////////////////////////////////////
 
-/*
-//////////////////  OLD GET_IR()  ////////////////////////////
-
-byte index;
-uint16_t bitTime =0;
-
-void GetIR()
+void PrintIR()
 {
-  bool pinState = digitalRead(IR_RECEIVE_PIN);
-
-  if (countISR > 1) Serial.println(F("!!!!! Too slow Farmer Joe !!!!!"));
+  bool extendedPrintIR = FALSE;
   
-  char highLow;
-  if (pinState == 0) highLow = 'H';  
-  if (pinState == 1) highLow = 'L'; 
-  
-  uint16_t newBit;
-  newBit = pinChangeTime - bitTime;
-  bitTime = pinChangeTime;
-  uint16_t delayTime = micros() - pinChangeTime;
-  messageIR    [index] = (newBit+500)/1000;
-  messageIRpin [index] = highLow;
-  messageIRdelay [index] = delayTime;
-  index++;
-  newIRpulse = FALSE;
+  disableInterrupt(IR_RECEIVE_PIN);
   countISR = 0;
-  if (newBit > 120000 || index > 17) DecodeIR();        // GOT IT - How to deal with rolloever of newBit length !!!
-  //if (index > 17) DecodeIR();
-}
-*/
+  
+  if (extendedPrintIR == TRUE)
+  {
+    Serial.println();
+    
+    Serial.print(F("\nPrinting bitLength data:\t"));
+    for (int i = 0; i<=ARRAY_LENGTH; i++)
+    {
+      Serial.print(messageIR [i]);
+      Serial.print(F("\t"));
+    }
+    
+    Serial.print(F("\nPrinting pulse raw times:\t"));
+    for (int i = 0; i<=ARRAY_LENGTH; i++)
+    {
+      Serial.print(messageIRpulse [i]);
+      Serial.print(F("\t"));
+    }
+    
+    Serial.print(F("\nPrinting total elasped times:\t"));  
+    for (int i = 1; i<=ARRAY_LENGTH; i++)
+    {
+      Serial.print(messageISRelapsed [i]);
+      Serial.print(F("\t"));
+    }
+    Serial.print(F("\nPrinting ISR cpu times:\t\t"));  
+    for (int i = 1; i<=ARRAY_LENGTH; i++)
+    {
+      Serial.print(messageISRdelay [i]);
+      Serial.print(F("\t"));
+    }
+  }
 
+  Serial.print("\nIRMessage: ");
+  Serial.print(receivedIRmessage.type);
+  Serial.print(", ");
+  Serial.print(receivedIRmessage.byteMsb, BIN);
+  Serial.print(", ");
+  Serial.print(receivedIRmessage.byteLsb, BIN);
+  Serial.println();
+  
+  ClearIRarray();
+  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ClearIRarray()
+{
+  for (int i = 0; i<=ARRAY_LENGTH; i++)
+  {
+    //messageIR[i] = 42;
+    //messageISRpulse[i] = 42
+    //messageISRdelay[i] = -42;
+    
+  }
+  receivedIRmessage.type = 'n';
+  receivedIRmessage.byteMsb = 0;
+  receivedIRmessage.byteLsb = 0;
+}

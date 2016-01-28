@@ -18,18 +18,27 @@ char* buttonPressed [12];
 void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
                 String Text, byte TextSize, uint16_t TextColour, uint8_t MaxCharacters) 
 {
+  bool Centre = FALSE;
+  
   // Calculate values if 0 is passed.
-  if (CursorX == 0) CursorX = (240-((Text.length()*5)+Text.length()-1)*TextSize)/2;
-    //CursorX = (240-TextWidth)/2;
+  if (CursorX == 0) { CursorX = (240-((Text.length()*5)+Text.length()-1)*TextSize)/2; Centre = TRUE; }
   if (BoxColour == 0) BoxColour = tft.readPixel(CursorX, CursorY);
   if (MaxCharacters == 0) MaxCharacters = Text.length();
 
   ///////////// The problem is that Cursor X is for the text, which is centred and we need a new Variable for BoxX
 
-  
+  uint16_t BoxPosX;
   // Draw the box
   int BoxWidth = (((MaxCharacters*5)+(MaxCharacters-1))*TextSize)+2;
-  tft.fillRect( CursorX-1, CursorY-1, BoxWidth, (TextSize*7)+2, BoxColour);
+  if (Centre == TRUE)
+  {
+    BoxPosX = (240-BoxWidth)/2;
+  }
+  else
+  {
+    BoxPosX = CursorX - 1;
+  }
+  tft.fillRect( BoxPosX, CursorY-1, BoxWidth, (TextSize*7)+2, BoxColour);
   
   // Set the text size & colour
   tft.setTextColor(TextColour);

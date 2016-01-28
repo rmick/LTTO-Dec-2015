@@ -88,8 +88,8 @@ void DrawTaggerScreen()
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",    2, BLACK);
     if (deBug) PrintButtonArray();
 
-    DrawTextLabel( 120,  110, CYAN, String(shotCount),    3, BLACK, 3);
-    DrawTextLabel( 0,  170, CYAN, String(shieldsTimer), 3, BLACK, 3);
+    DrawTextLabel( 160,  110, CYAN, String(shotCount),    3, BLACK, 3);
+    DrawTextLabel( 160,  180, CYAN, String(shieldsTimer), 3, RED,   3);
   }
 }
 
