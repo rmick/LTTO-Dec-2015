@@ -49,7 +49,7 @@ const byte eeRELOAD_AMOUNT = 10;
 const byte eeMAX_RELOADS =   12;
 const byte eeSHIELDS_TIMER = 14;
 
-byte medicCount =     EEPROM.read(eeMEDIC_COUNT);
+byte medicCount =   EEPROM.read(eeMEDIC_COUNT);
 byte medicDelay =   EEPROM.read(eeMEDIC_DELAY); 
 byte teamID =       EEPROM.read(eeTEAM_ID);         
 byte playerID =     EEPROM.read(eePLAYER_ID);
@@ -107,6 +107,7 @@ void setup()
   pinMode (IR_LED, OUTPUT);
   pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
+  receivedIRmessage.type = '_';
   
   /////////////////Setup the LCD screen////////////////////////
   tft.reset();
@@ -128,25 +129,6 @@ if (reloadAmount = 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15);
 
 void loop()
 { 
-  static byte healthCount = 0;
-  static byte badMessageCount = 0;
-
-  if (receivedIRmessage.type != '_')
-  {
-    if (receivedIRmessage.type == 'T' && receivedIRmessage.byteMsb == 15 && receivedIRmessage.byteLsb == 7)
-    {
-      healthCount++;
-      Serial.print(F("\n ----------------------------- BANG ! - # ")); Serial.print(healthCount); Serial.println(F(" -----------------------------"));
-      Serial.println();
-    }
-    else
-    {
-      badMessageCount++;
-      Serial.print(F("\n--- bad Tag message - # "));   Serial.print(badMessageCount); Serial.println(F(" ---"));
-      Serial.println();
-    }
-    receivedIRmessage.type = '_';
-  }
   ////////////////////////
   if      (state == MEDIC)            MedicMode();
   else if (state == PINPAD)           PinPadMode();
@@ -157,6 +139,30 @@ void loop()
   else if (state == CLEAR_SCORE)      ClearScore();
   else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
   //////////////////////////////////
+
+  static byte healthCount = 0;
+  static byte badMessageCount = 0;
+
+  if (receivedIRmessage.type != '_')
+  {
+    if (receivedIRmessage.type == 'T')  // && receivedIRmessage.byteMsb == 0 && receivedIRmessage.byteLsb == 0)
+    {
+      healthCount++;
+      Serial.print(F("\n ----------------------------- BANG ! - # ")); Serial.print(healthCount); Serial.println(F(" -----------------------------"));
+      Serial.println();
+    }
+    else if (receivedIRmessage.type == 'B')
+    {
+      Serial.print("b");
+    }
+    else
+    {
+      badMessageCount++;
+      Serial.print(F("\n--- bad Tag message - # "));   Serial.print(badMessageCount); Serial.println(F(" ---"));
+      Serial.println();
+    }
+    ClearIRarray();
+  }
 }
 
 ////////////////////// END MAIN LOOP//////////////////////////////////////////////////////////////////// END MAIN LOOP //////////////////////
