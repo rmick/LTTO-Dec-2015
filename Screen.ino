@@ -46,12 +46,15 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
   tft.setCursor(CursorX, CursorY);
   tft.println(Text);
 
-  Serial.print(F("DeBug DrawTextLabel - Box Width: "));
-  Serial.print (BoxWidth);
-  Serial.print(F(", Box Location: "));
-  Serial.print((240-BoxWidth)/2);
-  Serial.print(F(", "));
-  Serial.println(CursorY-1); 
+  if (deBug)
+  {
+    Serial.print(F("DeBug DrawTextLabel - Box Width: "));
+    Serial.print (BoxWidth);
+    Serial.print(F(", Box Location: "));
+    Serial.print((240-BoxWidth)/2);
+    Serial.print(F(", "));
+    Serial.println(CursorY-1);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

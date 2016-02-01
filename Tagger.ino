@@ -35,11 +35,14 @@ void UpdateShieldsTimer()
 void FireLaser(byte megaTag)
 {
   if (shotCount == 0) return;
+  long unsigned int shotTime = micros();
   tft.fillScreen(YELLOW);
+  Serial.println("Shot");
   SendIR('T', megaTag);
   shotCount = shotCount - (megaTag+1);
-  if (shotCount == 255) shotCount = 0;
+  if (shotCount >= 250 && shotCount <= 255) shotCount = 0;
   lastState = NONE;
+  Serial.print((micros()-shotTime)/1000); Serial.print("mS.");
   DrawTaggerScreen();
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,8 +91,9 @@ void DrawTaggerScreen()
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",    2, BLACK);
     if (deBug) PrintButtonArray();
 
-    DrawTextLabel( 160,  110, CYAN, String(shotCount),    3, BLACK, 3);
-    DrawTextLabel( 160,  180, CYAN, String(shieldsTimer), 3, RED,   3);
+    DrawTextLabel( 165,   98, 0,      String(shotCount),    3, BLACK, 2);
+    DrawTextLabel( 160,  145, YELLOW, String(playerHealth), 4, BLACK, 2);
+    DrawTextLabel( 165,  195, 0,      String(shieldsTimer), 3, RED,   2);
   }
 }
 

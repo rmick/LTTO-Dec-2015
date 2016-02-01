@@ -3,7 +3,6 @@
 #include <EnableInterrupt.h>
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
-//#include <QueueArray.h>
 #include <EEPROM.h>
 #include <SWTFT.h>
 
@@ -49,14 +48,18 @@ const byte eeRELOAD_AMOUNT = 10;
 const byte eeMAX_RELOADS =   12;
 const byte eeSHIELDS_TIMER = 14;
 
+//MedicStuff
 byte medicCount =   EEPROM.read(eeMEDIC_COUNT);
-byte medicDelay =   EEPROM.read(eeMEDIC_DELAY); 
+byte medicDelay =   EEPROM.read(eeMEDIC_DELAY);
+bool hostile =      EEPROM.read(eeHOSTILE);
+
+//TaggerStuff
 byte teamID =       EEPROM.read(eeTEAM_ID);         
 byte playerID =     EEPROM.read(eePLAYER_ID);
-bool hostile =      EEPROM.read(eeHOSTILE);
 byte reloadAmount = EEPROM.read(eeRELOAD_AMOUNT);
 byte maxReloads =   EEPROM.read(eeMAX_RELOADS);
 byte shieldsTimer = EEPROM.read(eeSHIELDS_TIMER);
+byte playerHealth = 50;
 byte shotCount = reloadAmount;
 
 const byte IR_LED = 13;
@@ -64,7 +67,7 @@ const byte IR_RECEIVE_PIN = 11;
 
 //DeBug use only
 unsigned long irTime;
-const bool deBug = 1;
+const bool deBug = FALSE;
 
 int timer1counter;
 
@@ -103,7 +106,7 @@ irMessage receivedIRmessage;
 
 void setup()
 {
-  if (deBug) Serial.begin(250000);
+  Serial.begin(250000);
   pinMode (IR_LED, OUTPUT);
   pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
@@ -114,7 +117,7 @@ void setup()
   uint16_t identifier = tft.readID();
   //if (deBug) Serial.println(identifier);
   tft.begin(identifier); 
-  //tft.setRotation(0);
+  tft.setRotation(180);
   tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
 
 //Initialises the EEPROM on first upload/run.
@@ -140,15 +143,17 @@ void loop()
   else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
   //////////////////////////////////
 
-  static byte healthCount = 0;
   static byte badMessageCount = 0;
 
   if (receivedIRmessage.type != '_')
   {
     if (receivedIRmessage.type == 'T')  // && receivedIRmessage.byteMsb == 0 && receivedIRmessage.byteLsb == 0)
     {
-      healthCount++;
-      Serial.print(F("\n ----------------------------- BANG ! - # ")); Serial.print(healthCount); Serial.println(F(" -----------------------------"));
+      playerHealth--;
+      //tft.fillScreen(RED);
+      DrawTextLabel( 160,  145, YELLOW, String(playerHealth), 4, BLACK, 2);
+      //lastState = NONE;
+      Serial.print(F("\n ----------------------------- BANG ! - # ")); Serial.print(playerHealth); Serial.println(F(" -----------------------------"));
       Serial.println();
     }
     else if (receivedIRmessage.type == 'B')

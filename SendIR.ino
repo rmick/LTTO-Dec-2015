@@ -33,7 +33,7 @@ void SendIR(char type, unsigned int message)
       break;
     case 'T':
       msgLength = 7;
-      interDelay = 1000;
+      interDelay = 5;
       PulseIR(3);
        DeBug(F("3mS mark  "));       ///////////
       delayMicroseconds (6000);
