@@ -59,8 +59,9 @@ byte playerID =     EEPROM.read(eePLAYER_ID);
 byte reloadAmount = EEPROM.read(eeRELOAD_AMOUNT);
 byte maxReloads =   EEPROM.read(eeMAX_RELOADS);
 byte shieldsTimer = EEPROM.read(eeSHIELDS_TIMER);
-byte playerHealth = 50;
+byte playerHealth = 10;
 byte shotCount = reloadAmount;
+bool shieldsUp = FALSE;
 
 const byte IR_LED = 13;
 const byte IR_RECEIVE_PIN = 11;
@@ -80,6 +81,7 @@ const char SET_TEAM         = 'i';
 const char SET_MEDIC_DELAY  = 'd';
 const char SET_HOSTILE      = 'h';
 const char CLEAR_SCORE      = 'r';
+const char GAME_OVER        = 'g';
 
 char state = PINPAD;
 char lastState = NONE;
@@ -96,6 +98,7 @@ uint16_t    messageISRelapsed [ARRAY_LENGTH];
 struct irMessage
 {
   char type;
+  int  dataPacket;
   byte byteMsb;
   byte byteLsb;
 };
@@ -141,33 +144,17 @@ void loop()
   else if (state == SET_HOSTILE)      SetHostile();
   else if (state == CLEAR_SCORE)      ClearScore();
   else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
+  else if (state == GAME_OVER)        GameOver();
   //////////////////////////////////
-
-  static byte badMessageCount = 0;
-
-  if (receivedIRmessage.type != '_')
-  {
-    if (receivedIRmessage.type == 'T')  // && receivedIRmessage.byteMsb == 0 && receivedIRmessage.byteLsb == 0)
-    {
-      playerHealth--;
-      //tft.fillScreen(RED);
-      DrawTextLabel( 160,  145, YELLOW, String(playerHealth), 4, BLACK, 2);
-      //lastState = NONE;
-      Serial.print(F("\n ----------------------------- BANG ! - # ")); Serial.print(playerHealth); Serial.println(F(" -----------------------------"));
-      Serial.println();
-    }
-    else if (receivedIRmessage.type == 'B')
-    {
-      Serial.print("b");
-    }
-    else
-    {
-      badMessageCount++;
-      Serial.print(F("\n--- bad Tag message - # "));   Serial.print(badMessageCount); Serial.println(F(" ---"));
-      Serial.println();
-    }
-    ClearIRarray();
-  }
+ 
 }
 
 ////////////////////// END MAIN LOOP//////////////////////////////////////////////////////////////////// END MAIN LOOP //////////////////////
+
+void GameOver()
+{
+  tft.fillScreen(BLACK);
+  DrawTextLabel ( 0, 100, BLACK, "Game", 6, RED, 0);
+  DrawTextLabel ( 0, 180, BLACK, "Over", 6, RED, 0);
+}
+

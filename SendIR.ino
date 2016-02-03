@@ -8,7 +8,7 @@
 
 void SendIR(char type, unsigned int message)
 {
-  disableInterrupt(IR_RECEIVE_PIN);
+  //disableInterrupt(IR_RECEIVE_PIN);
 
   irTime = micros();          ////////// for DeBug purposes only.
   int msgLength = 0;

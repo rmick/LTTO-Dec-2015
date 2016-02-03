@@ -36,6 +36,11 @@ and 10 minutes later had recovered 40% of my SRAM and the project was back on tr
 
 Ken Sherriff - for his ubiqitous IR library.
 Although I no longer use it in the project, it taught me most of what I needed to know to create the current code.
+I ditched the library for a number of reasons.
+  1)  I needed to use different Pins for the IR_RECEIVE and IR_SEND, as the pins in the library were used for the LCD touch screen.
+  2)  I really wanted duplex send/receive, whereas in Ken's library sending turns off receive. Having said that,
+      I currently disable interupts durin the sending, due to the dev hardware having the IR LED next to the receiver,
+      which meant that the gun triggered it's own receiver. The interupts can be left on once proper hardware is built.
 
 
 Tag Ferret - the inventor of the LTTO system, whose various blogs and websites provided much needed background information

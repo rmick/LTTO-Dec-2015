@@ -74,7 +74,7 @@ void ISRchange()
   // Check for too many bits without a header......... (stops overflow of Array variables)
   if (countISR > (ARRAY_LENGTH-2) )
   {
-    Serial.println("\nHouston we have a problem");
+    Serial.println("\nArray Overlength Error Trap");
     countISR = 0;
   }
 
@@ -110,13 +110,33 @@ void ISRchange()
 
 //////////////////////////////////////////////////////////////////////
 
-void CreateIRmessage()
+void CreateIRmessage()                                      // TODO: Currently not checking for valid -2mS breaks !!!!
 {
+  
   //if (deBug) Serial.println("\nCreating IR message");
   
   if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
   else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
   else                          receivedIRmessage.type = 'e';
+
+
+  
+  for (int i = 5; i<=17; i+=2)
+  {
+    receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
+    receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
+    
+    if (deBug)
+    {
+      Serial.print ("\t");
+      Serial.print (messageIR[i]);
+      Serial.print ("-");
+      Serial.print (receivedIRmessage.dataPacket);
+    }
+  }
+
+// TODO: Get rid of this
+// >>>>>>> From here !!!!!!!!!!
 
   for (int i = 5; i<=11; i=i+2)
   {
@@ -144,7 +164,11 @@ void CreateIRmessage()
       //Serial.print (receivedIRmessage.byteLsb);
     }
   }
-//countISR = 0;                         TODO : TEMPORARY TO LOOK FOR OVERLENGTH PACKETS !!!!
+
+// >>>>>>> To here !!!!!!!
+
+  
+  countISR = 0;
   if (deBug) PrintIR();
 }
 
