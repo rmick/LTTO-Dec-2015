@@ -113,60 +113,44 @@ void ISRchange()
 void CreateIRmessage()                                      // TODO: Currently not checking for valid -2mS breaks !!!!
 {
   
-  //if (deBug) Serial.println("\nCreating IR message");
+  if (deBug) Serial.println("\nCreating IR message");
   
   if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
   else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
   else                          receivedIRmessage.type = 'e';
 
-
-  
-  for (int i = 5; i<=17; i+=2)
+  if (receivedIRmessage.type == 'T')
   {
-    receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
-    receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
-    
-    if (deBug)
+    for (int i = 5; i<=17; i+=2)
     {
-      Serial.print ("\t");
-      Serial.print (messageIR[i]);
-      Serial.print ("-");
-      Serial.print (receivedIRmessage.dataPacket);
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
+    
+      if (deBug)
+      {
+        Serial.print ("\t");
+        Serial.print (messageIR[i]);
+        Serial.print ("-");
+        Serial.print (receivedIRmessage.dataPacket);
+      }
     }
   }
-
-// TODO: Get rid of this
-// >>>>>>> From here !!!!!!!!!!
-
-  for (int i = 5; i<=11; i=i+2)
+  else if (receivedIRmessage.type == 'B')
   {
-    receivedIRmessage.byteMsb = receivedIRmessage.byteMsb << 1;
-    receivedIRmessage.byteMsb = receivedIRmessage.byteMsb + (messageIR [i]-1);
-    
-    if (deBug)
+    for (int i = 5; i<=13; i+=2)
     {
-      //Serial.print ("\t");
-      //Serial.print (messageIR[i]);
-      //Serial.print ("-");
-      //Serial.print (receivedIRmessage.byteMsb);
-    }
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
     
-  }
-  for (int i = 13; i<=17; i=i+2)
-  {
-    receivedIRmessage.byteLsb = receivedIRmessage.byteLsb<< 1;
-    receivedIRmessage.byteLsb = receivedIRmessage.byteLsb + (messageIR [i]-1);
-    if (deBug)
-    {
-      //Serial.print ("\t");
-      //Serial.print (messageIR[i]);
-      //Serial.print ("-");
-      //Serial.print (receivedIRmessage.byteLsb);
+      if (deBug)
+      {
+        Serial.print ("\t");
+        Serial.print (messageIR[i]);
+        Serial.print ("-");
+        Serial.print (receivedIRmessage.dataPacket);
+      }
     }
   }
-
-// >>>>>>> To here !!!!!!!
-
   
   countISR = 0;
   if (deBug) PrintIR();
@@ -216,9 +200,7 @@ void PrintIR()
   Serial.print("\nIRMessage: ");
   Serial.print(receivedIRmessage.type);
   Serial.print(", ");
-  Serial.print(receivedIRmessage.byteMsb, BIN);
-  Serial.print(", ");
-  Serial.print(receivedIRmessage.byteLsb, BIN);
+  Serial.print(receivedIRmessage.dataPacket, BIN);
   Serial.println();
   
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
@@ -228,15 +210,15 @@ void PrintIR()
 
 void ClearIRarray()
 {
+  if (deBug) Serial.println(F("ClearIRarray()"));
   for (int i = 0; i<=ARRAY_LENGTH; i++)
   {
-    messageIR[i]          = 42;
-    messageIRpulse[i]     = 42;
-    messageISRdelay[i]    = 42;
-    messageISRelapsed[i]  = 42;
+    messageIR[i]          = 0;
+    messageIRpulse[i]     = 0;
+    messageISRdelay[i]    = 0;
+    messageISRelapsed[i]  = 0;
     
   }
   receivedIRmessage.type = '_';
-  receivedIRmessage.byteMsb = 0;
-  receivedIRmessage.byteLsb = 0;
+  receivedIRmessage.dataPacket = 0;
 }

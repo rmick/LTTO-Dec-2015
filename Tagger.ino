@@ -5,6 +5,7 @@
 //  void DrawTaggerScreen()
 //  void DrawTaggerScreenShieldsUp()
 //  void DecodeIR()
+//  void GameOver()
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -12,7 +13,7 @@ void TaggerMode()
 { 
   DrawTaggerScreen();
   
-  if (receivedIRmessage.type != '_') DecodeIR();
+  //  if (receivedIRmessage.type != '_') DecodeIR();
   
   char* Action = GetButtonPress();
   if      (Action == "Tag 1" && shieldsUp == FALSE)   FireLaser(B0000000);
@@ -33,17 +34,18 @@ void UpdateShieldsTimer()
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-void FireLaser(byte megaTag)
+void FireLaser(byte tagPower)
 {
-  if (shotCount == 0) return;
-  long unsigned int shotTime = micros();
+  if (tagCount == 0) return;
   //tft.fillScreen(YELLOW);
-  Serial.println("\nShot");
-  SendIR('T', megaTag);
-  shotCount = shotCount - (megaTag+1);
-  if (shotCount >= 250 && shotCount <= 255) shotCount = 0;
+
+  //Add TeamID, PlayerID and megaTag into the message data
+
+  SendIR('T', tagPower);
+  
+  tagCount = tagCount - (tagPower+1);
+  if (tagCount >= 250 && tagCount <= 255) tagCount = 0;
   lastState = NONE;
-  Serial.print((micros()-shotTime)/1000); Serial.println("mS.");
   DrawTaggerScreen();
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +69,7 @@ void Reload()
   
   tft.fillScreen(BLACK);
   delay (500);
-  shotCount = reloadAmount;
+  tagCount = reloadAmount;
   reloadAmount--;
   EEPROM.write(eeRELOAD_AMOUNT, reloadAmount);
   lastState = NONE;
@@ -92,7 +94,7 @@ void DrawTaggerScreen()
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",    2, BLACK);
     if (deBug) PrintButtonArray();
 
-    DrawTextLabel( 165,   98, 0,      String(shotCount),    3, BLACK, 2);
+    DrawTextLabel( 165,   98, 0,      String(tagCount),    3, BLACK, 2);
     DrawTextLabel( 160,  145, YELLOW, String(playerHealth), 4, BLACK, 2);
     DrawTextLabel( 165,  195, 0,      String(shieldsTimer), 3, RED,   2);
   }
@@ -126,7 +128,7 @@ void DrawTaggerScreenShieldsUp()
 
 void DecodeIR()
 {
-  
+  if (deBug) Serial.println(F("DecodeIR()"));
   static byte badMessageCount = 0;  
 
   byte shooterTeamID;
@@ -139,15 +141,15 @@ void DecodeIR()
   
   if (receivedIRmessage.type == 'T')
   {
-    Serial.print("\nT");
+    Serial.print("\nTag");
     // Find TeamID of shooter
-    shooterTeamID = receivedIRmessage.dataPacket & B01100000;
-    shooterTeamID = shooterTeamID << 5;
+    shooterTeamID = receivedIRmessage.dataPacket & B01100000;             // TeamID = 1 thru 3  (0 = NoTeams)
+    shooterTeamID = shooterTeamID >> 5;
     Serial.print(F("\tTeamID: "));
     Serial.print(shooterTeamID);
     // Find PlayerID
-    shooterPlayerID = receivedIRmessage.dataPacket & B00011100;
-    shooterPlayerID = shooterPlayerID << 3;
+    shooterPlayerID = (receivedIRmessage.dataPacket & B00011100)+1;       // PlayerID = 1 thru 8
+    shooterPlayerID = shooterPlayerID >> 2;
     Serial.print(F("\tPlayerID: "));
     Serial.print(shooterPlayerID);
     // Find Mega power
@@ -156,8 +158,9 @@ void DecodeIR()
     Serial.println(shooterShotPower);
 
     //Process the data  // TODO: maybe move this to a separate function !!!
-    if (shieldsUp == TRUE) // TODO: signal a shot was blocked.
-    if (teamID = shooterTeamID) return;
+    if (shieldsUp == TRUE)        { ClearIRarray(); return; }    // TODO: signal a shot was blocked.
+    if (teamID == shooterTeamID)  { ClearIRarray(); return; }
+    
     playerHealth = playerHealth - shooterShotPower;
     if (playerHealth <= 255 && playerHealth >= 250) playerHealth = 0;
     DrawTextLabel( 160,  145, YELLOW, String(playerHealth), 4, BLACK, 2);
@@ -165,24 +168,28 @@ void DecodeIR()
     if (playerHealth == 0)
       {
         state = GAME_OVER;
-        //return;
       }
-        
   }
     
   else if (receivedIRmessage.type == 'B')
   {
-    Serial.print("b");
+    //Serial.print("Bcn-");
   }
     
   else
   {
     badMessageCount++;                // TODO: Is this logical here, or am I off with the fairies.
-    Serial.print("-BAD-");
-    //Serial.print(F("\n--- bad Tag message - # "));   Serial.print(badMessageCount); Serial.println(F(" ---"));
-    //Serial.println();
+    //Serial.print("Error-");
   }    
   ClearIRarray();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GameOver()
+{
+  tft.fillScreen(BLACK);
+  DrawTextLabel ( 0, 100, BLACK, "Game", 6, RED, 0);
+  DrawTextLabel ( 0, 180, BLACK, "Over", 6, RED, 0);
+}
 

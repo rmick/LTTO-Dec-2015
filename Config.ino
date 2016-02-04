@@ -8,11 +8,11 @@ void ConfigMode()
   DrawConfigScreen();
 
   char* Action = GetButtonPress();
-  if      (Action == "Set Team")              state = SET_TEAM;         // TODO: If Team = 0 disable Hostile Mode config
+  if      (Action == "Set Team")              state = SET_TEAM;
   else if (Action == "Set Medic Delay")       state = SET_MEDIC_DELAY;
-  else if (Action == "Set Hostile")           state = SET_HOSTILE;      // TODO: enable Hostile mode - sends opposing 2/3 teams MegaTags
+  else if (Action == "Set Hostile")           state = SET_HOSTILE;
   else if (Action == "Clear Score")           state = CLEAR_SCORE;
-  else if (Action == "EXIT")                  state = PINPAD;
+  else if (Action == "EXIT")                  state = MEDIC;
 
 ////////////////  Later on add MODES
 ////////////////  Tagger Mode

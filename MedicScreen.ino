@@ -17,9 +17,9 @@ void MedicMode()
  
   if (count == 1000 && hostile)
   {
-    if (teamID == 1)  SendIR ('T', B0100011);
-    if (teamID == 2)  SendIR ('T', B1000011);
-    if (teamID == 3)  SendIR ('T', B1100011);
+    if (teamID == 1)  { SendIR ('T', B1000011); SendIR ('T', B1100011); }    // Tag Teams 2 + 3         //  If teamID == 0 then there NO teams,
+    if (teamID == 2)  { SendIR ('T', B0100011); SendIR ('T', B1100011); }    // Tag Teams 1 + 3         //  so there is no hostile mode possible
+    if (teamID == 3)  { SendIR ('T', B0100011); SendIR ('T', B1000011); }    // Tag Teams 1 + 2
     count = 0;
   }
 }

@@ -47,11 +47,14 @@ const bool eeHOSTILE =       8;
 const byte eeRELOAD_AMOUNT = 10;
 const byte eeMAX_RELOADS =   12;
 const byte eeSHIELDS_TIMER = 14;
+const byte eePIN_CODE = 16;         // NB. It is a 4 byte array, so next available is 20 !
+// const byte ee???? = 20;
 
 //MedicStuff
 byte medicCount =   EEPROM.read(eeMEDIC_COUNT);
 byte medicDelay =   EEPROM.read(eeMEDIC_DELAY);
 bool hostile =      EEPROM.read(eeHOSTILE);
+byte pinCode[4] =   {EEPROM.read(eePIN_CODE), EEPROM.read(eePIN_CODE)+1, EEPROM.read(eePIN_CODE)+2, EEPROM.read(eePIN_CODE)+3 };
 
 //TaggerStuff
 byte teamID =       EEPROM.read(eeTEAM_ID);         
@@ -59,8 +62,8 @@ byte playerID =     EEPROM.read(eePLAYER_ID);
 byte reloadAmount = EEPROM.read(eeRELOAD_AMOUNT);
 byte maxReloads =   EEPROM.read(eeMAX_RELOADS);
 byte shieldsTimer = EEPROM.read(eeSHIELDS_TIMER);
-byte playerHealth = 10;
-byte shotCount = reloadAmount;
+byte playerHealth = 50;
+byte tagCount = reloadAmount;
 bool shieldsUp = FALSE;
 
 const byte IR_LED = 13;
@@ -98,9 +101,7 @@ uint16_t    messageISRelapsed [ARRAY_LENGTH];
 struct irMessage
 {
   char type;
-  int  dataPacket;
-  byte byteMsb;
-  byte byteLsb;
+  unsigned int  dataPacket;
 };
 
 irMessage receivedIRmessage;
@@ -128,7 +129,11 @@ if (maxReloads = 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
 if (medicDelay = 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
 if (medicCount = 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
 if (shieldsTimer = 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
-if (reloadAmount = 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); shotCount = reloadAmount; }
+if (reloadAmount = 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
+if (pinCode[0] = 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE  , 0);
+                          pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 0);
+                          pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 0);
+                          pinCode[3] = 4;     EEPROM.write(eePIN_CODE+3, 0);  }
 }
 
 ////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////
@@ -146,15 +151,15 @@ void loop()
   else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
   else if (state == GAME_OVER)        GameOver();
   //////////////////////////////////
- 
+  
+  if (receivedIRmessage.type != '_')
+  {
+    if (state != TAGGER) ClearIRarray();     // Clears IR data when not in Tagger Mode.
+    if (state == TAGGER) DecodeIR();
+  }
 }
 
 ////////////////////// END MAIN LOOP//////////////////////////////////////////////////////////////////// END MAIN LOOP //////////////////////
 
-void GameOver()
-{
-  tft.fillScreen(BLACK);
-  DrawTextLabel ( 0, 100, BLACK, "Game", 6, RED, 0);
-  DrawTextLabel ( 0, 180, BLACK, "Over", 6, RED, 0);
-}
+
 
