@@ -68,13 +68,13 @@ void SendBeacon()         // Medic beacon is B0000011 (no team). Bits 2+3 alter 
   //TODO: Make a function to create the data
   // void AssembleByte(teamID, playerID, mega/beacon) 
   int bitShiftTeamID = teamID << 2;
-  int bitShiftPlayerID = playerID < 5;
+  int bitShiftPlayerID = playerID << 5;
   //TODO: Do a XOR merge of TeamID and PlayerID
   int beaconSignal = bitShiftTeamID + B11;
   tft.fillScreen(GREEN);
   for (int repeat = 1; repeat <=5; repeat++)
   {
-    SendIR('B', beaconSignal);      // Send a beacon with the message 00011 (DEC 3)           // This is a non-team beacon
+    SendIR('B', beaconSignal);
     if (deBug) Serial.println(F("Beacon Sent"));
   }
   lastState = NONE;

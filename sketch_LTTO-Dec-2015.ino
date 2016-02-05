@@ -86,7 +86,7 @@ const char SET_HOSTILE      = 'h';
 const char CLEAR_SCORE      = 'r';
 const char GAME_OVER        = 'g';
 
-char state = PINPAD;
+char state = MEDIC;
 char lastState = NONE;
 
 byte buttonCount;
@@ -125,12 +125,12 @@ void setup()
   tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
 
 //Initialises the EEPROM on first upload/run.
-if (maxReloads = 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
-if (medicDelay = 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
-if (medicCount = 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
-if (shieldsTimer = 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
-if (reloadAmount = 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
-if (pinCode[0] = 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE  , 0);
+if (maxReloads == 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
+if (medicDelay == 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
+if (medicCount == 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
+if (shieldsTimer == 255) { Serial.print("WTF!"); shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
+if (reloadAmount == 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
+if (pinCode[0] == 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE  , 0);
                           pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 0);
                           pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 0);
                           pinCode[3] = 4;     EEPROM.write(eePIN_CODE+3, 0);  }

@@ -11,44 +11,63 @@ void DrawAsterisk(uint8_t offset, uint8_t number)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
 byte pinCodeEntered[4];
+
+void ClearPin()
+{
+  for (uint8_t x = 0; x<4; x++)
+  {
+    pinCodeEntered[x] = 0;
+  }                                 
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void PinPadMode()
 {
-  DrawPinPadScreen();
-  
-  char* numberPressed = GetButtonPress();
   static unsigned int digitCount = 0;
-     
-  if      (numberPressed == "1")  { pinCodeEntered[digitCount] = 1; DrawAsterisk(digitCount, 1); digitCount++; }
-  else if (numberPressed == "2")  { pinCodeEntered[digitCount] = 2; DrawAsterisk(digitCount, 2); digitCount++; }
-  else if (numberPressed == "3")  { pinCodeEntered[digitCount] = 3; DrawAsterisk(digitCount, 3); digitCount++; }
-  else if (numberPressed == "4")  { pinCodeEntered[digitCount] = 4; DrawAsterisk(digitCount, 4); digitCount++; }
-  else if (numberPressed == "5")  { pinCodeEntered[digitCount] = 5; DrawAsterisk(digitCount, 5); digitCount++; }
-  else if (numberPressed == "6")  { pinCodeEntered[digitCount] = 6; DrawAsterisk(digitCount, 6); digitCount++; }
-  else if (numberPressed == "7")  { pinCodeEntered[digitCount] = 7; DrawAsterisk(digitCount, 7); digitCount++; }
-  else if (numberPressed == "8")  { pinCodeEntered[digitCount] = 8; DrawAsterisk(digitCount, 8); digitCount++; }
-  else if (numberPressed == "9")  { pinCodeEntered[digitCount] = 9; DrawAsterisk(digitCount, 9); digitCount++; }
-  else if (numberPressed == "0")  { pinCodeEntered[digitCount] = 0; DrawAsterisk(digitCount, 0); digitCount++; }
+  static int timeOut;
+  
+  DrawPinPadScreen();
+
+  timeOut ++;
+  if (timeOut == 5000)
+  {
+    state = MEDIC;
+    ClearPin;
+  }
+  
+  char* numberPressed = GetButtonPress();   
+  if      (numberPressed == "1")  { pinCodeEntered[digitCount] = 1; DrawAsterisk(digitCount, 1); digitCount++; timeOut = 0; }
+  else if (numberPressed == "2")  { pinCodeEntered[digitCount] = 2; DrawAsterisk(digitCount, 2); digitCount++; timeOut = 0; }
+  else if (numberPressed == "3")  { pinCodeEntered[digitCount] = 3; DrawAsterisk(digitCount, 3); digitCount++; timeOut = 0; }
+  else if (numberPressed == "4")  { pinCodeEntered[digitCount] = 4; DrawAsterisk(digitCount, 4); digitCount++; timeOut = 0; }
+  else if (numberPressed == "5")  { pinCodeEntered[digitCount] = 5; DrawAsterisk(digitCount, 5); digitCount++; timeOut = 0; }
+  else if (numberPressed == "6")  { pinCodeEntered[digitCount] = 6; DrawAsterisk(digitCount, 6); digitCount++; timeOut = 0; }
+  else if (numberPressed == "7")  { pinCodeEntered[digitCount] = 7; DrawAsterisk(digitCount, 7); digitCount++; timeOut = 0; }
+  else if (numberPressed == "8")  { pinCodeEntered[digitCount] = 8; DrawAsterisk(digitCount, 8); digitCount++; timeOut = 0;}
+  else if (numberPressed == "9")  { pinCodeEntered[digitCount] = 9; DrawAsterisk(digitCount, 9); digitCount++; timeOut = 0; }
+  else if (numberPressed == "0")  { pinCodeEntered[digitCount] = 0; DrawAsterisk(digitCount, 0); digitCount++; timeOut = 0; }
   else if (numberPressed =="Clr") { // Clear the display and reset counter
                                     for (uint8_t x = 0; x<4; x++)
                                     {
                                       DrawTextLabel( 150, 5, 0, "       ", 2, BLACK, 8);
                                       digitCount = 0;
+                                      timeOut = 0;
                                     }
                                   }
   else if (numberPressed == "OK") { //Check if we have a match
                                     if (pinCodeEntered[0] == pinCode[0] && 
                                         pinCodeEntered[1] == pinCode[1] &&
                                         pinCodeEntered[2] == pinCode[2] &&
-                                        pinCodeEntered[3] == pinCode[3] )   { digitCount = 0; state = CONFIG; }
+                                        pinCodeEntered[3] == pinCode[3] )   { digitCount = 0; state = CONFIG; ClearPin(); }
                                     else 
                                     {
                                       DrawTextLabel( 150, 5, 0, "WRONG", 2, RED, 5);
                                       delay (500);
                                       DrawTextLabel( 150, 5, 0, "       ", 2, BLACK, 8);
                                       digitCount = 0;
+                                      timeOut = 0;
                                     }
                                   }
   
