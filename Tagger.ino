@@ -63,15 +63,18 @@ void SetShields()
 
 void Reload()
 {
-  // if reLoadAmount is 0 then unlimited reloads, else kep count.
+  static uint8_t remainingReloads = maxReloads;
+  // if maxReloads is 0 then unlimited reloads, else keep count.
   
-  tft.fillScreen(BLACK);
-  delay (500);
-  tagCount = reloadAmount;
-  reloadAmount--;
-  EEPROM.write(eeRELOAD_AMOUNT, reloadAmount);
-  lastState = NONE;
-  DrawTaggerScreen();
+  if (remainingReloads >0)
+  {
+    tft.fillScreen(BLACK);
+    delay (500);
+    tagCount = reloadAmount;
+    remainingReloads--;
+    lastState = NONE;
+    DrawTaggerScreen();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
