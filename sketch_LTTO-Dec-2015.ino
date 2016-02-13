@@ -6,7 +6,7 @@
 #include <EEPROM.h>
 #include <SWTFT.h>
 
-//////////////////////Setup Touchscreen///////////////////////
+//////////////////////Setup Touchscreen////////////////////////
 #define YP A1
 #define XM A2
 #define YM 7
@@ -54,7 +54,7 @@ const byte eePIN_CODE = 16;         // NB. It is a 4 byte array, so next availab
 byte medicCount =   EEPROM.read(eeMEDIC_COUNT);
 byte medicDelay =   EEPROM.read(eeMEDIC_DELAY);
 bool hostile =      EEPROM.read(eeHOSTILE);
-byte pinCode[4] =   {EEPROM.read(eePIN_CODE), EEPROM.read(eePIN_CODE)+1, EEPROM.read(eePIN_CODE)+2, EEPROM.read(eePIN_CODE)+3 };
+byte pinCode[4] =   {EEPROM.read(eePIN_CODE), EEPROM.read(eePIN_CODE+1), EEPROM.read(eePIN_CODE+2), EEPROM.read(eePIN_CODE+3) };
 
 //TaggerStuff
 byte teamID =       EEPROM.read(eeTEAM_ID);         
@@ -85,6 +85,9 @@ const char SET_MEDIC_DELAY  = 'd';
 const char SET_HOSTILE      = 'h';
 const char CLEAR_SCORE      = 'r';
 const char GAME_OVER        = 'g';
+const char SETUP            = 's';
+const char CHANGE_PIN       = 'x';
+const char CONFIRM_PIN      = 'y';
 
 char state = MEDIC;
 char lastState = NONE;
@@ -94,9 +97,9 @@ bool touchGood = 0;
 
 const byte  ARRAY_LENGTH = 24;
 int8_t      messageIR         [ARRAY_LENGTH];
-uint16_t    messageIRpulse    [ARRAY_LENGTH];
-uint16_t    messageISRdelay   [ARRAY_LENGTH];
-uint16_t    messageISRelapsed [ARRAY_LENGTH];
+uint16_t    messageIRpulse    [ARRAY_LENGTH];     //TODO: Delete these parts of the array as they are debug only.
+//uint16_t    messageISRdelay   [ARRAY_LENGTH];
+//uint16_t    messageISRelapsed [ARRAY_LENGTH];
 
 struct irMessage
 {
@@ -115,6 +118,7 @@ void setup()
   pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
   receivedIRmessage.type = '_';
+  Serial.println(F("\nHere we go boys...."));
   
   /////////////////Setup the LCD screen////////////////////////
   tft.reset();
@@ -128,12 +132,12 @@ void setup()
 if (maxReloads == 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
 if (medicDelay == 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
 if (medicCount == 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
-if (shieldsTimer == 255) { Serial.print("WTF!"); shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
+if (shieldsTimer == 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
 if (reloadAmount == 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
-if (pinCode[0] == 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE  , 0);
-                          pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 0);
-                          pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 0);
-                          pinCode[3] = 4;     EEPROM.write(eePIN_CODE+3, 0);  }
+if (pinCode[0] == 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE,   1);
+                           pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 2);
+                           pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 3);
+                           pinCode[3] = 4;     EEPROM.write(eePIN_CODE+3, 4);  }
 }
 
 ////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////
@@ -149,6 +153,9 @@ void loop()
   else if (state == SET_HOSTILE)      SetHostile();
   else if (state == CLEAR_SCORE)      ClearScore();
   else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
+  else if (state == SETUP)            Setup();
+  else if (state == CHANGE_PIN)       ChangePin();
+  else if (state == CONFIRM_PIN)      ConfirmPin();
   else if (state == GAME_OVER)        GameOver();
   //////////////////////////////////
   

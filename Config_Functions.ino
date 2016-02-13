@@ -2,23 +2,25 @@
 //  void DrawSetTeam()
 //  void SetMedicDelay()
 //  void DrawMedicDelay()
-//  void UpdateMedicDelay()
 //  void SetHostile()
-//  
 //  void ClearScore()
 //  void DrawClearScore()
+
+////////////////////////////////////////////////////////////////////
 
 void SetTeam()
 {
   DrawSetTeam();
  
-  char* Action = GetButtonPress();                                  //TODO: Why does this routine NOT call Update TeamID ??????
+  char* Action = GetButtonPress();
   if      (Action == "No Team")  { teamID = 0; lastState = NONE; }
   else if (Action == "Team 1")   { teamID = 1; lastState = NONE; }
   else if (Action == "Team 2")   { teamID = 2; lastState = NONE; }
   else if (Action == "Team 3")   { teamID = 3; lastState = NONE; }
   else if (Action == "EXIT")     { EEPROM.write(eeTEAM_ID, teamID); state = CONFIG; }
 }
+
+////////////////////////////////////////////////////////////////////
 
 void DrawSetTeam()
 {
@@ -38,17 +40,19 @@ void DrawSetTeam()
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 void SetMedicDelay()
 {
   DrawMedicDelay();
   
   char* Action = GetButtonPress();
-  if      (Action == "Up")      { medicDelay++; DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3); }
-  else if (Action == "Down")    { medicDelay--; DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3); }
+  if      (Action == "Up")      { medicDelay++; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
+  else if (Action == "Down")    { medicDelay--; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
   else if (Action == "EXIT")    { EEPROM.write(eeMEDIC_DELAY, medicDelay); state = CONFIG; }
 }
+
+////////////////////////////////////////////////////////////////////
 
 void DrawMedicDelay()
 {
@@ -61,30 +65,13 @@ void DrawMedicDelay()
     DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
     if (deBug) PrintButtonArray();
     
-    DrawTextLabel( 0,  140, 0, String(medicDelay), 4, BLACK, 3);
-    //UpdateMedicDelay();
+    DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3);
   }
 }
-/*
-void UpdateMedicDelay()
-{
-  {
-    
-    return;
-    Serial.print(F("MedicDelay = "));
-    Serial.println(medicDelay);
-    tft.fillRect(40, 135, 160, 40, MAGENTA);
-    int numWidth = CountDigits(medicDelay)*(5*4);
-    tft.setCursor((240-numWidth)/2, 140);
-    tft.setTextColor(BLACK);
-    tft.setTextSize(4);
-    tft.print(medicDelay);
-  }
-}
-*/
+
 ////////////////////////////////////////////////////////////////////////////////
 
-void SetHostile()               // TODO: Send IR Tags every X seconds against other teams !
+void SetHostile()
 {
   DrawSetHostile();
   char* Action = GetButtonPress();
@@ -93,13 +80,16 @@ void SetHostile()               // TODO: Send IR Tags every X seconds against ot
   else if (Action == "EXIT") { EEPROM.write(eeHOSTILE, hostile); state = CONFIG; }
 }
 
+////////////////////////////////////////////////////////////////////
+
 void DrawSetHostile()
 {
   if (teamID == 0)
   {
     if (lastState != state)
     {
-      DrawScreen(SET_HOSTILE, "NOT VALID", MAGENTA, WHITE, 3);
+       if (deBug) Serial.println(F("DrawSetHostileScreen"));
+       DrawScreen(SET_HOSTILE, "NOT VALID", MAGENTA, WHITE, 3);
       DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
       tft.setTextColor(BLACK);
       tft.setTextSize(3);
@@ -135,6 +125,8 @@ void ClearScore()
   else if (Action == "No")   state = CONFIG;
 }
 
+////////////////////////////////////////////////////////////////////
+
 void DrawClearScore()
 {
   if (lastState != state)
@@ -147,3 +139,29 @@ void DrawClearScore()
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+void Setup()
+{
+  DrawSetup();
+  
+  char* Action = GetButtonPress();
+  if      (Action == "Change PIN")  state = CHANGE_PIN;
+  else if (Action == "Tagger")      state = TAGGER;
+  else if (Action == "EXIT")        state = CONFIG;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DrawSetup()
+{
+  if (lastState != state)
+  {
+    if (deBug) Serial.println(F("Setup Screen"));
+    DrawScreen(SETUP, "SET-UP", MAGENTA, WHITE, 3);
+    DrawButton( 20,  50, 200, 55, BLACK,  "Change PIN",   2, WHITE);
+    DrawButton( 20, 210, 200, 55, BLACK,  "Tagger", 2, WHITE);
+    DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
+    if (deBug) PrintButtonArray();
+  }
+}

@@ -22,7 +22,7 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
   
   // Calculate values if 0 is passed.
   if (CursorX == 0) { CursorX = (240-((Text.length()*5)+Text.length()-1)*TextSize)/2; Centre = TRUE; }
-  if (BoxColour == 0) BoxColour = tft.readPixel(CursorX, CursorY);
+  if (BoxColour == 1) BoxColour = tft.readPixel(CursorX, CursorY);
   if (MaxCharacters == 0) MaxCharacters = Text.length();
 
   ///////////// The problem is that Cursor X is for the text, which is centred and we need a new Variable for BoxX
@@ -66,23 +66,24 @@ char* GetButtonPress()
     delay (200);  //TODO: fix the debounce properly.
 
     // Match it to a button
-    byte row = 0;
-    for (row=0; row<12; row++) 
+
+    for (byte row=0; row<12; row++) 
     {
       if (TouchX > Buttons [row] [0] && TouchX < Buttons [row] [2])
       {
         if (TouchY > Buttons [row] [1] && TouchY < Buttons [row] [3])
         {
-          return buttonPressed [row];
           if (deBug)
           {
             Serial.print(F("Button Pressed: "));
             Serial.println(buttonPressed [row]);
           }
+        return buttonPressed [row];    
         }
-      }
+      }  
     }
-  }  
+  } 
+  else return "42"; 
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -204,7 +205,7 @@ void DrawScreen(char Title, char* Label, uint16_t BackColour, uint16_t TextColou
   tft.setTextColor(TextColour);
   tft.setTextSize(TextSize);
   tft.println(Label);
- 
+                                                      //TODO : Remove the Char Title variable, as it is not used !!!!
   buttonCount = 0;
   lastState = state;
 }

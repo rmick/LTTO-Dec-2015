@@ -93,8 +93,8 @@ void ISRchange()
 
   // Store the time it took to process the interupt routine 
   timerISR = micros() - pinChangeTime;
-  messageISRdelay[countISR] = timerISR;
-  messageISRelapsed [countISR] = micros();
+  //messageISRdelay[countISR] = timerISR;
+  //messageISRelapsed [countISR] = micros();
    
   // Check for re-entrant ISR routine calls.
   if (overflowISR >1)
@@ -186,13 +186,13 @@ void PrintIR()
     Serial.print(F("\nPrinting total elasped times:\t"));  
     for (int i = 1; i<=ARRAY_LENGTH; i++)
     {
-      Serial.print(messageISRelapsed [i]);
+//      Serial.print(messageISRelapsed [i]);
       Serial.print(F("\t"));
     }
     Serial.print(F("\nPrinting ISR cpu times:\t\t"));  
     for (int i = 1; i<=ARRAY_LENGTH; i++)
     {
-      Serial.print(messageISRdelay [i]);
+//      Serial.print(messageISRdelay [i]);
       Serial.print(F("\t"));
     }
   }
@@ -215,8 +215,8 @@ void ClearIRarray()
   {
     messageIR[i]          = 0;
     messageIRpulse[i]     = 0;
-    messageISRdelay[i]    = 0;
-    messageISRelapsed[i]  = 0;
+    //messageISRdelay[i]    = 0;
+    //messageISRelapsed[i]  = 0;
     
   }
   receivedIRmessage.type = '_';

@@ -13,8 +13,6 @@ void TaggerMode()
 { 
   DrawTaggerScreen();
   
-  //  if (receivedIRmessage.type != '_') DecodeIR();
-  
   char* Action = GetButtonPress();
   if      (Action == "Tag 1" && shieldsUp == FALSE)   FireLaser(B0000000);
   else if (Action == "Tag 2" && shieldsUp == FALSE)   FireLaser(B0000001);
@@ -22,7 +20,7 @@ void TaggerMode()
   else if (Action == "Tag 4" && shieldsUp == FALSE)   FireLaser(B0000011);
   else if (Action == "Shields")                     SetShields();
   else if (Action == "ReLoad")                      Reload();                    
-  else if (Action == "EXIT")                        state = PINPAD;
+  else if (Action == "EXIT")                        state = CONFIG;
 
   if (shieldsUp) UpdateShieldsTimer();
 }
@@ -94,9 +92,9 @@ void DrawTaggerScreen()
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",    2, BLACK);
     if (deBug) PrintButtonArray();
 
-    DrawTextLabel( 165,   98, 0,      String(tagCount),    3, BLACK, 2);
+    DrawTextLabel( 165,   98, GREEN,  String(tagCount),     3, BLACK, 2);
     DrawTextLabel( 160,  145, YELLOW, String(playerHealth), 4, BLACK, 2);
-    DrawTextLabel( 165,  195, 0,      String(shieldsTimer), 3, RED,   2);
+    DrawTextLabel( 165,  195, GREEN,  String(shieldsTimer), 3, RED,   2);
   }
 }
 
@@ -113,13 +111,11 @@ void DrawTaggerScreenShieldsUp()
     DrawButton(  5, 100,  100, 55, GREEN,  "Tag 2",   2, BLACK);
     DrawButton(  5, 160,  100, 55, GREEN,  "Tag 3",   2, BLACK);
     DrawButton(  5, 220,  100, 55, GREEN,  "Tag 4",   2, BLACK);
-    //DrawButton(135,  40,  100, 55, BLACK,  "ReLoad",  2, WHITE);
+    DrawButton(135,  40,  100, 55, GREEN,  "ReLoad",  2, WHITE);
     DrawButton(135, 220,  100, 55, RED,    "Shields", 2, GREEN);
-    DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",    2, BLACK);
     if (deBug) PrintButtonArray();
 
-    //DrawTextLabel( 150,  110, 0, String(shotCount),    3, BLACK, 3);
-    DrawTextLabel( 150,  170, 0, String(shieldsTimer), 3, BLACK, 3);
+    DrawTextLabel( 165,  195, GREEN, String(shieldsTimer), 3, RED, 2);
   }
 }
 
@@ -158,8 +154,8 @@ void DecodeIR()
     Serial.println(shooterShotPower);
 
     //Process the data  // TODO: maybe move this to a separate function !!!
-    if (shieldsUp == TRUE)        { ClearIRarray(); return; }    // TODO: signal a shot was blocked.
-    if (teamID == shooterTeamID)  { ClearIRarray(); return; }
+    if (shieldsUp == TRUE)                        { ClearIRarray(); return; }    // TODO: signal a shot was blocked.
+    if (teamID == shooterTeamID && teamID != 0)   { ClearIRarray(); return; }
     
     playerHealth = playerHealth - shooterShotPower;
     if (playerHealth <= 255 && playerHealth >= 250) playerHealth = 0;

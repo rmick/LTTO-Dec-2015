@@ -36,12 +36,12 @@ void DrawMedicScreen()
     DrawButton  (40,   40, 160, 160, CYAN,  "Heal", 4, CYAN);      // Draw a huge 'hidden' Cyan button behid the Red Cross
     tft.fillRect(40,  100, 160,  40, RED);                         // Draw a Red Cross over the top.
     tft.fillRect(100,  40,  40, 160, RED);
-    DrawButton  (100, 310,  40,   5, CYAN,  "EXIT", 1, CYAN);
+    DrawButton  (100, 310,  40,  10, CYAN,  "EXIT", 1, CYAN);
     
     // Draw the Bottom part of the screen with the Recharge Info
 
-    DrawTextLabel  ( 0,  240, 0, "Activations", 3, MAGENTA, 0);
-    DrawTextLabel  ( 0,  280, 0, String(medicCount), 4, MAGENTA, 0);
+    DrawTextLabel  ( 0,  240, CYAN, "Activations", 3, MAGENTA, 0);
+    DrawTextLabel  ( 0,  280, CYAN, String(medicCount), 4, MAGENTA, 0);
   }
 }
 
@@ -52,8 +52,8 @@ void ReCharge(int timer)
   // Countdown Timer
   while (timer >0)
   {
-    DrawTextLabel  ( 0,  105, YELLOW, String(timer), 4, BLUE, 3);
-    delay (1000);
+    DrawTextLabel  ( 0,  105, RED, String(timer), 4, YELLOW, 3);
+    delay (1000);                                                     //Change to non blocking (better for Hostile mode)
     timer--;
   }
   medicCount++;
