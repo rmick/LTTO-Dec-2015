@@ -14,11 +14,14 @@ void SendIR(char type, unsigned int message)
   int msgLength = 0;
   int interDelay = 25;
 
-  if (deBug) Serial.print(F("Sending IR- "));
-  if (deBug) Serial.print(type);
-  if (deBug) Serial.print(F(":"));
-  if (deBug) print_binary(message, 8);
-  if (deBug) Serial.println();
+  //if (deBug) 
+  {
+    Serial.print(F("\nSending IR- "));
+    Serial.print(type);
+    Serial.print(F(": "));
+    print_binary(message, 8);
+    Serial.println();
+  }
   
   //Send Header
   switch (type)
@@ -65,7 +68,7 @@ void SendIR(char type, unsigned int message)
   delay(interDelay);                                 
   if (deBug) Serial.println(F("IR Sent! "));
 
-  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
+  //enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 }
 
 ///////////////////////////////////////////////////////////////

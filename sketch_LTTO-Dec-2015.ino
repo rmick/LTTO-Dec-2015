@@ -65,6 +65,8 @@ byte shieldsTimer = EEPROM.read(eeSHIELDS_TIMER);
 byte playerHealth = 50;
 byte tagCount = reloadAmount;
 bool shieldsUp = FALSE;
+bool friendlyFire = FALSE;
+byte scoreGrid[24] [2];
 
 const byte IR_LED = 13;
 const byte IR_RECEIVE_PIN = 11;
@@ -89,7 +91,7 @@ const char SETUP            = 's';
 const char CHANGE_PIN       = 'x';
 const char CONFIRM_PIN      = 'y';
 
-char state = MEDIC;
+char state = TAGGER;
 char lastState = NONE;
 
 byte buttonCount;
@@ -133,7 +135,8 @@ if (maxReloads == 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  
 if (medicDelay == 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
 if (medicCount == 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
 if (shieldsTimer == 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
-if (reloadAmount == 255) { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
+if (reloadAmount > 100)  { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
+if (playerID == 255)     { playerID = 1;       EEPROM.write(eePLAYER_ID, 1); }
 if (pinCode[0] == 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE,   1);
                            pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 2);
                            pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 3);
