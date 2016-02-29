@@ -74,7 +74,7 @@ void ISRchange()
   // Check for too many bits without a header......... (stops overflow of Array variables)
   if (countISR > (ARRAY_LENGTH-2) )
   {
-    Serial.println("\nArray Overlength Error Trap");
+    Serial.println(F("\nArray Overlength Error Trap"));
     countISR = 0;
   }
 
@@ -99,9 +99,9 @@ void ISRchange()
   // Check for re-entrant ISR routine calls.
   if (overflowISR >1)
   {
-    Serial.print("(R-");
+    Serial.print(F("(R-"));
     Serial.print(countISR);
-    Serial.print(")");
+    Serial.print(F(")"));
   }
   overflowISR = 0;
 
@@ -112,9 +112,6 @@ void ISRchange()
 
 void CreateIRmessage()                                      // TODO: Currently not checking for valid -2mS breaks !!!!
 {
-  
-  if (deBug) Serial.println("\nCreating IR message");
-  
   if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
   else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
   else                          receivedIRmessage.type = 'e';
@@ -125,14 +122,6 @@ void CreateIRmessage()                                      // TODO: Currently n
     {
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
-    
-      if (deBug)
-      {
-        Serial.print ("\t");
-        Serial.print (messageIR[i]);
-        Serial.print ("-");
-        Serial.print (receivedIRmessage.dataPacket);
-      }
     }
   }
   else if (receivedIRmessage.type == 'B')
@@ -141,14 +130,6 @@ void CreateIRmessage()                                      // TODO: Currently n
     {
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
-    
-      if (deBug)
-      {
-        Serial.print ("\t");
-        Serial.print (messageIR[i]);
-        Serial.print ("-");
-        Serial.print (receivedIRmessage.dataPacket);
-      }
     }
   }
   
@@ -160,6 +141,7 @@ void CreateIRmessage()                                      // TODO: Currently n
 
 void PrintIR()
 {
+/*
   bool extendedPrintIR = FALSE;
   
   disableInterrupt(IR_RECEIVE_PIN);
@@ -204,13 +186,15 @@ void PrintIR()
   Serial.println();
   
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
+*/
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void ClearIRarray()
 {
-  if (deBug) Serial.println(F("ClearIRarray()"));
+  #ifdef DEBUG Serial.println(F("ClearIRarray()"));
+  #endif
   for (int i = 0; i<=ARRAY_LENGTH; i++)
   {
     messageIR[i]          = 0;

@@ -8,8 +8,6 @@
 //  void GameOver()
 
 byte tagPower = 1;
-//byte taggerTeamID;
-//byte taggerPlayerID;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -23,14 +21,18 @@ void TaggerMode()
   else if (Action == "TagPower")  { tagPower++; if (tagPower == 5)  tagPower = 1; DrawTextLabel(50, 260, GREEN, String(tagPower), 2, BLACK, 1); }
   else if (Action == "Fire")      FireLaser();
   else if (Action == "Shields")   SetShields();
-  else if (Action == "ReLoad")    Reload();                    
+  else if (Action == "ReLoad")    Reload();
+  else if (Action == "Scores")    state = SCORES;                    
   else if (Action == "EXIT")      state = CONFIG;
 
   if (shieldsUp) UpdateShieldsTimer();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void UpdateShieldsTimer()
 {
+  static uint16_t shieldsTimer = micros();
+  
   //Start a timer           // TODO:
   //check if 1 second has expired and then update display and variable
 }
@@ -59,6 +61,7 @@ void FireLaser()
   DrawTaggerScreen();
 }
 ///////////////////////////////////////////////////////////////////////////////
+uint16_t shieldsTimeMicros;
 
 void SetShields()
 {
@@ -97,13 +100,14 @@ void DrawTaggerScreen()
   {
     if (deBug) Serial.println(F("DrawTaggerScreen"));
     DrawScreen(TAGGER, "TAG MODE", GREEN, BLUE, 3);
-    //lastState = state;
+    lastState = state;
     DrawButton(  5,  30,  100, 55, WHITE,  "Team",     2, BLACK);
     DrawButton(  5, 115,  100, 55, WHITE,  "Player",   2, BLACK);
     DrawButton(  5, 200,  100, 55, WHITE,  "TagPower", 2, BLACK);
     DrawButton(135,  30,  100, 55, BLACK,  "ReLoad",   2, WHITE);
     DrawButton(135, 125,  100, 55, YELLOW, "Fire",     2, YELLOW);
     DrawButton(135, 200,  100, 55, RED,    "Shields",  2, GREEN);
+    DrawButton(  5, 290,   50, 30, YELLOW, "Scores",   1, BLACK);
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",     2, BLACK);
     if (deBug) PrintButtonArray();
 
@@ -156,25 +160,44 @@ void DecodeIR()
     
     //if (deBug)
     {
-      Serial.print("\nTag");
+      Serial.print("\n!TAG!");
       Serial.print(F("\tTaggedbyTeamID: "));
       Serial.print(taggedbyTeamID);
       Serial.print(F("\tTaggedbyPlayerID: "));
       Serial.print(taggedbyPlayerID);
       Serial.print(F("\tShotStrength: "));
       Serial.println(taggedbyMegaPower);
-    }
-
-  //TODO:  If same team then check FF flag before actioning.
-  //TODO:  Adjust health and then update score table (numberOfHitsByPlayerXX++ x Mega)
+    }   
+    ProcessTag(taggedbyTeamID, taggedbyPlayerID, taggedbyMegaPower);
+  }
     
-    //Process the data  // TODO: maybe move this to a separate function !!!
+  else if (receivedIRmessage.type == 'B')
+  {
+    //Serial.print("Bcn-");
+    
+    //  TODO:  Receive a Beacon
+    //  (TeamID 2 bits, Tag Received 1 bit, Tag Strength 2 bits)
+    //  (if TeamID = 0 in a hosted game, then it is a Medic Beacon)
 
-    Serial.print(teamID);
-    if (teamID == taggedbyTeamID && friendlyFire == FALSE && teamID != 0)
+    
+  }
+    
+  else
+  {
+    badMessageCount++;                // TODO: Is this logical here, or am I off with the fairies.
+    Serial.print("Error-");
+    //TODO: Check for a bad 3/6 Tag packet and then flag as a near miss !!
+  }    
+  ClearIRarray();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ProcessTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
+{
+    if (teamID == taggedTeamID && friendlyFire == FALSE && teamID != 0)
     {
       ClearIRarray(); 
-      Serial.print(teamID);
       Serial.print (F("\nFriendlyFire"));
       return;
     }
@@ -193,36 +216,53 @@ void DecodeIR()
     tft.fillScreen(RED);
     lastState = NONE;
     DrawTaggerScreen();
-    playerHealth = playerHealth - taggedbyMegaPower;
+    playerHealth = playerHealth - taggedMegaPower;
     if (playerHealth <= 255 && playerHealth >= 250) playerHealth = 0;
     DrawTextLabel( 170, 155, YELLOW, String(playerHealth), 3, BLACK, 2);
 
     //Update the scoreGrid
-    TODO:
-    
+    byte currentHitIndex;
+    currentHitIndex = taggedPlayerID;
+    if (teamID != 0)  currentHitIndex = currentHitIndex + (teamID * 8);
+    scoreGrid[currentHitIndex] = scoreGrid[currentHitIndex] + taggedMegaPower;
     
     //Check if they are dead !
     if (playerHealth == 0)
       {
         state = GAME_OVER;
       }
-  }
-    
-  else if (receivedIRmessage.type == 'B')
-  {
-    //Serial.print("Bcn-");
-  }
-    
-  else
-  {
-    badMessageCount++;                // TODO: Is this logical here, or am I off with the fairies.
-    //Serial.print("Error-");
-  }    
-  ClearIRarray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void DisplayScores()
+{
+  static bool scoresActive;
+  if (!scoresActive)
+  {
+    tft.fillScreen(BLACK);
+    DrawButton( 70, 290,  100, 30, YELLOW, "EXIT", 2, BLACK);
+    scoresActive = TRUE;
+    tft.setTextColor(YELLOW);
+    tft.setTextSize(1);
+    for (uint8_t teamPlayerCount = 1; teamPlayerCount <25; teamPlayerCount++)
+    {
+      tft.setCursor(60, (teamPlayerCount*11)+5);
+      byte displayPlayerID = teamPlayerCount%8; if (displayPlayerID == 0) displayPlayerID = 8;
+      tft.print("Team "); tft.print(teamPlayerCount/8); tft.print(", Player "); tft.print(displayPlayerID); tft.print(": ");
+      tft.println(scoreGrid[teamPlayerCount]);
 
+      //Serial.print("Team "); Serial.print(teamPlayerCount/8); Serial.print(", Player "); Serial.print(displayPlayerID); Serial.print(": ");
+      //Serial.println(scoreGrid[teamPlayerCount]);
+    }
+  }
+
+  char* Action = GetButtonPress();
+  if (Action == "EXIT")  { scoresActive = FALSE; state = TAGGER; lastState = NONE; DrawTaggerScreen(); Serial.print("ExitScores"); }
+
+  
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void GameOver()
 {
   tft.fillScreen(BLACK);

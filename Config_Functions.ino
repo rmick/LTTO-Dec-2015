@@ -26,7 +26,8 @@ void DrawSetTeam()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("SetTeamIDscreen"));
+    #ifdef DEBUG Serial.println(F("SetTeamIDscreen"));
+    #endif
     DrawScreen(SET_TEAM, "CHOOSE TEAM", MAGENTA, WHITE, 3);
     DrawButton( 20,  40, 200, 55, BLACK,  "No Team", 2, WHITE);
     DrawButton( 20, 100, 200, 55, BLACK,  "Team 1",  2, WHITE);
@@ -58,7 +59,8 @@ void DrawMedicDelay()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("SetMedicDelayScreen"));
+    #ifdef DEBUG Serial.println(F("SetMedicDelayScreen"));
+    #endif
     DrawScreen(SET_MEDIC_DELAY, "MEDIC DELAY", MAGENTA, WHITE, 3);
     DrawButton( 20,  50, 200, 55, BLACK,  "Up",   2, WHITE);
     DrawButton( 20, 210, 200, 55, BLACK,  "Down", 2, WHITE);
@@ -88,8 +90,9 @@ void DrawSetHostile()
   {
     if (lastState != state)
     {
-       if (deBug) Serial.println(F("DrawSetHostileScreen"));
-       DrawScreen(SET_HOSTILE, "NOT VALID", MAGENTA, WHITE, 3);
+      #ifdef DEBUG Serial.println(F("DrawSetHostileScreen"));
+      #endif
+      DrawScreen(SET_HOSTILE, "NOT VALID", MAGENTA, WHITE, 3);
       DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
       tft.setTextColor(BLACK);
       tft.setTextSize(3);
@@ -102,7 +105,8 @@ void DrawSetHostile()
   else
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("SetHostileScreen"));
+    #ifdef DEBUG Serial.println(F("SetHostileScreen"));
+    #endif
     DrawScreen(SET_HOSTILE, "HOSTILE ?", MAGENTA, WHITE, 3);
     DrawButton( 20,  80, 200, 55, BLACK,  "Yes", 2, WHITE);
     DrawButton( 20, 180, 200, 55, BLACK,  "No",  2, WHITE);
@@ -131,7 +135,8 @@ void DrawClearScore()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("ClearScoreScreen"));
+    #ifdef DEBUG Serial.println(F("ClearScoreScreen"));
+    #endif
     DrawScreen(SET_TEAM, "ARE YOU SURE", MAGENTA, WHITE, 3);
     DrawButton( 20,  80, 200, 55, BLACK,  "No", 2, WHITE);
     DrawButton( 20, 180, 200, 55, BLACK,  "Yes",   2, WHITE);
@@ -157,7 +162,8 @@ void DrawSetup()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("Setup Screen"));
+    #ifdef DEBUG Serial.println(F("Setup Screen"));
+    #endif
     DrawScreen(SETUP, "SET-UP", MAGENTA, WHITE, 3);
     DrawButton( 20,  50, 200, 55, BLACK,  "Change PIN",   2, WHITE);
     DrawButton( 20, 210, 200, 55, BLACK,  "Tagger", 2, WHITE);

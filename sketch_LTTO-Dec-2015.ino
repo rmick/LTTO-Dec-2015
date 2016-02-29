@@ -66,14 +66,15 @@ byte playerHealth = 50;
 byte tagCount = reloadAmount;
 bool shieldsUp = FALSE;
 bool friendlyFire = FALSE;
-byte scoreGrid[24] [2];
+byte scoreGrid[25];       // One extra so we can ignore base0 issues
 
 const byte IR_LED = 13;
 const byte IR_RECEIVE_PIN = 11;
 
 //DeBug use only
 unsigned long irTime;
-const bool deBug = FALSE;
+const bool deBug = TRUE;
+//#define DEBUG
 
 int timer1counter;
 
@@ -90,7 +91,8 @@ const char GAME_OVER        = 'g';
 const char SETUP            = 's';
 const char CHANGE_PIN       = 'x';
 const char CONFIRM_PIN      = 'y';
-
+const char SCORES           = 'z';
+const char HOST             = 'H';
 char state = TAGGER;
 char lastState = NONE;
 
@@ -160,6 +162,8 @@ void loop()
   else if (state == CHANGE_PIN)       ChangePin();
   else if (state == CONFIRM_PIN)      ConfirmPin();
   else if (state == GAME_OVER)        GameOver();
+  else if (state == SCORES)           DisplayScores();
+  else if (state == HOST)             HostMode();
   //////////////////////////////////
   
   if (receivedIRmessage.type != '_')
@@ -167,6 +171,18 @@ void loop()
     if (state != TAGGER) ClearIRarray();     // Clears IR data when not in Tagger Mode.
     if (state == TAGGER) DecodeIR();
   }
+
+  // Read the Serial port for a keypress              This is testing stuff and can be deleted later
+  if (Serial.available() !=0)
+    {
+      char keyIn = Serial.read();
+      switch (keyIn)
+        {
+        case 'h':
+          AnnounceCustomGame();
+          break;
+        }
+    }
 }
 
 ////////////////////// END MAIN LOOP//////////////////////////////////////////////////////////////////// END MAIN LOOP //////////////////////

@@ -9,7 +9,8 @@ Signature Count: 10-14 (including checksum)
 The Announce Game packet is sent by the host at 1.5 second intervals (from start to start) until it receives a Request Join Game packet from a joining tagger.
 
 
-- Packet Type (9 bits)
+
+- Packet Type (9 bits) - last bit must be 0
     0x002 - Announce Custom Lazer Tag Game
     0x003 - Announce Custom Lazer Tag (2 Teams) Game
     0x004 - Announce Custom Lazer Tag (3 Teams) Game
@@ -62,7 +63,66 @@ The Announce Game packet is sent by the host at 1.5 second intervals (from start
     
 - Game Name (32 bits) only for packet type 0x00C
 
-- Checksum (9 bits)
+- Checksum (9 bits) - last bit must be 1
 
  * 
  */
+
+ ///////////////////////////////////////////////////////////////////////////////
+
+  byte hostedGameType           = 2;
+  byte hostedGameID             = 175;
+  byte hostedGameTime           = 15;
+  byte hostedTagsAvailable     = 50;
+  byte hostedReloadsAvailable   = 255;
+  byte hostedShieldTime         = 15;
+  byte hostedMegaTags           = 255;
+  byte hostedPackedFlags1       = 0;
+  byte hostedPackedFlags2       = 1;
+
+
+  
+void HostMode()
+{
+  
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ void AnnounceCustomGame()
+ {
+  Serial.println(F("\nAnnounce Custom Game"));
+  SendIR('P', hostedGameType);
+  SendIR('D', hostedGameID);
+  SendIR('D', ConvertToBCD(hostedGameTime) );
+  SendIR('D', ConvertToBCD(hostedTagsAvailable) );
+  SendIR('D', ConvertToBCD(hostedReloadsAvailable));
+  SendIR('D', ConvertToBCD(hostedShieldTime) );
+  SendIR('D', ConvertToBCD(hostedMegaTags));
+  SendIR('D', ConvertToBCD(hostedPackedFlags1));
+  SendIR('D', ConvertToBCD(hostedPackedFlags1)  );
+  SendIR('C', CalculateCheckSum() );
+  
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
+uint16_t CalculateCheckSum()
+{
+  uint16_t checkSum;
+  checkSum =  hostedGameType + hostedGameID+ hostedGameTime + hostedTagsAvailable
+              + hostedReloadsAvailable + hostedShieldTime + hostedMegaTags
+              + hostedPackedFlags1 + hostedPackedFlags2;
+  //checkSum = byte(checkSum);
+  Serial.print(F("\nCheck Sum = "));
+  Serial.print(checkSum);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+byte ConvertToBCD(byte dec)
+{
+  if (dec == 0xff) return dec;
+  return (byte) (((dec/10) << 4) | (dec %10) );
+}
+

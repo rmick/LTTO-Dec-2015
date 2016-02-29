@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-void SendIR(char type, unsigned int message)
+void SendIR(char type, unsigned long int message)
 {
   //disableInterrupt(IR_RECEIVE_PIN);
 
@@ -14,45 +14,56 @@ void SendIR(char type, unsigned int message)
   int msgLength = 0;
   int interDelay = 25;
 
-  //if (deBug) 
-  {
+  #ifdef DEBUG
     Serial.print(F("\nSending IR- "));
     Serial.print(type);
     Serial.print(F(": "));
-    print_binary(message, 8);
+    PrintBinary(message, 8);
     Serial.println();
-  }
+  #endif
   
   //Send Header
   switch (type)
   {
     // if Type = B then Beacon,   so header is 366
     // if Type = T then Tag,      so header is 363
-    // if Type = D the data byte, so header is Null
-    case 'D':
+    // if Type = D the data byte, so no header
+    // if Type = P then Packet, no header and need to add 0 as the 9th bit
+    // if Type = C then CheckSum, no header and need to add a 1 as the 9th bit
+    case 'P':
       msgLength = 9;
       interDelay = 25;
+      message = message << 1;
+      message++;
+      Serial.print(F("\nPacket:"));
+      Serial.print(message, BIN);
       // No header so go straight to message transmission
       break;
+
+    case 'D':
+      msgLength = 8;
+      interDelay = 25;
+      break;
+
+    case 'C':
+      msgLength = 9;
+      interDelay = 25;
+      break;
+         
     case 'T':
       msgLength = 7;
       interDelay = 5;
       PulseIR(3);
-       DeBug(F("3mS mark  "));       ///////////
       delayMicroseconds (6000);
-       DeBug(F(" 6mS break"));       ///////////
       PulseIR(3);
-       DeBug(F("3mS mark  "));       ///////////
       break;
+    
     case 'B':
       msgLength = 5;
        interDelay = 25;
       PulseIR(3);
-       DeBug(F("3mS mark  "));       ///////////
       delayMicroseconds (6000);
-       DeBug(F(" 6mS break"));       ///////////
       PulseIR(6);
-       DeBug(F("6mS mark  "));       ///////////
       break;
   }
 
@@ -60,13 +71,12 @@ void SendIR(char type, unsigned int message)
   for (int bitCount=msgLength-1; bitCount >=0; bitCount--)
      {
       delayMicroseconds (2000);
-        DeBug(F(" 2mS break"));      //////////
       PulseIR(bitRead(message, bitCount)+1);
-        DeBug(String(bitRead(message, bitCount))+F(" bit     "));      //////////
+        //DeBug(String(bitRead(message, bitCount))+F(" bit     "));      //////////
      }
 
   delay(interDelay);                                 
-  if (deBug) Serial.println(F("IR Sent! "));
+  if (deBug) Serial.print(F("\nIR Sent! "));
 
   //enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 }
@@ -100,8 +110,9 @@ void DeBug(String data)
 
 ////////////////////////////////////////////////////////////
 
-void print_binary(int v, int num_places)
+void PrintBinary(int v, int num_places)
 {
+//#ifdef DEBUG
   int mask=0, n;
   for (n=1; n<=num_places; n++)
   {
@@ -126,5 +137,6 @@ void print_binary(int v, int num_places)
       Serial.print("_");
     }
   }
+//  #endif
 }
 

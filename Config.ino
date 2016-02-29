@@ -16,7 +16,6 @@ void ConfigMode()
   else if (Action == "EXIT")                  state = MEDIC;
 
 ////////////////  Later on add MODES
-////////////////  Tagger Mode
 ////////////////  Simple Host
 ////////////////  Capture the flag
 ////////////////  Own the Zone
@@ -31,7 +30,8 @@ void DrawConfigScreen()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("DrawConfigScreen"));
+    #ifdef DEBUG Serial.println(F("DrawConfigScreen"));
+    #endif
     DrawScreen(CONFIG, "CONFIG", MAGENTA, WHITE, 3);
     DrawButton( 20,  35, 200, 45, BLACK,  "Clear Score",      2, WHITE);
     DrawButton( 20,  85, 200, 45, BLACK,  "Set Medic Delay",  2, WHITE);

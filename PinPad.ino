@@ -64,9 +64,8 @@ void PinPadMode()
   else if (buttonPressed == "OK")
     { 
       //Check if we have a match
-      //if (deBug)
       {
-        Serial.print("\nEntered: ");
+        #ifdef DEBUG Serial.print("\nEntered: ");
         for (int x= 0; x<4; x++)
         {
           Serial.print(pinCodeEntered[x]);
@@ -76,6 +75,7 @@ void PinPadMode()
         {
           Serial.print(pinCode[y]);
         }
+        #endif
       }
                                             
       if (pinCodeEntered[0] == pinCode[0] && 
@@ -104,7 +104,8 @@ void DrawPinPadScreen()
 { 
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("DrawPinPadScreen"));
+    #ifdef DEBUG Serial.println(F("DrawPinPadScreen"));
+    #endif
     DrawScreen(PINPAD, "Pin Code?      ", BLACK, YELLOW, 2);
     DrawButton( 10,  25,  65,  65, BLUE,  "1",   4, BLACK);
     DrawButton( 85,  25,  65,  65, BLUE,  "2",   4, BLACK);
@@ -118,7 +119,8 @@ void DrawPinPadScreen()
     DrawButton( 10, 250,  65,  65, RED,  "Clr",  3, WHITE);
     DrawButton( 85, 250,  65,  65, BLUE,  "0",   4, BLACK);
     DrawButton(160, 250,  65,  65, GREEN, "OK",  3, WHITE);
-    if (deBug) PrintButtonArray();
+    #ifdef DEBUG PrintButtonArray();
+    #endif
   }
 }
 
@@ -128,7 +130,8 @@ void DrawChangePinScreen(byte runNumber)
 { 
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("DrawChangePinScreen"));
+    #ifdef DEBUG Serial.println(F("DrawChangePinScreen"));
+    #endif
     if      (runNumber == 1)
     {
       DrawScreen(PINPAD, "New Pin?      ", BLACK, YELLOW, 2);
@@ -153,7 +156,8 @@ void DrawChangePinScreen(byte runNumber)
     DrawButton( 10, 250,  65,  65, RED,  "Clr",  2, WHITE);
     DrawButton( 85, 250,  65,  65, BLUE,  "0",   4, BLACK);
     DrawButton(160, 250,  65,  65, GREEN, "Save",2, WHITE);
-    if (deBug) PrintButtonArray();
+    #ifdef DEBUG  PrintButtonArray();
+    #endif
   }
 }
 

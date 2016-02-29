@@ -46,15 +46,14 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
   tft.setCursor(CursorX, CursorY);
   tft.println(Text);
 
-  if (deBug)
-  {
+  #ifdef DEBUG
     Serial.print(F("DeBug DrawTextLabel - Box Width: "));
     Serial.print (BoxWidth);
     Serial.print(F(", Box Location: "));
     Serial.print((240-BoxWidth)/2);
     Serial.print(F(", "));
     Serial.println(CursorY-1);
-  }
+  #endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,7 +162,7 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
   
   // Centre the text on the button
   uint16_t CtrY = PosY+(Height/2)-(7*TextSize/2);                     // characters are 7 pixels high
-  uint16_t TextWidth = (strlen(Text)*5)+(strlen(Text)-1);           // characters are 5 pixels wide + 1 pixel space
+  uint16_t TextWidth = (strlen(Text)*5)+(strlen(Text)-1);             // characters are 5 pixels wide + 1 pixel space
   uint16_t CtrX = PosX+(Width/2) - ((TextWidth*TextSize)/2);  
   tft.setCursor(CtrX, CtrY);
   tft.println(Text);
@@ -214,7 +213,7 @@ void DrawScreen(char Title, char* Label, uint16_t BackColour, uint16_t TextColou
 
 void PrintButtonArray()
 {
-  //return;
+  #ifdef DEBUG
   byte Row;
   byte Column;
   for (Row=0; Row<12; Row++)
@@ -232,6 +231,7 @@ void PrintButtonArray()
     Serial.print (F(", "));
   }
   Serial.println();
+  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////
