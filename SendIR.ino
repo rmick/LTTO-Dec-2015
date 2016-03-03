@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-void SendIR(char type, unsigned long int message)
+void SendIR(char type, uint16_t message)
 {
   //disableInterrupt(IR_RECEIVE_PIN);
 
@@ -18,7 +18,7 @@ void SendIR(char type, unsigned long int message)
     Serial.print(F("\nSending IR- "));
     Serial.print(type);
     Serial.print(F(": "));
-    PrintBinary(message, 8);
+    PrintBinary(message, 10);
     Serial.println();
   #endif
   
@@ -33,21 +33,29 @@ void SendIR(char type, unsigned long int message)
     case 'P':
       msgLength = 9;
       interDelay = 25;
-      message = message << 1;
-      message++;
-      Serial.print(F("\nPacket:"));
-      Serial.print(message, BIN);
-      // No header so go straight to message transmission
+      PulseIR(3);
+      delayMicroseconds (6000);
+      PulseIR(3);
+      //Serial.print(F("\nPckt: ")); Serial.print(message); Serial.print(F("\t")); Serial.print(message,HEX); Serial.print(F("\t"));
       break;
 
     case 'D':
       msgLength = 8;
       interDelay = 25;
+      PulseIR(3);
+      delayMicroseconds (6000);
+      PulseIR(3);
+      //Serial.print(F("\nData: ")); Serial.print(message); Serial.print(F("\t")); Serial.print(message,HEX); Serial.print(F("\t"));
       break;
 
     case 'C':
       msgLength = 9;
       interDelay = 25;
+      PulseIR(3);
+      delayMicroseconds (6000);
+      PulseIR(3);
+      message = message | 256;
+      //Serial.print(F("\nChk:  ")); Serial.print(message-256); Serial.print(F("\t")); Serial.print(message,HEX); Serial.print(F("\t"));
       break;
          
     case 'T':
@@ -71,12 +79,16 @@ void SendIR(char type, unsigned long int message)
   for (int bitCount=msgLength-1; bitCount >=0; bitCount--)
      {
       delayMicroseconds (2000);
-      PulseIR(bitRead(message, bitCount)+1);
+      PulseIR(bitRead(message, bitCount)+1);        // the +1 is to convert 0/1 data into 1/2mS pulses.
+      //Serial.print(bitRead(message, bitCount));
         //DeBug(String(bitRead(message, bitCount))+F(" bit     "));      //////////
      }
 
   delay(interDelay);                                 
-  if (deBug) Serial.print(F("\nIR Sent! "));
+  
+  #ifdef DEBUG
+    Serial.print(F("\nIR Sent! "));
+  #endif
 
   //enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 }

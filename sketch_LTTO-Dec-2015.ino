@@ -19,10 +19,10 @@ SWTFT tft;    //Defines all control and data lines for LCD shield.
 // For the one we're using, its 300 ohms across the X plate
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
-#define MinValTouchX  947
-#define MinValTouchY  958
-#define MaxValTouchX  90
-#define MaxValTouchY  137
+#define MIN_VAL_TOUCH_X  947
+#define MIN_VAL_TOUCH_Y  958
+#define MAX_VAL_TOUCH_X   90
+#define MAX_VAL_TOUCH_Y   137
 
 ////////////////////Define common colours//////////////////////
 #define  BLACK    0x0000
@@ -73,7 +73,8 @@ const byte IR_RECEIVE_PIN = 11;
 
 //DeBug use only
 unsigned long irTime;
-const bool deBug = TRUE;
+//unsigned long hostTimer;
+const bool deBug = FALSE;
 //#define DEBUG
 
 int timer1counter;
@@ -101,7 +102,7 @@ bool touchGood = 0;
 
 const byte  ARRAY_LENGTH = 24;
 int8_t      messageIR         [ARRAY_LENGTH];
-uint16_t    messageIRpulse    [ARRAY_LENGTH];     //TODO: Delete these parts of the array as they are debug only.
+//uint16_t    messageIRpulse    [ARRAY_LENGTH];     //TODO: Delete these parts of the array as they are debug only.
 //uint16_t    messageISRdelay   [ARRAY_LENGTH];
 //uint16_t    messageISRelapsed [ARRAY_LENGTH];
 
@@ -179,7 +180,17 @@ void loop()
       switch (keyIn)
         {
         case 'h':
+          //hostTimer = micros();
+          state = HOST;
+          break;
+        case 'x':
+          state = TAGGER;
+          break;
+        case 'n':
           AnnounceCustomGame();
+          break;
+        case 'b':
+          Serial.println();
           break;
         }
     }

@@ -18,6 +18,8 @@ void ISRchange()
   static uint16_t runtime = micros();           // TODO: Debug, remove it!
 
   // Action the Interrupt........
+  Serial.print(".");
+  
   overflowISR++;
   pinChangeTime = micros();                   // Store the time that the pin changes
   pulseLength = pinChangeTime - lastEdge;     // Measure the elapsed time since last lastEdge
@@ -42,6 +44,7 @@ void ISRchange()
       //if (deBug) Serial.print("(3/6)");
       messageIR[1] = 3;
       countISR = 2;
+      Serial.print(F("IR."));
     }
     else 
     {
@@ -80,7 +83,7 @@ void ISRchange()
 
   //Store the data to the message array
   messageIR[countISR] = bitLength; 
-  messageIRpulse[countISR] = pulseLength;
+  //messageIRpulse[countISR] = pulseLength;
   countISR++;
 
     if (deBug)
@@ -198,7 +201,7 @@ void ClearIRarray()
   for (int i = 0; i<=ARRAY_LENGTH; i++)
   {
     messageIR[i]          = 0;
-    messageIRpulse[i]     = 0;
+    //messageIRpulse[i]     = 0;
     //messageISRdelay[i]    = 0;
     //messageISRelapsed[i]  = 0;
     

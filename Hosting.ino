@@ -70,20 +70,33 @@ The Announce Game packet is sent by the host at 1.5 second intervals (from start
 
  ///////////////////////////////////////////////////////////////////////////////
 
-  byte hostedGameType           = 2;
-  byte hostedGameID             = 175;
-  byte hostedGameTime           = 15;
-  byte hostedTagsAvailable     = 50;
-  byte hostedReloadsAvailable   = 255;
-  byte hostedShieldTime         = 15;
-  byte hostedMegaTags           = 255;
-  byte hostedPackedFlags1       = 0;
-  byte hostedPackedFlags2       = 1;
+  byte hostedGameType           = 0x02;
+  byte hostedGameID             = 0xAF;
+  byte hostedGameTime           = 0x15;
+  byte hostedTagsAvailable      = 0x50;
+  byte hostedReloadsAvailable   = 0xFF;
+  byte hostedShieldTime         = 0x15;
+  byte hostedMegaTags           = 0xFF;
+  byte hostedPackedFlags1       = 0x00;
+  byte hostedPackedFlags2       = 0x01;
+  byte ascii1              = 0;
+  byte ascii2              = 0;
+  byte ascii3              = 0;
+  byte ascii4              = 0;
 
+  bool patent = TRUE;
 
   
 void HostMode()
 {
+  static unsigned long hostTimer = micros();
+  Serial.print("h");
+  if (hostTimer+15000 > micros())
+  {
+    Serial.println();
+    AnnounceCustomGame;
+    hostTimer = micros();
+  }
   
 }
 
@@ -91,38 +104,84 @@ void HostMode()
 
  void AnnounceCustomGame()
  {
+  disableInterrupt(IR_RECEIVE_PIN);
+  
+  //  Game sample from Patent
+  if (patent)
+  {
+    hostedGameType           = 0x0C;
+    hostedGameID             = 0x2C;
+    hostedGameTime           = 0x15;
+    hostedTagsAvailable      = 0x50;
+    hostedReloadsAvailable   = 0xFF;
+    hostedShieldTime         = 0x45;
+    hostedMegaTags           = 0x12;
+    hostedPackedFlags1       = 0x28;
+    hostedPackedFlags2       = 0xA2;
+    ascii1              = 0x32;
+    ascii2              = 0x5A;
+    ascii3              = 0x4F;
+    ascii4              = 0x4E;
+  }
+  
   Serial.println(F("\nAnnounce Custom Game"));
   SendIR('P', hostedGameType);
   SendIR('D', hostedGameID);
-  SendIR('D', ConvertToBCD(hostedGameTime) );
-  SendIR('D', ConvertToBCD(hostedTagsAvailable) );
-  SendIR('D', ConvertToBCD(hostedReloadsAvailable));
-  SendIR('D', ConvertToBCD(hostedShieldTime) );
-  SendIR('D', ConvertToBCD(hostedMegaTags));
-  SendIR('D', ConvertToBCD(hostedPackedFlags1));
-  SendIR('D', ConvertToBCD(hostedPackedFlags1)  );
-  SendIR('C', CalculateCheckSum() );
+  SendIR('D', hostedGameTime);
+  SendIR('D', hostedTagsAvailable);
+  SendIR('D', hostedReloadsAvailable);
+  SendIR('D', hostedShieldTime);
+  SendIR('D', hostedMegaTags);
+  SendIR('D', hostedPackedFlags1);
+  SendIR('D', hostedPackedFlags2);
+  if (patent)
+  {
+    SendIR('D', ascii1);
+    SendIR('D', ascii2);
+    SendIR('D', ascii3);
+    SendIR('D', ascii4);
+  }
+  SendIR('C', CalculateCheckSum());
   
+  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
+
  }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-uint16_t CalculateCheckSum()
+uint8_t CalculateCheckSum()
 {
-  uint16_t checkSum;
+  uint8_t checkSum;
   checkSum =  hostedGameType + hostedGameID+ hostedGameTime + hostedTagsAvailable
               + hostedReloadsAvailable + hostedShieldTime + hostedMegaTags
-              + hostedPackedFlags1 + hostedPackedFlags2;
-  //checkSum = byte(checkSum);
-  Serial.print(F("\nCheck Sum = "));
-  Serial.print(checkSum);
+              + hostedPackedFlags1 + hostedPackedFlags2 + ascii1 + ascii2
+              + ascii3 + ascii4;
+  return checkSum;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-byte ConvertToBCD(byte dec)
+byte ConvertDecToBCD(byte dec)
 {
   if (dec == 0xff) return dec;
   return (byte) (((dec/10) << 4) | (dec %10) );
+}
+
+byte ConvertBCDtoDec(byte bcd)
+{
+  if (bcd == 0xff) return bcd;
+  return (byte) (((bcd >> 4) & 0xF) *10) + (bcd & 0xF);
+}
+///////////////////////////////////////////////////////////////////////////////
+
+void SendText()
+{
+  SendIR('P', ConvertBCDtoDec(80));
+  SendIR('D', ConvertBCDtoDec(48));
+  SendIR('D', ConvertBCDtoDec(45));
+  SendIR('D', ConvertBCDtoDec(0x4C));
+  SendIR('D', ConvertBCDtoDec(0x4C));
+  SendIR('D', ConvertBCDtoDec(0x4F));
+  SendIR('C', ConvertBCDtoDec(0xF4));
 }
 

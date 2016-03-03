@@ -129,9 +129,9 @@ void DrawTaggerScreenShieldsUp()
     if (deBug) Serial.println(F("DrawTaggerScreen-ShieldsUp"));
     DrawScreen(TAGGER, "TAG MODE", GREEN, BLUE, 3);
     lastState = state;
-    DrawButton(135, 220,  100, 55, RED,    "Shields", 2, GREEN);
+    DrawButton(135, 200,  100, 55, RED,    "Shields",  2, GREEN);
     if (deBug) PrintButtonArray();
-    DrawTextLabel( 165,  195, GREEN, String(shieldsTimer), 3, RED, 2);
+    DrawTextLabel( 165, 260, GREEN,  String(shieldsTimer), 3, RED,   2);
   }
 }
 

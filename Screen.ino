@@ -72,11 +72,10 @@ char* GetButtonPress()
       {
         if (TouchY > Buttons [row] [1] && TouchY < Buttons [row] [3])
         {
-          if (deBug)
-          {
+          #ifdef DEBUG
             Serial.print(F("Button Pressed: "));
             Serial.println(buttonPressed [row]);
-          }
+          #endif
         return buttonPressed [row];    
         }
       }  
@@ -93,8 +92,8 @@ bool GetTouch(bool Touched)
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
 
-  TouchX = map(p.x, MinValTouchX, MaxValTouchX, 0, tft.width() );
-  TouchY = map(p.y, MinValTouchY, MaxValTouchY, 0, tft.height());
+  TouchX = map(p.x, MIN_VAL_TOUCH_X, MAX_VAL_TOUCH_X, 0, tft.width() );
+  TouchY = map(p.y, MIN_VAL_TOUCH_Y, MAX_VAL_TOUCH_Y, 0, tft.height());
   
   if (p.z >10) Touched = TRUE;
   return Touched;
@@ -139,8 +138,8 @@ TSPoint getPressPosition()
  
    } while( upCount < 10 );  // and this count for different results.
  
-   TouchX = map(p.x, MinValTouchX, MaxValTouchX, 0, tft.width() );
-   TouchY = map(p.y, MinValTouchY, MaxValTouchY, 0, tft.height());
+   TouchX = map(p.x, MIN_VAL_TOUCH_X, MAX_VAL_TOUCH_X, 0, tft.width() );
+   TouchY = map(p.y, MIN_VAL_TOUCH_Y, MAX_VAL_TOUCH_Y, 0, tft.height());
  
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
