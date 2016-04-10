@@ -12,6 +12,7 @@ void ISRchange()
   static uint16_t lastEdge;
   static uint16_t pinChangeTime;
   static byte expectedMessageLength = 0;
+  
   static byte overflowISR = 0;                  // TODO: Debug, remove it!
   uint16_t timerISR = 0;                        // TODO: Debug, remove it!
   static uint16_t elapsedtime = 0;              // TODO: Debug, remove it!
@@ -19,6 +20,7 @@ void ISRchange()
 
   // Action the Interrupt........
   Serial.print(".");
+  
   
   overflowISR++;
   pinChangeTime = micros();                   // Store the time that the pin changes
@@ -31,6 +33,7 @@ void ISRchange()
     overflowISR = 0;
     return;              // exit as the pulse is too short, so probably noise
   }
+  rxTimer0 = 25;
   lastEdge = pinChangeTime;                   // Reset the lastEdge to now
   int8_t bitLength = (pulseLength+500)/1000;
   if (PINB & 8); else   bitLength = 0 - bitLength;    //Set a Mark as Positive and a Break as Negative.
@@ -44,6 +47,7 @@ void ISRchange()
       //if (deBug) Serial.print("(3/6)");
       messageIR[1] = 3;
       countISR = 2;
+      receiveMilliTimer = 20;
       Serial.print(F("IR."));
     }
     else 
@@ -115,10 +119,23 @@ void ISRchange()
 
 void CreateIRmessage()                                      // TODO: Currently not checking for valid -2mS breaks !!!!
 {
-  if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
-  else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
-  else                          receivedIRmessage.type = 'e';
+  if (state == TAGGER)
+  {
+    if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
+    else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
+  }
+  
+  if (state == HOST)
+  {
+    if (messageIR[3] == 3)
+    {
+      receivedIRmessage.type = 'D';
+      Serial.print(F("Data"));
+    }
+    else return;
+  }
 
+  
   if (receivedIRmessage.type == 'T')
   {
     for (int i = 5; i<=17; i+=2)
@@ -135,6 +152,16 @@ void CreateIRmessage()                                      // TODO: Currently n
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
     }
   }
+  else if (receivedIRmessage.type == 'D')
+  {
+    for (int i = 5; i<=22; i+=2)
+    {
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
+    }
+    PrintIR();
+  }
+
   
   countISR = 0;
   if (deBug) PrintIR();
@@ -144,12 +171,12 @@ void CreateIRmessage()                                      // TODO: Currently n
 
 void PrintIR()
 {
-/*
   bool extendedPrintIR = FALSE;
   
   disableInterrupt(IR_RECEIVE_PIN);
   countISR = 0;
-  
+
+/*
   if (extendedPrintIR == TRUE)
   {
     Serial.println();
@@ -181,6 +208,7 @@ void PrintIR()
       Serial.print(F("\t"));
     }
   }
+*/
 
   Serial.print("\nIRMessage: ");
   Serial.print(receivedIRmessage.type);
@@ -189,7 +217,6 @@ void PrintIR()
   Serial.println();
   
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
-*/
 }
 
 ////////////////////////////////////////////////////////////////////

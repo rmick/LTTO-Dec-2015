@@ -80,8 +80,6 @@ void SendIR(char type, uint16_t message)
      {
       delayMicroseconds (2000);
       PulseIR(bitRead(message, bitCount)+1);        // the +1 is to convert 0/1 data into 1/2mS pulses.
-      //Serial.print(bitRead(message, bitCount));
-        //DeBug(String(bitRead(message, bitCount))+F(" bit     "));      //////////
      }
 
   delay(interDelay);                                 
@@ -100,16 +98,45 @@ void PulseIR(int mSec)
   unsigned long pulseStartTime = micros();
   unsigned long pulseLength = mSec*1000;
   unsigned long pulseEndTime = pulseStartTime + pulseLength - 24;
-  while (pulseEndTime >micros() )
+  
+  if (IR_LED != 11)
   {
-    digitalWrite(IR_LED, HIGH);
-    delayMicroseconds(12);
-    digitalWrite(IR_LED, LOW);
-    delayMicroseconds(12);
+    while (pulseEndTime >micros() )
+    {
+      digitalWrite(IR_LED, HIGH);
+      delayMicroseconds(12);
+      digitalWrite(IR_LED, LOW);
+      delayMicroseconds(12);
+    }
   }
+  else
+  {
+    /*
+    TCCR2A = 0x00;
+    bitWrite(TCCR2A, COM2A0, 1);
+    bitWrite(TCCR2A, COM2B1, 1);
+    bitWrite(TCCR2A, WGM21, 1);
+    bitWrite(TCCR2A, WGM20, 1);
+  
+    TCCR2B = 0x00;
+    bitWrite(TCCR2B, WGM22, 1);
+    bitWrite(TCCR2B, CS20, 1);  
+  
+    OCR2A = 209;
+    OCR2B = 128;  //Doesn't matter
+    */
+    
+    pinMode(IR_LED, OUTPUT);
+    delayMicroseconds(pulseLength);
+    pinMode(IR_LED, INPUT);
+    
+  }
+  
 }
 
 /////////////////////////////////////////////////////////////
+
+
 
 void DeBug(String data)
 {

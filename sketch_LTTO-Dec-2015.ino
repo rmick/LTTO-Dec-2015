@@ -78,6 +78,8 @@ const bool deBug = FALSE;
 //#define DEBUG
 
 int timer1counter;
+bool rxTimer0;
+// bool txTimer0;
 
 const char MEDIC            = 'm';
 const char PINPAD           = 'p';
@@ -113,90 +115,5 @@ struct irMessage
 };
 
 irMessage receivedIRmessage;
-
-///////////////////////////////////////////////////////////////
-
-void setup()
-{
-  Serial.begin(250000);
-  pinMode (IR_LED, OUTPUT);
-  pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
-  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
-  receivedIRmessage.type = '_';
-  Serial.println(F("\nHere we go boys...."));
-  
-  /////////////////Setup the LCD screen////////////////////////
-  tft.reset();
-  uint16_t identifier = tft.readID();
-  //if (deBug) Serial.println(identifier);
-  tft.begin(identifier); 
-  tft.setRotation(180);
-  tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
-
-//Initialises the EEPROM on first upload/run.
-if (maxReloads == 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
-if (medicDelay == 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
-if (medicCount == 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
-if (shieldsTimer == 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
-if (reloadAmount > 100)  { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
-if (playerID == 255)     { playerID = 1;       EEPROM.write(eePLAYER_ID, 1); }
-if (pinCode[0] == 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE,   1);
-                           pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 2);
-                           pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 3);
-                           pinCode[3] = 4;     EEPROM.write(eePIN_CODE+3, 4);  }
-}
-
-////////////////////// MAIN LOOP ///////////////////////////////////////////////////////////////////////// MAIN LOOP ////////////////////////
-
-void loop()
-{ 
-  ////////////////////////
-  if      (state == MEDIC)            MedicMode();
-  else if (state == PINPAD)           PinPadMode();
-  else if (state == TAGGER)           TaggerMode();
-  else if (state == CONFIG)           ConfigMode();
-  else if (state == SET_TEAM)         SetTeam();
-  else if (state == SET_HOSTILE)      SetHostile();
-  else if (state == CLEAR_SCORE)      ClearScore();
-  else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
-  else if (state == SETUP)            Setup();
-  else if (state == CHANGE_PIN)       ChangePin();
-  else if (state == CONFIRM_PIN)      ConfirmPin();
-  else if (state == GAME_OVER)        GameOver();
-  else if (state == SCORES)           DisplayScores();
-  else if (state == HOST)             HostMode();
-  //////////////////////////////////
-  
-  if (receivedIRmessage.type != '_')
-  {
-    if (state != TAGGER) ClearIRarray();     // Clears IR data when not in Tagger Mode.
-    if (state == TAGGER) DecodeIR();
-  }
-
-  // Read the Serial port for a keypress              This is testing stuff and can be deleted later
-  if (Serial.available() !=0)
-    {
-      char keyIn = Serial.read();
-      switch (keyIn)
-        {
-        case 'h':
-          //hostTimer = micros();
-          state = HOST;
-          break;
-        case 'x':
-          state = TAGGER;
-          break;
-        case 'n':
-          AnnounceCustomGame();
-          break;
-        case 'b':
-          Serial.println();
-          break;
-        }
-    }
-}
-
-////////////////////// END MAIN LOOP//////////////////////////////////////////////////////////////////// END MAIN LOOP //////////////////////
-
 
 

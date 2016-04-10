@@ -1,3 +1,43 @@
+/*
+
+//////////////////////TIMER 0 INTERUPT///////////////////////////
+// Timer0 is used for mills(), so this routine piggybacks on that by using a mid-time interupt.
+
+
+OCR0A = 0xAF;
+TIMSK0 |= _BV(OCIE0A);
+
+////////////////////////////////////
+
+*/
+int16_t receiveMilliTimer = 0;
+//int16_t transmitMilliTimer = 0;
+
+SIGNAL(TIMER0_COMPA_vect)
+{
+  
+  receiveMilliTimer--;
+  //transmitMilliTimer--;
+  //TODO: think about overflow here, If there is no IR activity these will rollover every 32,768 mS.
+  if (receiveMilliTimer == 0)  rxTimer0 = TRUE;
+  //if (transmitMilliTimer == 0) bool txTimer0 = TRUE;
+  
+  if (receiveMilliTimer < 0)
+  {
+    receiveMilliTimer = 32768;
+    Serial.print(F("\nTimer0 RX Rollover"));
+  }
+ //if (transmitMilliTimer < 0)
+ // {
+ //   transmitMilliTimer = 32768;
+    //Serial.print(F("\nTimer0 TX Rollover"));
+ // }
+
+  //if (txTimer0 == TRUE);
+  
+}
+
+
 //////////////////////TIMER 1 INTERUPT///////////////////////////
 
 /*
@@ -27,5 +67,5 @@ ISR(TIMER1_OVF_vect)          // interrrupt service routine
     //digitalWrite(13, !digitalRead(13));   // Interferes with the IR LED on the same Pin!
     TCNT1 = timer1counter;    //re-preload the timer
   }
-
 */
+

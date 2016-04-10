@@ -10,7 +10,7 @@ The Announce Game packet is sent by the host at 1.5 second intervals (from start
 
 
 
-- Packet Type (9 bits) - last bit must be 0
+- Packet Type (9 bits) - FIRST bit must be 0
     0x002 - Announce Custom Lazer Tag Game
     0x003 - Announce Custom Lazer Tag (2 Teams) Game
     0x004 - Announce Custom Lazer Tag (3 Teams) Game
@@ -63,7 +63,7 @@ The Announce Game packet is sent by the host at 1.5 second intervals (from start
     
 - Game Name (32 bits) only for packet type 0x00C
 
-- Checksum (9 bits) - last bit must be 1
+- Checksum (9 bits) - FIRST bit must be 1
 
  * 
  */
@@ -90,28 +90,30 @@ The Announce Game packet is sent by the host at 1.5 second intervals (from start
 void HostMode()
 {
   static unsigned long hostTimer = micros();
-  Serial.print("h");
-  if (hostTimer+15000 > micros())
+  
+/*  if (hostTimer+15000 > micros())
   {
     Serial.println();
     AnnounceCustomGame;
+    Serial.print("h");
     hostTimer = micros();
   }
-  
+*/  
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
  void AnnounceCustomGame()
  {
-  disableInterrupt(IR_RECEIVE_PIN);
+  //disableInterrupt(IR_RECEIVE_PIN);
   
   //  Game sample from Patent
+  byte hostedCheckSum;
   if (patent)
   {
     hostedGameType           = 0x0C;
     hostedGameID             = 0x2C;
-    hostedGameTime           = 0x15;
+    hostedGameTime           = 15;
     hostedTagsAvailable      = 0x50;
     hostedReloadsAvailable   = 0xFF;
     hostedShieldTime         = 0x45;
@@ -122,12 +124,13 @@ void HostMode()
     ascii2              = 0x5A;
     ascii3              = 0x4F;
     ascii4              = 0x4E;
+    hostedCheckSum      = 0xE6;
   }
   
   Serial.println(F("\nAnnounce Custom Game"));
   SendIR('P', hostedGameType);
   SendIR('D', hostedGameID);
-  SendIR('D', hostedGameTime);
+  SendIR('D', ConvertDecToBCD(hostedGameTime));
   SendIR('D', hostedTagsAvailable);
   SendIR('D', hostedReloadsAvailable);
   SendIR('D', hostedShieldTime);
@@ -140,19 +143,24 @@ void HostMode()
     SendIR('D', ascii2);
     SendIR('D', ascii3);
     SendIR('D', ascii4);
+    SendIR('C', hostedCheckSum);
+    Serial.print(F("\nCalc : Correct :\t"));
+    Serial.print(CalculateCheckSum());
+    Serial.print(F(": "));
+    Serial.print(hostedCheckSum);
   }
-  SendIR('C', CalculateCheckSum());
+  else SendIR('C', CalculateCheckSum());
   
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 
- }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 uint8_t CalculateCheckSum()
 {
   uint8_t checkSum;
-  checkSum =  hostedGameType + hostedGameID+ hostedGameTime + hostedTagsAvailable
+  checkSum =  hostedGameType + ConvertDecToBCD(hostedGameID)+ hostedGameTime + hostedTagsAvailable
               + hostedReloadsAvailable + hostedShieldTime + hostedMegaTags
               + hostedPackedFlags1 + hostedPackedFlags2 + ascii1 + ascii2
               + ascii3 + ascii4;
