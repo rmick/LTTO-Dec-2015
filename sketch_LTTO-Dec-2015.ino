@@ -1,12 +1,14 @@
 
-//////////////////////Include libraries////////////////////////
+////////////////////// Include libraries ////////////////////////
+
 #include <EnableInterrupt.h>
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <EEPROM.h>
 #include <SWTFT.h>
 
-//////////////////////Setup Touchscreen////////////////////////
+////////////////////// Setup Touchscreen ////////////////////////
+
 #define YP A1
 #define XM A2
 #define YM 7
@@ -17,14 +19,16 @@ SWTFT tft;    //Defines all control and data lines for LCD shield.
 // For better pressure precision, we need to know the resistance
 // between X+ and X- Use any multimeter to read it
 // For the one we're using, its 300 ohms across the X plate
+
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 #define MIN_VAL_TOUCH_X  947
 #define MIN_VAL_TOUCH_Y  958
 #define MAX_VAL_TOUCH_X   90
-#define MAX_VAL_TOUCH_Y   137
+#define MAX_VAL_TOUCH_Y  137
 
-////////////////////Define common colours//////////////////////
+//////////////////// Define common colours //////////////////////
+
 #define  BLACK    0x0000
 #define  BLUE     0x001F
 #define  RED      0xF800
@@ -34,7 +38,7 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define  YELLOW   0xFFE0
 #define  WHITE    0xFFFF
 
-////////////////////My Variables //////////////////////////////
+//////////////////// Global Constants //////////////////////////////
 
 const bool TRUE =  1;
 const bool FALSE = 0;
@@ -50,13 +54,15 @@ const byte eeSHIELDS_TIMER = 14;
 const byte eePIN_CODE = 16;         // NB. It is a 4 byte array, so next available is 20 !
 // const byte ee???? = 20;
 
-//MedicStuff
+//////////////////// Medic Variables ////////////////////////////////
+
 byte medicCount =   EEPROM.read(eeMEDIC_COUNT);
 byte medicDelay =   EEPROM.read(eeMEDIC_DELAY);
 bool hostile =      EEPROM.read(eeHOSTILE);
 byte pinCode[4] =   {EEPROM.read(eePIN_CODE), EEPROM.read(eePIN_CODE+1), EEPROM.read(eePIN_CODE+2), EEPROM.read(eePIN_CODE+3) };
 
-//TaggerStuff
+//////////////////// Tagger Variables ///////////////////////////////
+
 byte teamID =       EEPROM.read(eeTEAM_ID);         
 byte playerID =     EEPROM.read(eePLAYER_ID);
 byte reloadAmount = EEPROM.read(eeRELOAD_AMOUNT);
@@ -75,7 +81,7 @@ const byte IR_RECEIVE_PIN = 11;
 unsigned long irTime;
 //unsigned long hostTimer;
 const bool deBug = FALSE;
-//#define DEBUG
+#define DEBUG
 
 int timer1counter;
 bool rxTimer0;
@@ -84,14 +90,14 @@ bool rxTimer0;
 const char MEDIC            = 'm';
 const char PINPAD           = 'p';
 const char TAGGER           = 't';
-const char CONFIG           = 'c';
+const char CONFIG1          = '1';
 const char NONE             = 'n';
 const char SET_TEAM         = 'i';
 const char SET_MEDIC_DELAY  = 'd';
 const char SET_HOSTILE      = 'h';
 const char CLEAR_SCORE      = 'r';
 const char GAME_OVER        = 'g';
-const char SETUP            = 's';
+const char CONFIG2          = '2';
 const char CHANGE_PIN       = 'x';
 const char CONFIRM_PIN      = 'y';
 const char SCORES           = 'z';

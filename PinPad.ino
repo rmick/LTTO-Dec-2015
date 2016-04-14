@@ -84,7 +84,7 @@ void PinPadMode()
           pinCodeEntered[3] == pinCode[3] )
           {
             digitCount = 0;
-            state = CONFIG;
+            state = CONFIG1;
             ClearPin();
           }
       else 
@@ -173,7 +173,7 @@ void ChangePin()
   timeOut ++;
   if (timeOut == 5000)
   {
-    state = CONFIG;
+    state = CONFIG1;
     ClearPin;
   }
   
@@ -222,7 +222,7 @@ void ConfirmPin()
   timeOut ++;
   if (timeOut == 5000)
   {
-    state = CONFIG;
+    state = CONFIG1;
     ClearPin;
   }
   
@@ -266,7 +266,7 @@ void ConfirmPin()
           {
             digitCount = 0;
             StoreNewPin();
-            state = CONFIG;
+            state = CONFIG1;
             ClearPin();
           }
     }                             

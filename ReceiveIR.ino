@@ -19,7 +19,7 @@ void ISRchange()
   static uint16_t runtime = micros();           // TODO: Debug, remove it!
 
   // Action the Interrupt........
-  Serial.print(".");
+  // Serial.print(".");            // USED TO SEE WHEN IR BITS ARE RECEIVED _ STOPS THINGS FROM WORKING! !!!!
   
   
   overflowISR++;
@@ -63,10 +63,14 @@ void ISRchange()
     }
   }
   
-  // Set message length based on header type
+  // Set message length based on header type                      
+  //              TODO: This does not work with Data packets - So we need a new routine to deal with this !!!
+  //                    (a) In non-game mode use a different routine, as all packets will be P,D,C type only
+  //                    (b) Use Timer0 and ISR routines to watch for long breaks (>6mS) as the end of a packet
+
   if        (messageIR[3] == 3)   expectedMessageLength = 18;
   else if   (messageIR[3] == 6)   expectedMessageLength = 14;
-  //else if   (there is no header) expectedMessageLength = 2-3bytes  // TODO: how do we process packets without headers ?
+  
   
   // Check for a Long Break...............
   if (bitLength < -7 || bitLength > 7)                // This means we have an error, as max value is +/- 6

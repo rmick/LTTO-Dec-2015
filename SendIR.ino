@@ -25,11 +25,12 @@ void SendIR(char type, uint16_t message)
   //Send Header
   switch (type)
   {
-    // if Type = B then Beacon,   so header is 366
-    // if Type = T then Tag,      so header is 363
-    // if Type = D the data byte, so no header
-    // if Type = P then Packet, no header and need to add 0 as the 9th bit
-    // if Type = C then CheckSum, no header and need to add a 1 as the 9th bit
+    // if Type = B then Beacon,   Header is 366, length is 5 bits
+    // if Type = T then Tag,      Header is 363, length is 7 bits
+    // if Type = D the data byte, Header is 363, length is 8 bits
+    // if Type = P then Packet,   Header is 363, length is 9 bits, first bit must be 0
+    // if Type = C then CheckSum, Header is 363, length is 9 bits, first bit must be 1
+    
     case 'P':
       msgLength = 9;
       interDelay = 25;
@@ -99,7 +100,7 @@ void PulseIR(int mSec)
   unsigned long pulseLength = mSec*1000;
   unsigned long pulseEndTime = pulseStartTime + pulseLength - 24;
   
-  if (IR_LED != 11)
+  if (IR_LED != 11)                                   // Pin11 is 38kHz Oscilator via Timer2 in SetUp - Pin 11 Uno - Pin 10 Mega 
   {
     while (pulseEndTime >micros() )
     {
@@ -111,25 +112,9 @@ void PulseIR(int mSec)
   }
   else
   {
-    /*
-    TCCR2A = 0x00;
-    bitWrite(TCCR2A, COM2A0, 1);
-    bitWrite(TCCR2A, COM2B1, 1);
-    bitWrite(TCCR2A, WGM21, 1);
-    bitWrite(TCCR2A, WGM20, 1);
-  
-    TCCR2B = 0x00;
-    bitWrite(TCCR2B, WGM22, 1);
-    bitWrite(TCCR2B, CS20, 1);  
-  
-    OCR2A = 209;
-    OCR2B = 128;  //Doesn't matter
-    */
-    
-    pinMode(IR_LED, OUTPUT);
-    delayMicroseconds(pulseLength);
-    pinMode(IR_LED, INPUT);
-    
+     pinMode(IR_LED, OUTPUT);
+     delayMicroseconds(pulseLength);
+     pinMode(IR_LED, INPUT);
   }
   
 }
@@ -137,7 +122,7 @@ void PulseIR(int mSec)
 /////////////////////////////////////////////////////////////
 
 
-
+/*
 void DeBug(String data)
 {
   return;                             //Comment out to Enable DeBug messages
@@ -146,6 +131,8 @@ void DeBug(String data)
   Serial.println(irTime);
   irTime = micros();
 }
+*/
+
 
 ////////////////////////////////////////////////////////////
 

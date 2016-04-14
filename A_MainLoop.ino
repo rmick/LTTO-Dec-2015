@@ -4,12 +4,12 @@ void loop()
   if      (state == MEDIC)            MedicMode();
   else if (state == PINPAD)           PinPadMode();
   else if (state == TAGGER)           TaggerMode();
-  else if (state == CONFIG)           ConfigMode();
+  else if (state == CONFIG1)          ConfigScreen1();
   else if (state == SET_TEAM)         SetTeam();
   else if (state == SET_HOSTILE)      SetHostile();
   else if (state == CLEAR_SCORE)      ClearScore();
   else if (state == SET_MEDIC_DELAY)  SetMedicDelay();
-  else if (state == SETUP)            Setup();
+  else if (state == CONFIG2)          ConfigScreen2();
   else if (state == CHANGE_PIN)       ChangePin();
   else if (state == CONFIRM_PIN)      ConfirmPin();
   else if (state == GAME_OVER)        GameOver();

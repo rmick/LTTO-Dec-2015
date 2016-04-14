@@ -17,7 +17,7 @@ void SetTeam()
   else if (Action == "Team 1")   { teamID = 1; lastState = NONE; }
   else if (Action == "Team 2")   { teamID = 2; lastState = NONE; }
   else if (Action == "Team 3")   { teamID = 3; lastState = NONE; }
-  else if (Action == "EXIT")     { EEPROM.write(eeTEAM_ID, teamID); state = CONFIG; }
+  else if (Action == "EXIT")     { EEPROM.write(eeTEAM_ID, teamID); state = CONFIG1; }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ void SetMedicDelay()
   char* Action = GetButtonPress();
   if      (Action == "Up")      { medicDelay++; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
   else if (Action == "Down")    { medicDelay--; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
-  else if (Action == "EXIT")    { EEPROM.write(eeMEDIC_DELAY, medicDelay); state = CONFIG; }
+  else if (Action == "EXIT")    { EEPROM.write(eeMEDIC_DELAY, medicDelay); state = CONFIG1; }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ void SetHostile()
   char* Action = GetButtonPress();
   if      (Action == "Yes")  { hostile =  TRUE; lastState = NONE; }
   else if (Action ==  "No")  { hostile = FALSE; lastState = NONE; } 
-  else if (Action == "EXIT") { EEPROM.write(eeHOSTILE, hostile); state = CONFIG; }
+  else if (Action == "EXIT") { EEPROM.write(eeHOSTILE, hostile); state = CONFIG1; }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -125,8 +125,8 @@ void ClearScore()
     DrawClearScore();
  
   char* Action = GetButtonPress();
-  if      (Action == "Yes")  { EEPROM.write(eeMEDIC_COUNT, 0); medicCount = 0; tft.fillScreen(BLACK); state = CONFIG; }
-  else if (Action == "No")   state = CONFIG;
+  if      (Action == "Yes")  { EEPROM.write(eeMEDIC_COUNT, 0); medicCount = 0; tft.fillScreen(BLACK); state = CONFIG1; }
+  else if (Action == "No")   state = CONFIG1;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -146,28 +146,4 @@ void DrawClearScore()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Setup()
-{
-  DrawSetup();
-  
-  char* Action = GetButtonPress();
-  if      (Action == "Change PIN")  state = CHANGE_PIN;
-  else if (Action == "Tagger")      state = TAGGER;
-  else if (Action == "EXIT")        state = CONFIG;
-}
 
-////////////////////////////////////////////////////////////////////
-
-void DrawSetup()
-{
-  if (lastState != state)
-  {
-    #ifdef DEBUG Serial.println(F("Setup Screen"));
-    #endif
-    DrawScreen(SETUP, "SET-UP", MAGENTA, WHITE, 3);
-    DrawButton( 20,  50, 200, 55, BLACK,  "Change PIN",   2, WHITE);
-    DrawButton( 20, 210, 200, 55, BLACK,  "Tagger", 2, WHITE);
-    DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
-    if (deBug) PrintButtonArray();
-  }
-}

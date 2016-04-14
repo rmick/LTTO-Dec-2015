@@ -23,7 +23,7 @@ void TaggerMode()
   else if (Action == "Shields")   SetShields();
   else if (Action == "ReLoad")    Reload();
   else if (Action == "Scores")    state = SCORES;                    
-  else if (Action == "EXIT")      state = CONFIG;
+  else if (Action == "EXIT")      state = CONFIG1;
 
   if (shieldsUp) UpdateShieldsTimer();
 }

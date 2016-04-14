@@ -86,26 +86,42 @@ The Announce Game packet is sent by the host at 1.5 second intervals (from start
 
   bool patent = TRUE;
 
-  
+//////////////////////////////////////////////////////////////////////
+
 void HostMode()
 {
-  static unsigned long hostTimer = micros();
+  DrawHostMode();
   
-/*  if (hostTimer+15000 > micros())
+  static unsigned long hostTimer = micros();
+
+  char* Action = GetButtonPress();
+  if      (Action == "Host 2 Teams")  AnnounceCustomGame();
+  else if (Action == "Make Coffee");  //Go make it yourself
+  else if (Action == "EXIT")           state = CONFIG2;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void DrawHostMode()
+{
+  if (lastState != state)
   {
-    Serial.println();
-    AnnounceCustomGame;
-    Serial.print("h");
-    hostTimer = micros();
+    #ifdef DEBUG Serial.println(F("HostMode Screen"));
+    #endif
+    DrawScreen(HOST, "HOST GAME", MAGENTA, WHITE, 3);
+    DrawButton( 20,  50, 200, 55, BLACK,  "Host 2 Teams", 2, WHITE);
+    DrawButton( 20, 210, 200, 55, BLACK,  "Make Coffee", 2, WHITE);
+    DrawButton( 20, 150, 200, 55, BLACK,  "Start Timer",  2, WHITE);
+    DrawButton( 70, 290, 100, 30, YELLOW, "EXIT",       2, BLACK);
+    if (deBug) PrintButtonArray();
   }
-*/  
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
  void AnnounceCustomGame()
  {
-  //disableInterrupt(IR_RECEIVE_PIN);
+  disableInterrupt(IR_RECEIVE_PIN);
   
   //  Game sample from Patent
   byte hostedCheckSum;

@@ -1,15 +1,4 @@
-/*
 
-//////////////////////TIMER 0 INTERUPT///////////////////////////
-// Timer0 is used for mills(), so this routine piggybacks on that by using a mid-time interupt.
-
-
-OCR0A = 0xAF;
-TIMSK0 |= _BV(OCIE0A);
-
-////////////////////////////////////
-
-*/
 int16_t receiveMilliTimer = 0;
 //int16_t transmitMilliTimer = 0;
 
