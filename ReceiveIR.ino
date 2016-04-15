@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 byte countISR = 0;
+byte packetCount = 0;
 
 void ISRchange()
 {
@@ -20,7 +21,7 @@ void ISRchange()
 
   // Action the Interrupt........
 
-  Serial.print("-");
+  Serial.print("-");              // TODO: QF10 stuff
 
   
   overflowISR++;
@@ -101,6 +102,7 @@ void ISRchange()
     
   // Look for the end of a message and process it.  
   if (countISR == expectedMessageLength) CreateIRmessage();
+  if (countISR >  expectedMessageLength) Serial.print(F("My what a long message you have! RecIR:105"));
 
   // Store the time it took to process the interupt routine 
   timerISR = micros() - pinChangeTime;
@@ -123,26 +125,57 @@ void ISRchange()
 
 void CreateIRmessage()                                      // TODO: Currently not checking for valid -2mS breaks !!!!
 {
-  if (state == TAGGER)
+  if      (state == TAGGER)
   {
     if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
     else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
   }
   
-  if (state == HOST)
-  {
+  else if (state == HOST)
+  { 
     if (messageIR[3] == 3)
     {
-      receivedIRmessage.type = 'D';
-      Serial.print(F("Data"));
+      packetCount++;
+      if  (packetCount == 1)
+      {
+        receivedIRmessage.type = 'P';
+        Serial.print(F("Packet"));
+      }
+      else
+      {
+        receivedIRmessage.type = 'D';
+        Serial.print(F("Data"));
+      }
+      //TODO : Need to allow for Checksum which is 9 bits long !!!
+      
     }
-    else return;
+    else if (messageIR[3] == 6)
+    {
+      Serial.print(F("is not posseeble Mr Fawlty! RecIR:154"));        //TODO: QF10 stuff to be checked
+      return;
+    }
   }
+  else return;      // We only process incoming IR in HOST and TAGGER modes !
 
-  
-  if (receivedIRmessage.type == 'T')
+  //Set message length
+  byte messageLength = 0;
+  if      (receivedIRmessage.type == 'T') messageLength = 17;   // Long Break [0] + 3 header [1,2,3] + break [4] + 7 bits,breaks [5,7,9,11,13,15,17]
+  else if (receivedIRmessage.type == 'B') messageLength = 13;   // Long Break [0] + 3 header [1,2,3] + break [4] + 5 bits,breaks [5,7,9,11,13]
+  else if (receivedIRmessage.type == 'P') messageLength = 22;   // Long Break [0] + 3 header [1,2,3] + break [4] + 9 bits,breaks [5,7,9,11,13,15,17,19,21]
+  else if (receivedIRmessage.type == 'D') messageLength = 17;   // Long Break [0] + 3 header [1,2,3] + break [4] + 8 bits,breaks [5,7,9,11,13,15,17,19]
+  else if (receivedIRmessage.type == 'C') messageLength = 17;   // Long Break [0] + 3 header [1,2,3] + break [4] + 9 bits,breaks [5,7,9,11,13,15,17,19,21]
+
+  //Push the data into the dataPacket
+  for (int i = 5; i<=messageLength; i+=2)
+    {
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
+      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
+    }
+
+/*          //TODO: QF10 stuff
+  if      (receivedIRmessage.type == 'T')
   {
-    for (int i = 5; i<=17; i+=2)
+    for (int i = 5; i<=17; i+=2)      // Long Break [0] + 3 header [1,2,3] + break [4] + 7 bits,breaks [5,7,9,11,13,15,17]
     {
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
@@ -150,7 +183,7 @@ void CreateIRmessage()                                      // TODO: Currently n
   }
   else if (receivedIRmessage.type == 'B')
   {
-    for (int i = 5; i<=13; i+=2)
+    for (int i = 5; i<=13; i+=2)      // Long Break [0] + 3 header [1,2,3] + break [4] + 5 bits,breaks [5,7,9,11,13]
     {
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
@@ -158,7 +191,7 @@ void CreateIRmessage()                                      // TODO: Currently n
   }
   else if (receivedIRmessage.type == 'D')
   {
-    for (int i = 5; i<=22; i+=2)
+    for (int i = 5; i<=21; i+=2)      // Long Break [0] + 3 header [1,2,3] + break [4] + 7 bits,breaks [5,7,9,11,13,15,17]
     {
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
@@ -166,8 +199,10 @@ void CreateIRmessage()                                      // TODO: Currently n
     PrintIR();
   }
 
+*/
   
   countISR = 0;
+  packetCount = 0;
   if (deBug) PrintIR();
 }
 
@@ -239,4 +274,6 @@ void ClearIRarray()
   }
   receivedIRmessage.type = '_';
   receivedIRmessage.dataPacket = 0;
+  packetCount = 0;
+  
 }

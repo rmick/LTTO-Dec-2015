@@ -26,7 +26,8 @@ void DrawSetTeam()
 {
   if (lastState != state)
   {
-    #ifdef DEBUG Serial.println(F("SetTeamIDscreen"));
+    #ifdef DEBUG
+      Serial.println(F("SetTeamIDscreen"));
     #endif
     DrawScreen(SET_TEAM, "CHOOSE TEAM", MAGENTA, WHITE, 3);
     DrawButton( 20,  40, 200, 55, BLACK,  "No Team", 2, WHITE);

@@ -24,7 +24,6 @@ void loop()
   
   if (receivedIRmessage.type != '_')
   {
-    //if (state != TAGGER) 
     if      (state == TAGGER)   DecodeIR();
     else if (state == HOST)     DecodeIR();
     else                        ClearIRarray();     // Clears IR data when not in Tagger/Host Mode.

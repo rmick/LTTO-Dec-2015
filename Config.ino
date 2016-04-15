@@ -62,7 +62,8 @@ void DrawConfigScreen2()
 {
   if (lastState != state)
   {
-    #ifdef DEBUG Serial.println(F("DrawConfig-2"));
+    #ifdef DEBUG
+      Serial.println(F("DrawConfig-2"));
     #endif
     DrawScreen(CONFIG2, "CONFIG", MAGENTA, WHITE, 3);
     DrawButton( 20,  50, 200, 55, BLACK,  "Change PIN", 2, WHITE);
