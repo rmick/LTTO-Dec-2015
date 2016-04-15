@@ -13,7 +13,7 @@ void SendIR(char type, uint16_t message)
   irTime = micros();          ////////// for DeBug purposes only.
   int msgLength = 0;
   int interDelay = 25;
-
+  
   #ifdef DEBUG
     Serial.print(F("\nSending IR- "));
     Serial.print(type);

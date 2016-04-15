@@ -19,8 +19,9 @@ void ISRchange()
   static uint16_t runtime = micros();           // TODO: Debug, remove it!
 
   // Action the Interrupt........
-  // Serial.print(".");            // USED TO SEE WHEN IR BITS ARE RECEIVED _ STOPS THINGS FROM WORKING! !!!!
-  
+
+  Serial.print("-");
+
   
   overflowISR++;
   pinChangeTime = micros();                   // Store the time that the pin changes
@@ -38,13 +39,12 @@ void ISRchange()
   int8_t bitLength = (pulseLength+500)/1000;
   if (PINB & 8); else   bitLength = 0 - bitLength;    //Set a Mark as Positive and a Break as Negative.
 
-
   // Find a Header............
   if (bitLength == -6)                        // Look for a 6mS break
   {
     if (messageIR[countISR-1] == 3)           // Check that the preceding bit was 3mS Header.
     {                                         // - we have a header so start collecting data
-      //if (deBug) Serial.print("(3/6)");
+      if (deBug) Serial.print("(3/6)\t");
       messageIR[1] = 3;
       countISR = 2;
       receiveMilliTimer = 20;

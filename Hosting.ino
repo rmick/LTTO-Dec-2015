@@ -166,9 +166,10 @@ void DrawHostMode()
     Serial.print(hostedCheckSum);
   }
   else SendIR('C', CalculateCheckSum());
-  
-  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 
+ 
+  enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
+ Serial.print("Enabling ITR");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

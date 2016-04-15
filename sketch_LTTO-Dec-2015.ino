@@ -81,7 +81,13 @@ const byte IR_RECEIVE_PIN = 11;
 unsigned long irTime;
 //unsigned long hostTimer;
 const bool deBug = FALSE;
-#define DEBUG
+
+
+
+//  #define DEBUG
+
+
+
 
 int timer1counter;
 bool rxTimer0;
@@ -102,7 +108,7 @@ const char CHANGE_PIN       = 'x';
 const char CONFIRM_PIN      = 'y';
 const char SCORES           = 'z';
 const char HOST             = 'H';
-char state = TAGGER;
+char state = MEDIC;
 char lastState = NONE;
 
 byte buttonCount;

@@ -39,7 +39,7 @@ void loop()
         case 'h':
           state = HOST;
           break;
-        case 'x':
+        case 't':
           state = TAGGER;
           break;
         case 'n':
