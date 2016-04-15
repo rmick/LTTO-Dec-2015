@@ -20,9 +20,6 @@ void ISRchange()
   static uint16_t runtime = micros();           // TODO: Debug, remove it!
 
   // Action the Interrupt........
-
-  Serial.print("-");              // TODO: QF10 stuff
-
   
   overflowISR++;
   pinChangeTime = micros();                   // Store the time that the pin changes
@@ -35,7 +32,7 @@ void ISRchange()
     overflowISR = 0;
     return;              // exit as the pulse is too short, so probably noise
   }
-  rxTimer0 = 25;
+  receiveMilliTimer = 25;
   lastEdge = pinChangeTime;                   // Reset the lastEdge to now
   int8_t bitLength = (pulseLength+500)/1000;
   if (PINB & 8); else   bitLength = 0 - bitLength;    //Set a Mark as Positive and a Break as Negative.
@@ -49,7 +46,7 @@ void ISRchange()
       messageIR[1] = 3;
       countISR = 2;
       receiveMilliTimer = 20;
-      Serial.print(F("IR."));
+      Serial.print(F("\nIR."));
     }
     else 
     {
@@ -86,7 +83,7 @@ void ISRchange()
   // Check for too many bits without a header......... (stops overflow of Array variables)
   if (countISR > (ARRAY_LENGTH-2) )
   {
-    Serial.println(F("\nArray Overlength Error Trap"));
+    Serial.println(F("\nArray Overlength Error Trap  RecIR:86  "));
     countISR = 0;
   }
 
@@ -102,7 +99,10 @@ void ISRchange()
     
   // Look for the end of a message and process it.  
   if (countISR == expectedMessageLength) CreateIRmessage();
-  if (countISR >  expectedMessageLength) Serial.print(F("My what a long message you have! RecIR:105"));
+  if (countISR >  expectedMessageLength && expectedMessageLength > 10)        //TODO: this is debug. The >10 is becuase until the 363 stuff arrives the length = ZERO.
+  {
+    Serial.print(F("\n   My what a long message you have! RecIR:105   - "));
+  }
 
   // Store the time it took to process the interupt routine 
   timerISR = micros() - pinChangeTime;
@@ -139,19 +139,19 @@ void CreateIRmessage()                                      // TODO: Currently n
       if  (packetCount == 1)
       {
         receivedIRmessage.type = 'P';
-        Serial.print(F("Packet"));
+        Serial.println(F("Packet"));
       }
       else
       {
         receivedIRmessage.type = 'D';
-        Serial.print(F("Data"));
+        Serial.println(F("Data"));
       }
       //TODO : Need to allow for Checksum which is 9 bits long !!!
       
     }
     else if (messageIR[3] == 6)
     {
-      Serial.print(F("is not posseeble Mr Fawlty! RecIR:154"));        //TODO: QF10 stuff to be checked
+      Serial.print(F("\n   is not posseeble Mr Fawlty! RecIR:154"));        //TODO: QF10 stuff to be checked
       return;
     }
   }
@@ -171,39 +171,18 @@ void CreateIRmessage()                                      // TODO: Currently n
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
       receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
     }
-
-/*          //TODO: QF10 stuff
-  if      (receivedIRmessage.type == 'T')
-  {
-    for (int i = 5; i<=17; i+=2)      // Long Break [0] + 3 header [1,2,3] + break [4] + 7 bits,breaks [5,7,9,11,13,15,17]
-    {
-      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
-      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
-    }
-  }
-  else if (receivedIRmessage.type == 'B')
-  {
-    for (int i = 5; i<=13; i+=2)      // Long Break [0] + 3 header [1,2,3] + break [4] + 5 bits,breaks [5,7,9,11,13]
-    {
-      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
-      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
-    }
-  }
-  else if (receivedIRmessage.type == 'D')
-  {
-    for (int i = 5; i<=21; i+=2)      // Long Break [0] + 3 header [1,2,3] + break [4] + 7 bits,breaks [5,7,9,11,13,15,17]
-    {
-      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket << 1;
-      receivedIRmessage.dataPacket = receivedIRmessage.dataPacket + (messageIR [i]-1);
-    }
-    PrintIR();
-  }
-
-*/
-  
+ 
   countISR = 0;
   packetCount = 0;
   if (deBug) PrintIR();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void DecodeDataIR()
+{
+  PrintIR();
+  ClearIRarray();
 }
 
 //////////////////////////////////////////////////////////////////////

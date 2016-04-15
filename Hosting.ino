@@ -96,6 +96,7 @@ void HostMode()
 
   char* Action = GetButtonPress();
   if      (Action == "Host 2 Teams")  AnnounceCustomGame();
+  else if (Action == "Join Game")     RequestJoinGame();
   else if (Action == "Make Coffee");  //Go make it yourself
   else if (Action == "EXIT")           state = CONFIG2;
 }
@@ -110,8 +111,8 @@ void DrawHostMode()
     #endif
     DrawScreen(HOST, "HOST GAME", MAGENTA, WHITE, 3);
     DrawButton( 20,  50, 200, 55, BLACK,  "Host 2 Teams", 2, WHITE);
+    DrawButton( 20, 120, 200, 55, BLACK,  "Join Game",  2, WHITE);
     DrawButton( 20, 210, 200, 55, BLACK,  "Make Coffee", 2, WHITE);
-    DrawButton( 20, 150, 200, 55, BLACK,  "Start Timer",  2, WHITE);
     DrawButton( 70, 290, 100, 30, YELLOW, "EXIT",       2, BLACK);
     if (deBug) PrintButtonArray();
   }
@@ -172,6 +173,19 @@ void DrawHostMode()
  Serial.print("Enabling ITR");
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void RequestJoinGame()
+{
+  Serial.println(F("\nRequest Join Game"));
+  SendIR('P', 0x10);
+  SendIR('D', hostedGameID);
+  SendIR('D', 0x42);
+  SendIR('D', 0x00);
+  SendIR('C', 0x98);  //Junk for now I just need a 9 bit packet.
+
+  
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 uint8_t CalculateCheckSum()

@@ -1,29 +1,18 @@
 
-int16_t receiveMilliTimer = 0;
-//int16_t transmitMilliTimer = 0;
+int16_t receiveMilliTimer = 32768;
 
 SIGNAL(TIMER0_COMPA_vect)
 {
   
   receiveMilliTimer--;
-  //transmitMilliTimer--;
   //TODO: think about overflow here, If there is no IR activity these will rollover every 32,768 mS.
-  if (receiveMilliTimer == 0)  rxTimer0 = TRUE;
-  //if (transmitMilliTimer == 0) bool txTimer0 = TRUE;
+  if (receiveMilliTimer == 0)  rxTimerExpired = TRUE;
   
   if (receiveMilliTimer < 0)
   {
     receiveMilliTimer = 32768;
-    Serial.print(F("\nTimer0 RX Rollover"));
+    Serial.print(F("\nTimer0 RX Rollover  - ISR:14"));
   }
- //if (transmitMilliTimer < 0)
- // {
- //   transmitMilliTimer = 32768;
-    //Serial.print(F("\nTimer0 TX Rollover"));
- // }
-
-  //if (txTimer0 == TRUE);
-  
 }
 
 

@@ -138,7 +138,7 @@ void DrawTaggerScreenShieldsUp()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void DecodeIR()
+void DecodeTagIR()
 {
   if (deBug) Serial.println(F("DecodeIR()"));
   static byte badMessageCount = 0;  
@@ -185,7 +185,7 @@ void DecodeIR()
   else
   {
     badMessageCount++;                // TODO: Is this logical here, or am I off with the fairies.
-    Serial.print("Error-");
+    Serial.print("\nbad Message Count - Tagger:188");
     //TODO: Check for a bad 3/6 Tag packet and then flag as a near miss !!
   }    
   ClearIRarray();

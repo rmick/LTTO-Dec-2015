@@ -79,18 +79,14 @@ const byte IR_RECEIVE_PIN = 11;
 
 //DeBug use only
 unsigned long irTime;
-//unsigned long hostTimer;
 const bool deBug = FALSE;
-
-
-
 //  #define DEBUG
 
 
 
 
 int timer1counter;
-bool rxTimer0;
+bool rxTimerExpired;
 // bool txTimer0;
 
 const char MEDIC            = 'm';

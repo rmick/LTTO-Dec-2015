@@ -19,13 +19,16 @@ void loop()
 
   if (state == HOST)
   {
-    if (rxTimer0 <=0) CreateIRmessage();
+    if (rxTimerExpired)
+    {
+      CreateIRmessage();
+    }
   }
   
   if (receivedIRmessage.type != '_')
   {
-    if      (state == TAGGER)   DecodeIR();
-    else if (state == HOST)     DecodeIR();
+    if      (state == TAGGER)   DecodeTagIR();
+    else if (state == HOST)     DecodeDataIR();
     else                        ClearIRarray();     // Clears IR data when not in Tagger/Host Mode.
   }
 
@@ -41,11 +44,14 @@ void loop()
         case 't':
           state = TAGGER;
           break;
-        case 'n':
-          AnnounceCustomGame();
-          break;
         case 'b':
           Serial.println();
+          break;
+        case 'd' :
+          DecodeTagIR();
+          break;
+        case 'j' :
+          RequestJoinGame();
           break;
         }
     }
