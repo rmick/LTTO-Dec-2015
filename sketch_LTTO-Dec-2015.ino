@@ -84,10 +84,11 @@ const bool deBug = FALSE;
 
 
 
-
+/////////////////////// ISR variables  ////////////////////////////
 int timer1counter;
 bool rxTimerExpired;
-// bool txTimer0;
+
+/////////////////////// State machine Constants ////////////////////////////
 
 const char MEDIC            = 'm';
 const char PINPAD           = 'p';

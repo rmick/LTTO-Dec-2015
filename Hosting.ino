@@ -97,8 +97,8 @@ void HostMode()
   char* Action = GetButtonPress();
   if      (Action == "Host 2 Teams")  AnnounceCustomGame();
   else if (Action == "Join Game")     RequestJoinGame();
-  else if (Action == "Make Coffee");  //Go make it yourself
-  else if (Action == "EXIT")           state = CONFIG2;
+  else if (Action == "Make Coffee")   LinearNumbersTest();
+  else if (Action == "EXIT")          state = CONFIG2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -183,9 +183,20 @@ void RequestJoinGame()
   SendIR('D', 0x42);
   SendIR('D', 0x00);
   SendIR('C', 0x98);  //Junk for now I just need a 9 bit packet.
-
-  
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void LinearNumbersTest()
+{
+  Serial.println(F("\nLinearNumbersTest"));
+  SendIR('P', 0x01);
+  SendIR('D', 0x02);
+  SendIR('D', 0x03);
+  SendIR('D', 0x04);
+  SendIR('C', 0x05);  //Junk for now I just need a 9 bit packet.
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 uint8_t CalculateCheckSum()

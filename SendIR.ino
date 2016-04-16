@@ -121,21 +121,6 @@ void PulseIR(int mSec)
 
 /////////////////////////////////////////////////////////////
 
-
-/*
-void DeBug(String data)
-{
-  return;                             //Comment out to Enable DeBug messages
-  irTime = micros() - irTime;         // N.B. When DeBug runs it stops SendIR from talking to guns !!!!
-  Serial.print(data + " - ");
-  Serial.println(irTime);
-  irTime = micros();
-}
-*/
-
-
-////////////////////////////////////////////////////////////
-
 void PrintBinary(int v, int num_places)
 {
 //#ifdef DEBUG

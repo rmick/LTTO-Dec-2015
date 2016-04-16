@@ -5,7 +5,6 @@
 ///////////////////////////////////////////////////////////////////////
 
 byte countISR = 0;
-byte packetCount = 0;
 
 void ISRchange()
 {
@@ -20,7 +19,6 @@ void ISRchange()
   static uint16_t runtime = micros();           // TODO: Debug, remove it!
 
   // Action the Interrupt........
-  
   overflowISR++;
   pinChangeTime = micros();                   // Store the time that the pin changes
   pulseLength = pinChangeTime - lastEdge;     // Measure the elapsed time since last lastEdge
@@ -32,10 +30,11 @@ void ISRchange()
     overflowISR = 0;
     return;              // exit as the pulse is too short, so probably noise
   }
-  receiveMilliTimer = 25;
-  lastEdge = pinChangeTime;                   // Reset the lastEdge to now
+  receiveMilliTimer = 20;
+  lastEdge = pinChangeTime;                           // Reset the lastEdge to now
   int8_t bitLength = (pulseLength+500)/1000;
   if (PINB & 8); else   bitLength = 0 - bitLength;    //Set a Mark as Positive and a Break as Negative.
+
 
   // Find a Header............
   if (bitLength == -6)                        // Look for a 6mS break
@@ -45,8 +44,7 @@ void ISRchange()
       if (deBug) Serial.print("(3/6)\t");
       messageIR[1] = 3;
       countISR = 2;
-      receiveMilliTimer = 20;
-      Serial.print(F("\nIR."));
+      Serial.print(F("\nHeader."));
     }
     else 
     {
@@ -66,14 +64,16 @@ void ISRchange()
   //                    (a) In non-game mode use a different routine, as all packets will be P,D,C type only
   //                    (b) Use Timer0 and ISR routines to watch for long breaks (>6mS) as the end of a packet
 
-  if        (messageIR[3] == 3)   expectedMessageLength = 18;
-  else if   (messageIR[3] == 6)   expectedMessageLength = 14;
-  
+  if (state == TAGGER)
+  {
+    if        (messageIR[3] == 3)   expectedMessageLength = 18;
+    else if   (messageIR[3] == 6)   expectedMessageLength = 14;
+  }
   
   // Check for a Long Break...............
   if (bitLength < -7 || bitLength > 7)                // This means we have an error, as max value is +/- 6
   { 
-    //if (deBug) Serial.print(">");
+    if (deBug) Serial.print("RecIR:77 - Long Break");     //TODO: QF10
     messageIR[0] = bitLength;
     countISR = 1;
     overflowISR = 0;
@@ -83,7 +83,7 @@ void ISRchange()
   // Check for too many bits without a header......... (stops overflow of Array variables)
   if (countISR > (ARRAY_LENGTH-2) )
   {
-    Serial.println(F("\nArray Overlength Error Trap  RecIR:86  "));
+    Serial.println(F("\nRecIR:86 - Array Overlength Error Trap"));
     countISR = 0;
   }
 
@@ -98,7 +98,7 @@ void ISRchange()
     }
     
   // Look for the end of a message and process it.  
-  if (countISR == expectedMessageLength) CreateIRmessage();
+  if (countISR == expectedMessageLength) CreateIRmessage('T');
   if (countISR >  expectedMessageLength && expectedMessageLength > 10)        //TODO: this is debug. The >10 is becuase until the 363 stuff arrives the length = ZERO.
   {
     Serial.print(F("\n   My what a long message you have! RecIR:105   - "));
@@ -123,48 +123,34 @@ void ISRchange()
 
 //////////////////////////////////////////////////////////////////////
 
-void CreateIRmessage()                                      // TODO: Currently not checking for valid -2mS breaks !!!!
+void CreateIRmessage(char source)                                      // TODO: Currently not checking for valid -2mS breaks !!!!
 {
-  if      (state == TAGGER)
+  Serial.print(F("Create."));
+  switch (source)
   {
-    if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
-    else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
-  }
-  
-  else if (state == HOST)
-  { 
-    if (messageIR[3] == 3)
-    {
-      packetCount++;
-      if  (packetCount == 1)
-      {
-        receivedIRmessage.type = 'P';
-        Serial.println(F("Packet"));
-      }
-      else
-      {
-        receivedIRmessage.type = 'D';
-        Serial.println(F("Data"));
-      }
-      //TODO : Need to allow for Checksum which is 9 bits long !!!
-      
-    }
-    else if (messageIR[3] == 6)
-    {
-      Serial.print(F("\n   is not posseeble Mr Fawlty! RecIR:154"));        //TODO: QF10 stuff to be checked
-      return;
-    }
-  }
-  else return;      // We only process incoming IR in HOST and TAGGER modes !
+    case 'T':
+      if      (messageIR[3] == 3)   receivedIRmessage.type = 'T';
+      else if (messageIR[3] == 6)   receivedIRmessage.type = 'B';
+    break;
 
+    case 'H':
+      if      (countISR == 22 && messageIR[5] == 1)  { receivedIRmessage.type = 'P'; Serial.print("packet."); }    //TODO:  && Bit 9 must be zero
+      else if (countISR == 20)  { receivedIRmessage.type = 'D'; Serial.print("data."); }
+      else if (countISR == 22 && messageIR[5] == 2)  { receivedIRmessage.type = 'C'; Serial.print("checksum."); }   // messageIR[5] is the first bit in the array.
+      else    { Serial.print("unknown:"); Serial.print(countISR); Serial.print("."); }        
+    break;
+    
+  }
+ 
   //Set message length
   byte messageLength = 0;
   if      (receivedIRmessage.type == 'T') messageLength = 17;   // Long Break [0] + 3 header [1,2,3] + break [4] + 7 bits,breaks [5,7,9,11,13,15,17]
   else if (receivedIRmessage.type == 'B') messageLength = 13;   // Long Break [0] + 3 header [1,2,3] + break [4] + 5 bits,breaks [5,7,9,11,13]
-  else if (receivedIRmessage.type == 'P') messageLength = 22;   // Long Break [0] + 3 header [1,2,3] + break [4] + 9 bits,breaks [5,7,9,11,13,15,17,19,21]
-  else if (receivedIRmessage.type == 'D') messageLength = 17;   // Long Break [0] + 3 header [1,2,3] + break [4] + 8 bits,breaks [5,7,9,11,13,15,17,19]
-  else if (receivedIRmessage.type == 'C') messageLength = 17;   // Long Break [0] + 3 header [1,2,3] + break [4] + 9 bits,breaks [5,7,9,11,13,15,17,19,21]
-
+  else if (receivedIRmessage.type == 'P') messageLength = 21;   // Long Break [0] + 3 header [1,2,3] + break [4] + 9 bits,breaks [5,7,9,11,13,15,17,19,21]
+  else if (receivedIRmessage.type == 'D') messageLength = 19;   // Long Break [0] + 3 header [1,2,3] + break [4] + 8 bits,breaks [5,7,9,11,13,15,17,19]
+  else if (receivedIRmessage.type == 'C') messageLength = 21;   // Long Break [0] + 3 header [1,2,3] + break [4] + 9 bits,breaks [5,7,9,11,13,15,17,19,21]
+  else { messageLength = countISR; Serial.print("set."); }      //TODO: this is a trap all, for debug
+  
   //Push the data into the dataPacket
   for (int i = 5; i<=messageLength; i+=2)
     {
@@ -173,7 +159,6 @@ void CreateIRmessage()                                      // TODO: Currently n
     }
  
   countISR = 0;
-  packetCount = 0;
   if (deBug) PrintIR();
 }
 
@@ -228,7 +213,7 @@ void PrintIR()
   }
 */
 
-  Serial.print("\nIRMessage: ");
+  Serial.print("\nPrintIR: ");
   Serial.print(receivedIRmessage.type);
   Serial.print(", ");
   Serial.print(receivedIRmessage.dataPacket, BIN);
@@ -253,6 +238,5 @@ void ClearIRarray()
   }
   receivedIRmessage.type = '_';
   receivedIRmessage.dataPacket = 0;
-  packetCount = 0;
   
 }

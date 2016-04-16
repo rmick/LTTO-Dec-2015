@@ -5,13 +5,19 @@ SIGNAL(TIMER0_COMPA_vect)
 {
   
   receiveMilliTimer--;
-  //TODO: think about overflow here, If there is no IR activity these will rollover every 32,768 mS.
-  if (receiveMilliTimer == 0)  rxTimerExpired = TRUE;
+
+  if (receiveMilliTimer == 0)
+  {
+    rxTimerExpired = TRUE;
+    receiveMilliTimer = 32767;
+  }
+
+  if (receiveMilliTimer == 100) receiveMilliTimer = 32767;      // Prevents rollover into the 25mS zone
   
   if (receiveMilliTimer < 0)
   {
     receiveMilliTimer = 32768;
-    Serial.print(F("\nTimer0 RX Rollover  - ISR:14"));
+    Serial.print(F("\nTimer0 RX Rollover Error - ISR:14"));
   }
 }
 

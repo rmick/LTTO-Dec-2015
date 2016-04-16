@@ -21,7 +21,9 @@ void loop()
   {
     if (rxTimerExpired)
     {
-      CreateIRmessage();
+      rxTimerExpired = FALSE;
+      CreateIRmessage('H');
+      DecodeDataIR();
     }
   }
   
@@ -45,6 +47,8 @@ void loop()
           state = TAGGER;
           break;
         case 'b':
+          Serial.println();
+          Serial.println(F("_____________________________"));
           Serial.println();
           break;
         case 'd' :
