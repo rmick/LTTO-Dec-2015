@@ -79,7 +79,7 @@ const byte IR_RECEIVE_PIN = 11;
 
 //DeBug use only
 unsigned long irTime;
-const bool deBug = FALSE;
+const bool deBug = TRUE;
 //  #define DEBUG
 
 

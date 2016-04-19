@@ -23,7 +23,7 @@ void loop()
     {
       rxTimerExpired = FALSE;
       CreateIRmessage('H');
-      DecodeDataIR();
+      if (rxTimerExpired) DecodeDataIR();
     }
   }
   
@@ -56,6 +56,9 @@ void loop()
           break;
         case 'j' :
           RequestJoinGame();
+          break;
+        case 'x':
+          FireLaser();
           break;
         }
     }

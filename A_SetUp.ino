@@ -23,6 +23,7 @@ void setup()
   if (medicCount == 255)   { medicCount =    0;  EEPROM.write(eeMEDIC_COUNT,  0); }
   if (shieldsTimer == 255) { shieldsTimer = 30;  EEPROM.write(eeSHIELDS_TIMER, 15); }  
   if (reloadAmount > 100)  { reloadAmount = 15;  EEPROM.write(eeRELOAD_AMOUNT, 15); tagCount = reloadAmount; }
+  if (teamID == 255)       { teamID = 0;         EEPROM.write(eeTEAM_ID, 0); }
   if (playerID == 255)     { playerID = 1;       EEPROM.write(eePLAYER_ID, 1); }
   if (pinCode[0] == 255)   { pinCode[0] = 1;     EEPROM.write(eePIN_CODE,   1);
                              pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 2);
