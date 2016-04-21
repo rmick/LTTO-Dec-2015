@@ -24,9 +24,9 @@ void ISRchange()
   pulseLength = pinChangeTime - lastEdge;     // Measure the elapsed time since last lastEdge
   if (pulseLength < 500 && pulseLength > 0)
   {
-    //Serial.print("(S-");
+    //Serial.print(F("(S-"));
     //Serial.print(pulseLength);
-    //Serial.print("mS)");
+    //Serial.print(F("mS)"));
     overflowISR = 0;
     return;              // exit as the pulse is too short, so probably noise
   }
@@ -52,9 +52,9 @@ void ISRchange()
       countISR = 2;       // reset the count as this is a long break, even if the 3mS mark is missing.
       if (deBug)
       {
-        //Serial.print("(");
+        //Serial.print(F("("));
         //Serial.print(messageIR[countISR]);
-        //Serial.print("/6)");
+        //Serial.print(F("/6)"));
       }
     }
   }
@@ -64,16 +64,25 @@ void ISRchange()
   //                    (a) In non-game mode use a different routine, as all packets will be P,D,C type only
   //                    (b) Use Timer0 and ISR routines to watch for long breaks (>6mS) as the end of a packet
 
+
+
+
+
+
+
+
+/*
   if (state == TAGGER)
   {
     if        (messageIR[3] == 3)   expectedMessageLength = 18;
     else if   (messageIR[3] == 6)   expectedMessageLength = 14;
   }
+*/
   
   // Check for a Long Break...............
-  if (bitLength < -7 || bitLength > 7)                // This means we have an error, as max value is +/- 6
+  if (deBug) if (bitLength < -7 || bitLength > 7)                // This means we have an error, as max value is +/- 6
   { 
-    //if (deBug) Serial.println("RecIR:77 - Long Break");     //TODO: Use the RxTimer in Tagger mode to trigger packets, such as text data.
+    Serial.println(F("RecIR:77 - Long Break"));     //TODO: Use the RxTimer in Tagger mode to trigger packets, such as text data.
     messageIR[0] = bitLength;
     countISR = 1;
     overflowISR = 0;
@@ -97,14 +106,14 @@ void ISRchange()
 
     if (deBug)
     {
-      //Serial.print(".");
+      //Serial.print(F("."));
     }
     
   // Look for the end of a message and process it.  
   if (countISR == expectedMessageLength) CreateIRmessage('T');
   if (countISR >  expectedMessageLength && expectedMessageLength > 10)        //TODO: this is debug. The >10 is because until the 363 stuff arrives the length = ZERO.
   {
-    Serial.print(F("\n   My what a long message you have! RecIR:105   - "));
+    Serial.print(F("\nRecIR:105 - My what a long message you have!"));
   }
 
   // Store the time it took to process the interupt routine 
@@ -115,9 +124,8 @@ void ISRchange()
   // Check for re-entrant ISR routine calls.
   if (overflowISR >1)
   {
-    Serial.print(F("(R-"));
+    Serial.print(F("RecIR:118 - reEntrant error in ISR. countISR="));
     Serial.print(countISR);
-    Serial.print(F(")"));
   }
   overflowISR = 0;
 
@@ -224,9 +232,9 @@ void PrintIR()
   }
 */
 
-  Serial.print("\nPrintIR: ");
+  Serial.print(F("\nPrintIR: "));
   Serial.print(receivedIRmessage.type);
-  Serial.print(", ");
+  Serial.print(F(", "));
   Serial.print(receivedIRmessage.dataPacket, BIN);
   Serial.println();
 

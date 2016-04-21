@@ -17,6 +17,22 @@ void loop()
   else if (state == HOST)             HostMode();
   //////////////////////////////////
 
+  if (rxTimerExpired)
+    {
+      rxTimerExpired = FALSE;
+      if      (state == HOST)
+      {
+        CreateIRmessage('H');
+      }
+      else if (state == TAGGER)
+      {
+        CreateIRmessage('T');
+      }
+      rxTimerExpired = FALSE;
+    }
+
+
+/*
   if (state == HOST)
   {
     if (rxTimerExpired)
@@ -26,6 +42,8 @@ void loop()
       if (rxTimerExpired) DecodeDataIR();
     }
   }
+*/
+
   
   if (receivedIRmessage.type != '_')
   {

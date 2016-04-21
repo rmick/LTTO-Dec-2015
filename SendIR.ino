@@ -135,17 +135,17 @@ void PrintBinary(int v, int num_places)
   {
     if (v & (0x0001 << num_places-1))
     {
-      Serial.print("1");
+      Serial.print(F("1"));
     }
     else
     {
-      Serial.print("0");
+      Serial.print(F("0"));
     }
     
     --num_places;
     if(((num_places%4) == 0) && (num_places != 0))
     {
-      Serial.print("_");
+      Serial.print(F("_"));
     }
   }
 //  #endif

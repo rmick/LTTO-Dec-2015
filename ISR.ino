@@ -47,7 +47,7 @@ SIGNAL(TIMER0_COMPA_vect)
 
 ISR(TIMER1_OVF_vect)          // interrrupt service routine
   {
-    // if (deBug) Serial.println(" Tick");
+    // if (deBug) Serial.println(F(" Tick"));
     //digitalWrite(13, !digitalRead(13));   // Interferes with the IR LED on the same Pin!
     TCNT1 = timer1counter;    //re-preload the timer
   }

@@ -170,7 +170,6 @@ void DrawHostMode()
 
  
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
- Serial.print("Enabling ITR");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

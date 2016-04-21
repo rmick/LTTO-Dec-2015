@@ -160,7 +160,7 @@ void DecodeTagIR()
     
     //if (deBug)
     {
-      Serial.print("\n!TAG!");
+      Serial.print(F("\n!TAG!"));
       Serial.print(F("\tTaggedbyTeamID: "));
       Serial.print(taggedbyTeamID);
       Serial.print(F("\tTaggedbyPlayerID: "));
@@ -173,7 +173,7 @@ void DecodeTagIR()
     
   else if (receivedIRmessage.type == 'B')
   {
-    //Serial.print("Bcn-");
+    //Serial.print(F("Bcn-"));
     
     //  TODO:  Receive a Beacon
     //  (TeamID 2 bits, Tag Received 1 bit, Tag Strength 2 bits)
@@ -185,7 +185,7 @@ void DecodeTagIR()
   else
   {
     badMessageCount++;                // TODO: Is this logical here, or am I off with the fairies.
-    Serial.print("\nbad Message Count - Tagger:188");
+    Serial.print(F("\nTagger:188 - bad Message Count"));
     //TODO: Check for a bad 3/6 Tag packet and then flag as a near miss !!
   }    
   ClearIRarray();
@@ -198,7 +198,7 @@ void ProcessTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
     if (teamID == taggedTeamID && friendlyFire == FALSE && teamID != 0)
     {
       ClearIRarray(); 
-      Serial.print (F("\nFriendlyFire"));
+      Serial.print(F("\nFriendlyFire"));
       return;
     }
 
@@ -208,7 +208,7 @@ void ProcessTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
       tft.fillScreen(WHITE);
       lastState = NONE;
       DrawTaggerScreenShieldsUp();
-      Serial.print (F("\nShields Blocked A Shot"));
+      Serial.print(F("\nShields Blocked A Shot"));
       return;
       }
 
@@ -251,13 +251,13 @@ void DisplayScores()
       tft.print("Team "); tft.print(teamPlayerCount/8); tft.print(", Player "); tft.print(displayPlayerID); tft.print(": ");
       tft.println(scoreGrid[teamPlayerCount]);
 
-      //Serial.print("Team "); Serial.print(teamPlayerCount/8); Serial.print(", Player "); Serial.print(displayPlayerID); Serial.print(": ");
+      //Serial.print(F("Team ")); Serial.print(teamPlayerCount/8); Serial.print(F(", Player ")); Serial.print(displayPlayerID); Serial.print((F": "));
       //Serial.println(scoreGrid[teamPlayerCount]);
     }
   }
 
   char* Action = GetButtonPress();
-  if (Action == "EXIT")  { scoresActive = FALSE; state = TAGGER; lastState = NONE; DrawTaggerScreen(); Serial.print("ExitScores"); }
+  if (Action == "EXIT")  { scoresActive = FALSE; state = TAGGER; lastState = NONE; DrawTaggerScreen(); Serial.print(F("ExitScores")); }
 
   
 }

@@ -117,7 +117,7 @@ int intPlayer = -1;
 
 void setup() {
 
-  Serial.println("Program started.");
+  Serial.println(F("Program started."));
   Serial.begin(BAUD_RATE);
 
   pinMode(13, OUTPUT); // blink the built-in LED to show signal traffic
@@ -199,7 +199,7 @@ void loop() {
 
   // Wait for a tag signal from any player to set up the HFE
 
-  Serial.println("Ready to receive firing code.");
+  Serial.println(F("Ready to receive firing code."));
 
   do {
     if (irrecv.decode(&results)) {

@@ -65,12 +65,12 @@ void PinPadMode()
     { 
       //Check if we have a match
       {
-        #ifdef DEBUG Serial.print("\nEntered: ");
+        #ifdef DEBUG Serial.print(F("\nEntered: "));
         for (int x= 0; x<4; x++)
         {
           Serial.print(pinCodeEntered[x]);
         }
-          Serial.print("\nPinCode: ");
+          Serial.print(F("\nPinCode: "));
         for (int y= 0; y<4; y++)
         {
           Serial.print(pinCode[y]);

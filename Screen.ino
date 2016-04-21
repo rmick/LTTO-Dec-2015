@@ -48,7 +48,7 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
 
   #ifdef DEBUG
     Serial.print(F("DeBug DrawTextLabel - Box Width: "));
-    Serial.print (BoxWidth);
+    Serial.print(BoxWidth);
     Serial.print(F(", Box Location: "));
     Serial.print((240-BoxWidth)/2);
     Serial.print(F(", "));
@@ -219,15 +219,15 @@ void PrintButtonArray()
   {
     for (Column=0; Column<4; Column++)
     {
-      Serial.print (Buttons[Row] [Column]);
-      Serial.print (F(", "));
+      Serial.print(Buttons[Row] [Column]);
+      Serial.print(F(", "));
     }
     Serial.println();
   }
   for (Row=0; Row<12; Row++)
   {
-    Serial.print (buttonPressed [Row]);
-    Serial.print (F(", "));
+    Serial.print(buttonPressed [Row]);
+    Serial.print(F(", "));
   }
   Serial.println();
   #endif
