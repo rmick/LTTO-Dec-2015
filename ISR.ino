@@ -1,6 +1,4 @@
 
-int16_t receiveMilliTimer = 32768;
-
 SIGNAL(TIMER0_COMPA_vect)
 {
   
@@ -8,8 +6,8 @@ SIGNAL(TIMER0_COMPA_vect)
 
   if (receiveMilliTimer == 0)
   {
-    rxTimerExpired = TRUE;
     receiveMilliTimer = 32767;
+    CreateIRmessage();
   }
 
   if (receiveMilliTimer == 100) receiveMilliTimer = 32767;      // Prevents rollover into the 25mS zone
@@ -17,7 +15,7 @@ SIGNAL(TIMER0_COMPA_vect)
   if (receiveMilliTimer < 0)
   {
     receiveMilliTimer = 32768;
-    Serial.print(F("\nTimer0 RX Rollover Error - ISR:14"));
+    Serial.print(F("\nISR:18 - Timer0 RX Rollover Error"));
   }
 }
 

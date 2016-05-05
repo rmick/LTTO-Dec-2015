@@ -68,23 +68,6 @@ The Announce Game packet is sent by the host at 1.5 second intervals (from start
  * 
  */
 
- ///////////////////////////////////////////////////////////////////////////////
-
-  byte hostedGameType           = 0x02;
-  byte hostedGameID             = 0xAF;
-  byte hostedGameTime           = 0x15;
-  byte hostedTagsAvailable      = 0x50;
-  byte hostedReloadsAvailable   = 0xFF;
-  byte hostedShieldTime         = 0x15;
-  byte hostedMegaTags           = 0xFF;
-  byte hostedPackedFlags1       = 0x00;
-  byte hostedPackedFlags2       = 0x01;
-  byte ascii1              = 0;
-  byte ascii2              = 0;
-  byte ascii3              = 0;
-  byte ascii4              = 0;
-
-  bool patent = TRUE;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -120,7 +103,25 @@ void DrawHostMode()
 
 ///////////////////////////////////////////////////////////////////////////////
 
- void AnnounceCustomGame()
+  byte hostedGameType           = 0x02;
+  byte hostedGameID             = 0xAF;
+  byte hostedGameTime           = 0x15;
+  byte hostedTagsAvailable      = 0x50;
+  byte hostedReloadsAvailable   = 0xFF;
+  byte hostedShieldTime         = 0x15;
+  byte hostedMegaTags           = 0xFF;
+  byte hostedPackedFlags1       = 0x00;
+  byte hostedPackedFlags2       = 0x01;
+  byte ascii1              = 0;
+  byte ascii2              = 0;
+  byte ascii3              = 0;
+  byte ascii4              = 0;
+
+  bool patent = TRUE;
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AnnounceCustomGame()
  {
   disableInterrupt(IR_RECEIVE_PIN);
   
@@ -167,7 +168,8 @@ void DrawHostMode()
     Serial.print(hostedCheckSum);
   }
   else SendIR('C', CalculateCheckSum());
-
+  Serial.print(F("\nCheckSum = "));
+  Serial.print(CalculateCheckSum(), HEX);
  
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 }

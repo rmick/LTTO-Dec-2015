@@ -4,7 +4,7 @@
 //  void Reload()
 //  void DrawTaggerScreen()
 //  void DrawTaggerScreenShieldsUp()
-//  void DecodeIR()
+//  void DecodeTagIR()
 //  void GameOver()
 
 byte tagPower = 1;
@@ -98,7 +98,7 @@ void DrawTaggerScreen()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("DrawTaggerScreen"));
+    if (deBug) Serial.println(F("\nDrawTaggerScreen"));
     DrawScreen(TAGGER, "TAG MODE", GREEN, BLUE, 3);
     lastState = state;
     DrawButton(  5,  30,  100, 55, WHITE,  "Team",     2, BLACK);
@@ -140,7 +140,7 @@ void DrawTaggerScreenShieldsUp()
 
 void DecodeTagIR()
 {
-  if (deBug) Serial.println(F("DecodeIR()"));
+  //if (deBug) Serial.println(F("\nDecodeTagIR"));
   static byte badMessageCount = 0;  
 
   byte taggedbyTeamID;
@@ -173,7 +173,7 @@ void DecodeTagIR()
     
   else if (receivedIRmessage.type == 'B')
   {
-    //Serial.print(F("Bcn-"));
+    Serial.print(F("-Bcn-"));
     
     //  TODO:  Receive a Beacon
     //  (TeamID 2 bits, Tag Received 1 bit, Tag Strength 2 bits)
@@ -213,9 +213,9 @@ void ProcessTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
       }
 
     //Take the hit
-    tft.fillScreen(RED);
-    lastState = NONE;
-    DrawTaggerScreen();
+    //tft.fillScreen(RED);
+    //lastState = NONE;
+    //DrawTaggerScreen();
     playerHealth = playerHealth - taggedMegaPower;
     if (playerHealth <= 255 && playerHealth >= 250) playerHealth = 0;
     DrawTextLabel( 170, 155, YELLOW, String(playerHealth), 3, BLACK, 2);

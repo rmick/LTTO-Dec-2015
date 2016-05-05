@@ -79,14 +79,15 @@ const byte IR_RECEIVE_PIN = 11;
 
 //DeBug use only
 unsigned long irTime;
-const bool deBug = FALSE;
-//  #define DEBUG
+const bool deBug = TRUE;
+ #define DEBUG
 
 
 
 /////////////////////// ISR variables  ////////////////////////////
-int timer1counter;
-bool rxTimerExpired;
+//int timer1counter;
+//bool rxTimerExpired;
+int16_t receiveMilliTimer = 32767;
 
 /////////////////////// State machine Constants ////////////////////////////
 
@@ -111,7 +112,7 @@ char lastState = NONE;
 byte buttonCount;
 bool touchGood = 0;
 
-const byte  ARRAY_LENGTH = 24;
+const byte  ARRAY_LENGTH = 28;
 int8_t      messageIR         [ARRAY_LENGTH];
 //uint16_t    messageIRpulse    [ARRAY_LENGTH];     //TODO: Delete these parts of the array as they are debug only.
 //uint16_t    messageISRdelay   [ARRAY_LENGTH];
@@ -124,5 +125,7 @@ struct irMessage
 };
 
 irMessage receivedIRmessage;
+
+bool newIRmessageReady = FALSE;
 
 

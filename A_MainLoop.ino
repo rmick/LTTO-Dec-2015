@@ -15,44 +15,26 @@ void loop()
   else if (state == GAME_OVER)        GameOver();
   else if (state == SCORES)           DisplayScores();
   else if (state == HOST)             HostMode();
+  
   //////////////////////////////////
 
-  if (rxTimerExpired)
-    {
-      rxTimerExpired = FALSE;
-      if      (state == HOST)
-      {
-        CreateIRmessage('H');
-      }
-      else if (state == TAGGER)
-      {
-        CreateIRmessage('T');
-      }
-      rxTimerExpired = FALSE;
-    }
-
-
-/*
-  if (state == HOST)
+  if (newIRmessageReady)
   {
-    if (rxTimerExpired)
-    {
-      rxTimerExpired = FALSE;
-      CreateIRmessage('H');
-      if (rxTimerExpired) DecodeDataIR();
-    }
-  }
-*/
-
-  
-  if (receivedIRmessage.type != '_')
-  {
-    if      (state == TAGGER)   DecodeTagIR();
-    else if (state == HOST)     DecodeDataIR();
-    else                        ClearIRarray();     // Clears IR data when not in Tagger/Host Mode.
+      if      (receivedIRmessage.type == 'T')  DecodeTagIR();
+      else if (receivedIRmessage.type == 'B')  DecodeTagIR();
+      else if (receivedIRmessage.type == 'P')  DecodeDataIR();
+      else if (receivedIRmessage.type == 'D')  DecodeDataIR();
+      else if (receivedIRmessage.type == 'C')  DecodeDataIR();
+      else
+      {
+        Serial.print(F("\nMainLoop:28 - invalid message.type = "));
+        Serial.print(receivedIRmessage.type);
+      }
+      newIRmessageReady = FALSE;
   }
 
-  // Read the Serial port for a keypress              This is testing stuff and can be deleted later
+////////////////////////////////// DeBug access /////////////////////////////////////////
+
   if (Serial.available() !=0)
     {
       char keyIn = Serial.read();
@@ -60,6 +42,9 @@ void loop()
         {
         case 'h':
           state = HOST;
+          break;
+        case 'a' :
+          AnnounceCustomGame();
           break;
         case 't':
           state = TAGGER;
@@ -77,6 +62,9 @@ void loop()
           break;
         case 'x':
           FireLaser();
+          break;
+        case 'p' :
+          PrintIR();
           break;
         }
     }
