@@ -1,21 +1,20 @@
 //////////////////////////////////////////////////////////////////////
+static bool hostingActive = FALSE;
+
 
 void HostMode()
 {
   DrawHostMode();
   
   static unsigned long hostTimer = millis();
-  static bool hostingActive = FALSE;
 
   if(debugStartHost) hostingActive = TRUE;
     
   char const* Action = GetButtonPress();
   if      (Action == "Host 2 Teams")    hostingActive = TRUE;
   else if (Action == "Assign Player")   AssignPlayer();
-  else if (Action == "CountDown")       StartCountDown();
+  else if (Action == "Start Game")      StartCountDown();
   else if (Action == "EXIT")            state = CONFIG2;
-
-
 
 
   if (millis() - hostTimer > 1500 && hostingActive)
@@ -23,10 +22,6 @@ void HostMode()
     AnnounceCustomGame();
     hostTimer = millis();
   }
-  //if (PacketByte
-  
-
- 
 }
 
 
@@ -46,7 +41,7 @@ void DrawHostMode()
     DrawScreen(HOST, "HOST GAME", MAGENTA, WHITE, 3);
     DrawButton( 20,  50, 200, 55, BLACK,  "Host 2 Teams",   2, WHITE);
     DrawButton( 20, 120, 200, 55, BLACK,  "Assign Player",  2, WHITE);
-    DrawButton( 20, 210, 200, 55, BLACK,  "Countdown",      2, WHITE);
+    DrawButton( 20, 210, 200, 55, BLACK,  "Start Game",      2, WHITE);
     DrawButton( 70, 290, 100, 30, YELLOW, "EXIT",           2, BLACK);
 
     debugStartHost = FALSE;
@@ -55,12 +50,11 @@ void DrawHostMode()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-
-
-
-///////////////////////////////////////////////////////////////////////////////
+////--------------------------------------------------
+  //  Hosting variables
 
   uint8_t   checkSumCalc = 0;
+  uint8_t taggerID = 0;
 
   ////--------------------------------------------------
   //  Host 2Teams Game (captured packets from LTTO host)
@@ -93,15 +87,15 @@ void AnnounceCustomGame()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-uint8_t taggerID = 0;
+
 
 void AssignPlayer()
 {
-  Serial.println(F("\nAssignPlayer"));
+  Serial.println(F("\nAssignPlayer - "));
   SendIR('P', 0x01);
   SendIR('D', hostedGameID);
   SendIR('D', taggerID);
-  SendIR('D', B01110);
+  SendIR('D', B11010);            // This is the team/player byte !!! ( need to increment this with each join)
   SendIR('C', checkSumCalc);
 }
 
@@ -109,7 +103,8 @@ void AssignPlayer()
 
 void StartCountDown()
 {
-  static byte CountDownTime = 0x0A;           //TODO: his needs to be BCD not HEX
+  hostingActive = FALSE;
+  static byte CountDownTime = 0x0C;           //TODO: his needs to be BCD not HEX
   Serial.println(F("\nStartCountDown"));
   SendIR('P', 0x00);
   SendIR('D', hostedGameID);

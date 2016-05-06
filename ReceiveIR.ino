@@ -122,6 +122,7 @@ uint8_t CheckSumRx = 0;
 
 bool gameIDmatch = FALSE; 
 
+
 void ProcessRxPacket()
 {
     Serial.print(F("\nProcessRxPacket"));
@@ -129,7 +130,6 @@ void ProcessRxPacket()
     CheckSumRx = 0;
     CheckSumRx = CheckSumRx + decodedIRmessage.PacketByte;
     gameIDmatch = FALSE;
-    taggerID = 0;
     
     switch (decodedIRmessage.PacketByte)
     {
@@ -182,11 +182,17 @@ void ProcessRxDataByte()
 
 void ProcessRxCheckSum()
 {
+    //TODO: Move this stuff to the HOSTING module !
+    // All this should do is set a flag based on 
+    //if(CheckSumRx == decodedIRmessage.CheckSumRxByte)
+    
+    
     if (decodedIRmessage.PacketName == "RequestJoinGame" && CheckSumRx == decodedIRmessage.CheckSumRxByte && gameIDmatch == TRUE && taggerID != 0)
     {
       Serial.print (F("\nWe have a valid join request"));
-      AssignPlayer();
       decodedIRmessage.PacketName = "null";
+      AssignPlayer();
+      
 
 
       //TODO; Acknowledge Player Assignment

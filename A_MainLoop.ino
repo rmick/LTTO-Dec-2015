@@ -24,6 +24,7 @@ void loop()
    ////---------------------------------------------------------------------------------------------------------
   //  This is where the rubber hits the road. Decode the messages.
 
+ uint8_t         taggerID = 0;
     
     if (DecodeIR() )
     {  

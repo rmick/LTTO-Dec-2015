@@ -74,20 +74,34 @@ bool shieldsUp = FALSE;
 bool friendlyFire = FALSE;
 byte scoreGrid[25];       // One extra so we can ignore base0 issues
 
-const byte IR_LED = 13;
-const byte IR_RECEIVE_PIN = 11;
+const byte IR_LED             = 13;
+const byte IR_RECEIVE_PIN     = 11;
+const byte DE_BUG_TIMING_PIN  = 12;
 
-//DeBug use only
-unsigned long irTime;
-const bool deBug = TRUE;
- #define DEBUG
+//#define DEBUG
 
 
 
-/////////////////////// ISR variables  ////////////////////////////
-//int timer1counter;
-//bool rxTimerExpired;
-int16_t receiveMilliTimer = 32767;
+  ////---------------------------------------------------------------------------------------------------------
+  //  Set ISR variables
+  
+    volatile byte irPacketLength = 0;
+    volatile byte countISR = 0;
+
+    // DeBug use only
+    volatile byte shortPulseLengthError = 0;
+    volatile byte arrayOverLengthError = 0;
+
+  ////---------------------------------------------------------------------------------------------------------
+  //  Set CreateIRmessage Debug variables
+
+     int badMessage_CountISRshortPacket = 0;
+     int badMessage_InvalidPacketType = 0;
+     int badMessage_non3_6Header = 0;
+
+
+      bool debugStartHost = FALSE;
+
 
 /////////////////////// State machine Constants ////////////////////////////
 
@@ -112,20 +126,33 @@ char lastState = NONE;
 byte buttonCount;
 bool touchGood = 0;
 
-const byte  ARRAY_LENGTH = 28;
-int8_t      messageIR         [ARRAY_LENGTH];
-//uint16_t    messageIRpulse    [ARRAY_LENGTH];     //TODO: Delete these parts of the array as they are debug only.
-//uint16_t    messageISRdelay   [ARRAY_LENGTH];
-//uint16_t    messageISRelapsed [ARRAY_LENGTH];
 
-struct irMessage
-{
-  char type;
-  unsigned int  dataPacket;
-};
+  ////---------------------------------------------------------------------------------------------------------
+  //  Set up the irMessage data structure and then create an instance of it 'decodedIRmessage'
 
-irMessage receivedIRmessage;
+    struct decodedIR             //  Most of these are accessed via ISR so must be declared volatile
+    {
+      volatile bool           newMessage;           //  True = Yes there is a new message waiting
+      volatile char           type;                 //  T, B, P, D, C
+      volatile unsigned int   rawDataPacket;        //  The undecoded datapacket
+      volatile unsigned int   messageOverwritten;   //  This counts messages that are overwritten by a new packet before being read by the main loop if(DecodeIR() ) call
+      unsigned int            TeamID;               //  Team 0 = No Team, then 1,2,3
+      unsigned int            PlayerID;             //  Player 1 thru 8
+      unsigned int            ShotStrength;         //  Mega = 1 thru 4
+      // TODO: These are yet to be implemented in DecodeIR()
+      bool                    TagReceivedBeacon;    //  True = Beacon sent due to Tagger being tagged (confirmation)
+      int                     PacketByte;           //  The undecoded Packet number in Hex
+      String                  PacketName;           //  The simple name for the packet (e.g. Announce Game)  - source   wiki.lazerswarm.com
+      String                  DataType;             //  What the current DataByte contains (e.g. GameID, TaggerID, ShieldTime, PackedByte1, etc)
+      long int                DataByte;             //  Data Byte (in Hex)
+      uint8_t                 CheckSumRxByte;       //  CheckSum value (in Hex)
+      bool                    CheckSumOK;           //  True = The Checksum matches the data packets
+    };
 
-bool newIRmessageReady = FALSE;
+    decodedIR decodedIRmessage;
+
+    static uint8_t  byteCount = 0;                                   // Used to keep track of which datapacket is what.
 
 
+
+    
