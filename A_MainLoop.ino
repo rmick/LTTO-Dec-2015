@@ -1,5 +1,7 @@
 void loop()
 { 
+  uint32_t entryTime = micros();
+  
   ////////////////////////
   if      (state == MEDIC)            MedicMode();
   else if (state == PINPAD)           PinPadMode();
@@ -18,55 +20,131 @@ void loop()
   
   //////////////////////////////////
 
-  if (newIRmessageReady)
-  {
-      if      (receivedIRmessage.type == 'T')  DecodeTagIR();
-      else if (receivedIRmessage.type == 'B')  DecodeTagIR();
-      else if (receivedIRmessage.type == 'P')  DecodeDataIR();
-      else if (receivedIRmessage.type == 'D')  DecodeDataIR();
-      else if (receivedIRmessage.type == 'C')  DecodeDataIR();
-      else
-      {
-        Serial.print(F("\nMainLoop:28 - invalid message.type = "));
-        Serial.print(receivedIRmessage.type);
-      }
-      newIRmessageReady = FALSE;
-  }
+  
+   ////---------------------------------------------------------------------------------------------------------
+  //  This is where the rubber hits the road. Decode the messages.
 
-////////////////////////////////// DeBug access /////////////////////////////////////////
+    
+    if (DecodeIR() )
+    {  
+        switch (decodedIRmessage.type)
+        {
+            case 'T':
+              ProcessRxTag(decodedIRmessage.TeamID, decodedIRmessage.PlayerID, decodedIRmessage.ShotStrength);
+              Serial.print(F("\n\Tag - "));
+              Serial.print(decodedIRmessage.rawDataPacket, BIN);
+              break;
+            
+            case 'B':
+              BeaconFlash(TRUE);
+              break;
+
+            case 'P':
+              Serial.print(F("\n\t\t------------------\n\t\tPacket - 0x"));
+              Serial.print(decodedIRmessage.PacketByte, HEX);
+              ProcessRxPacket();
+              break;
+
+            case 'D':
+              Serial.print(F("\n\t\t\tData - 0x"));
+              Serial.print(decodedIRmessage.DataByte, HEX);
+              ProcessRxDataByte();
+              break;
+
+            case 'C':
+              Serial.print(F("\n\t\tCheckSum - 0x"));
+              Serial.print(decodedIRmessage.rawDataPacket & B11111111, HEX); 
+              ProcessRxCheckSum();
+              break;   
+        }
+        decodedIRmessage.newMessage = FALSE;
+ 
+    }   
+    BeaconFlash(FALSE);
+
+
+////////////////////////////////// DeBug Terminal access /////////////////////////////////////////
 
   if (Serial.available() !=0)
     {
       char keyIn = Serial.read();
       switch (keyIn)
         {
-        case 'h':
-          state = HOST;
-          break;
-        case 'a' :
+        case '1' :
           AnnounceCustomGame();
           break;
-        case 't':
-          state = TAGGER;
+        case '2' :
+          AssignPlayer();
           break;
+        case '3' :
+          StartCountDown();
+          break;
+            
         case 'b':
           Serial.println();
           Serial.println(F("_____________________________"));
           Serial.println();
           break;
         case 'd' :
-          DecodeTagIR();
+          DecodeIR();
           break;
         case 'j' :
           RequestJoinGame();
           break;
-        case 'x':
-          FireLaser();
-          break;
+        case 's' :
+          SendText();
+          break;  
         case 'p' :
-          PrintIR();
+          PrintIR('X');
           break;
+        case 'x' :
+          Serial.print(F("\nTag Sent :-)"));
+          SendIR('T',0);
+          break;
+        case 't' :
+          state = TAGGER;
+          break;
+        case 'h' :
+          state = HOST;
+          break;
+        case 'g' :
+          debugStartHost = TRUE;
+          break;
+        case 'c' :
+          debugStartHost = FALSE;
+          StartCountDown();
+          break;  
+        case 'm' :
+          state = MEDIC;
+          break;
+          
+          
+        #ifdef DEBUG
+        case 'q' :
+          shortPulseLengthError = 0;
+          arrayOverLengthError = 0;
+          badMessage_CountISRshortPacket = 0;
+          badMessage_non3_6Header = 0;
+          badMessage_InvalidPacketType = 0;
+          break;
+        case 'z' :
+          Serial.print(F("\n----------------"));
+          Serial.print(F("\nShortPulse: "));
+          Serial.print(shortPulseLengthError);
+          Serial.print(F("\tArrayOverRun: "));
+          Serial.print(arrayOverLengthError);
+          Serial.print(F("\nShortPacketLength: "));
+          Serial.print(badMessage_CountISRshortPacket);
+          Serial.print(F("\tInvalidPacketType: "));
+          Serial.print(badMessage_InvalidPacketType);
+          Serial.print(F("\tBadMessage_non3_6Header: "));
+          Serial.print(badMessage_non3_6Header);
+          Serial.print(F("\n----------------"));
+          break;
+        #endif 
         }
     }
+    //Serial.print(F("\nLoopTime = "));
+    //1\Serial.print( micros() - entryTime );
 }
 

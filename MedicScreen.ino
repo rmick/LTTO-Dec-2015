@@ -9,7 +9,7 @@ void MedicMode()
 {
   DrawMedicScreen();   
   static int count;
-  char* Action = GetButtonPress();
+  char const* Action = GetButtonPress();
   if      (Action == "Heal")   ReCharge(medicDelay);
   else if (Action == "EXIT")   state = PINPAD;
 

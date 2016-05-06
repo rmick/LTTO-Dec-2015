@@ -1,6 +1,5 @@
 // void SendIR(char type, unsigned int message)
 // void PulseIR(int mSec)
-// void DeBug(String data)
 // void print_binary(int v, int num_places)
 
 
@@ -8,9 +7,6 @@
 
 void SendIR(char type, uint16_t message)
 {
-  //disableInterrupt(IR_RECEIVE_PIN);
-
-  irTime = micros();          ////////// for DeBug purposes only.
   int msgLength = 0;
   int interDelay = 25;
   
@@ -19,7 +15,8 @@ void SendIR(char type, uint16_t message)
     Serial.print(type);
     Serial.print(F(": "));
     PrintBinary(message, 10);
-    Serial.println();
+    Serial.print(F(" - "));
+    Serial.print(message, HEX);
   #endif
   
   //Send Header
@@ -34,29 +31,30 @@ void SendIR(char type, uint16_t message)
     case 'P':
       msgLength = 9;
       interDelay = 25;
+      checkSumCalc = 0;
+      checkSumCalc = checkSumCalc+message;
       PulseIR(3);
       delayMicroseconds (6000);
       PulseIR(3);
-      //Serial.print(F("\nPckt: ")); Serial.print(message); Serial.print(F("\t")); Serial.print(message,HEX); Serial.print(F("\t"));
       break;
 
     case 'D':
       msgLength = 8;
       interDelay = 25;
+      checkSumCalc = checkSumCalc+message;
       PulseIR(3);
       delayMicroseconds (6000);
       PulseIR(3);
-      //Serial.print(F("\nData: ")); Serial.print(message); Serial.print(F("\t")); Serial.print(message,HEX); Serial.print(F("\t"));
       break;
 
     case 'C':
       msgLength = 9;
       interDelay = 25;
+      message = checkSumCalc;           //Overwrite the message with the calculated checksum
       PulseIR(3);
       delayMicroseconds (6000);
       PulseIR(3);
-      message = message | 256;
-      //Serial.print(F("\nChk:  ")); Serial.print(message-256); Serial.print(F("\t")); Serial.print(message,HEX); Serial.print(F("\t"));
+      message = message | 256;          //  Set the required 9th MSB bit to 1 to indicate it is a checksum
       break;
          
     case 'T':
@@ -89,7 +87,6 @@ void SendIR(char type, uint16_t message)
     Serial.print(F("\nIR Sent! "));
   #endif
 
-  //enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -133,7 +130,7 @@ void PrintBinary(int v, int num_places)
   
   while(num_places)
   {
-    if (v & (0x0001 << num_places-1))
+    if (v & (0x0001 << (num_places-1)))
     {
       Serial.print(F("1"));
     }

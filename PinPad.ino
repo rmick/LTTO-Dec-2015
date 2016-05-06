@@ -34,7 +34,7 @@ void PinPadMode()
     ClearPin;
   }
   
-  char* buttonPressed = GetButtonPress();
+  char const* buttonPressed = GetButtonPress();
   uint8_t numberPressed = atoi(buttonPressed);
 
 
@@ -177,7 +177,7 @@ void ChangePin()
     ClearPin;
   }
   
-  char* buttonPressed = GetButtonPress();
+  char const* buttonPressed = GetButtonPress();
   uint8_t numberPressed = atoi(buttonPressed);
 
   if (digitCount < 4)
@@ -226,7 +226,7 @@ void ConfirmPin()
     ClearPin;
   }
   
-  char* buttonPressed = GetButtonPress();
+  char const* buttonPressed = GetButtonPress();
   uint8_t numberPressed = atoi(buttonPressed);
 
   if (digitCount < 4)

@@ -2,7 +2,7 @@
 //  char Get ButtonPress()
 //  bool GetTouch()
 //  void DrawButton (PosX, PosY, Width, Height, BoxColour(uint16_t), Text(string), TextSize, TextColour(uint16_t) )
-//  void DrawScreen(char* Label, uint16_t BackColour, uint16_t TextColour)
+//  void DrawScreen(char const* Label, uint16_t BackColour, uint16_t TextColour)
 //  void PrintButtonArray()      - for deBug only
 //  int CountDigits(int num)
 
@@ -10,10 +10,41 @@ static int TouchX;
 static int TouchY;
 
 int Buttons [12] [4];
-char* buttonPressed [12];
+char const* buttonPressed [12];
 
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool BeaconOn = FALSE;
+uint32_t startTime = 0;
+uint16_t backColour = 1;
+  
+bool BeaconFlash(bool OnOff)
+{
+  
+  if (OnOff == TRUE)
+  {
+    backColour = tft.readPixel(1,1);
+    BeaconOn = TRUE;
+    startTime = millis();
+    if (decodedIRmessage.TagReceivedBeacon == FALSE)  DrawTextLabel  ( 225,  295, backColour, "*", 2, RED,    0);
+    if (decodedIRmessage.TagReceivedBeacon == TRUE)   DrawTextLabel  ( 225,  295, backColour, "*", 2, GREEN,  0);     // Indicates Tag was received due a hit on the Tx Tagger.
+  }
+  else if (OnOff == FALSE)
+  {
+    if ( (millis() - startTime) >150 && BeaconOn)
+    {
+      backColour = tft.readPixel(1,1);
+      BeaconOn = FALSE;
+      DrawTextLabel  ( 225,  295, backColour, "*", 2, backColour, 0);
+    }
+  }
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
                 String Text, byte TextSize, uint16_t TextColour, uint8_t MaxCharacters) 
@@ -25,7 +56,7 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
   if (BoxColour == 1) BoxColour = tft.readPixel(CursorX, CursorY);
   if (MaxCharacters == 0) MaxCharacters = Text.length();
 
-  ///////////// The problem is that Cursor X is for the text, which is centred and we need a new Variable for BoxX
+  ///////////// TODO: The problem is that Cursor X is for the text, which is centred and we need a new Variable for BoxX
 
   uint16_t BoxPosX;
   // Draw the box
@@ -46,19 +77,22 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
   tft.setCursor(CursorX, CursorY);
   tft.println(Text);
 
+/*
   #ifdef DEBUG
-    Serial.print(F("DeBug DrawTextLabel - Box Width: "));
+    Serial.print(F("\nDrawTextLabel - Box Width: "));
     Serial.print(BoxWidth);
     Serial.print(F(", Box Location: "));
     Serial.print((240-BoxWidth)/2);
     Serial.print(F(", "));
     Serial.println(CursorY-1);
   #endif
+*/
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char* GetButtonPress()
+char const* GetButtonPress()
 {
   if (GetTouch(FALSE))
   {
@@ -150,7 +184,7 @@ TSPoint getPressPosition()
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, uint16_t BoxColour,
-                char* Text, byte TextSize, uint16_t TextColour) 
+                char const* Text, byte TextSize, uint16_t TextColour) 
 {
   // Draw the button
   tft.fillRoundRect(PosX, PosY, Width, Height, 10, BoxColour);
@@ -193,7 +227,7 @@ void DrawButton(uint16_t PosX, uint16_t PosY, uint16_t Width, uint16_t Height, u
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void DrawScreen(char Title, char* Label, uint16_t BackColour, uint16_t TextColour, uint8_t TextSize)
+void DrawScreen(char Title, char const* Label, uint16_t BackColour, uint16_t TextColour, uint8_t TextSize)
 {
   tft.fillScreen(BackColour);
   

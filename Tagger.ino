@@ -15,7 +15,7 @@ void TaggerMode()
 { 
   DrawTaggerScreen();
   
-  char* Action = GetButtonPress();
+  char const* Action = GetButtonPress();
   if      (Action == "Team")      { teamID++;   if (teamID == 4)    teamID = 0;   DrawTextLabel(50, 90,  GREEN, String(teamID),   2, BLACK, 1); }
   else if (Action == "Player")    { playerID++; if (playerID == 9)  playerID = 1; DrawTextLabel(50, 175, GREEN, String(playerID), 2, BLACK, 1); }
   else if (Action == "TagPower")  { tagPower++; if (tagPower == 5)  tagPower = 1; DrawTextLabel(50, 260, GREEN, String(tagPower), 2, BLACK, 1); }
@@ -98,7 +98,9 @@ void DrawTaggerScreen()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("\nDrawTaggerScreen"));
+    #ifdef DEBUG
+      Serial.println(F("\nDrawTaggerScreen"));
+    #endif
     DrawScreen(TAGGER, "TAG MODE", GREEN, BLUE, 3);
     lastState = state;
     DrawButton(  5,  30,  100, 55, WHITE,  "Team",     2, BLACK);
@@ -109,7 +111,6 @@ void DrawTaggerScreen()
     DrawButton(135, 200,  100, 55, RED,    "Shields",  2, GREEN);
     DrawButton(  5, 290,   50, 30, YELLOW, "Scores",   1, BLACK);
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",     2, BLACK);
-    if (deBug) PrintButtonArray();
 
     DrawTextLabel(  50, 90,  GREEN,  String(teamID),       2, BLACK, 1);
     DrawTextLabel(  50, 175, GREEN,  String(playerID),     2, BLACK, 1);
@@ -126,85 +127,30 @@ void DrawTaggerScreenShieldsUp()
 {
   if (lastState != state)
   {
-    if (deBug) Serial.println(F("DrawTaggerScreen-ShieldsUp"));
+    #ifdef DEBUG
+      Serial.println(F("DrawTaggerScreen-ShieldsUp"));
+    #endif
     DrawScreen(TAGGER, "TAG MODE", GREEN, BLUE, 3);
     lastState = state;
     DrawButton(135, 200,  100, 55, RED,    "Shields",  2, GREEN);
-    if (deBug) PrintButtonArray();
     DrawTextLabel( 165, 260, GREEN,  String(shieldsTimer), 3, RED,   2);
   }
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-
-void DecodeTagIR()
-{
-  //if (deBug) Serial.println(F("\nDecodeTagIR"));
-  static byte badMessageCount = 0;  
-
-  byte taggedbyTeamID;
-  byte taggedbyPlayerID;
-  byte taggedbyMegaPower;
-  
-  if (receivedIRmessage.type == 'T')
-  {
-    // Find TeamID of tagger
-    taggedbyTeamID = receivedIRmessage.dataPacket & B01100000;             // TeamID = 1 thru 3  (0 = NoTeams)
-    taggedbyTeamID = taggedbyTeamID >> 5;
-    // Find PlayerID
-    taggedbyPlayerID = (receivedIRmessage.dataPacket & B00011100);         // PlayerID = 1 thru 8
-    taggedbyPlayerID = (taggedbyPlayerID >> 2) + 1;
-    // Find tag Power
-    taggedbyMegaPower = (receivedIRmessage.dataPacket & B00000011)+1;
-    
-    //if (deBug)
-    {
-      Serial.print(F("\n!TAG!"));
-      Serial.print(F("\tTaggedbyTeamID: "));
-      Serial.print(taggedbyTeamID);
-      Serial.print(F("\tTaggedbyPlayerID: "));
-      Serial.print(taggedbyPlayerID);
-      Serial.print(F("\tShotStrength: "));
-      Serial.println(taggedbyMegaPower);
-    }   
-    ProcessTag(taggedbyTeamID, taggedbyPlayerID, taggedbyMegaPower);
-  }
-    
-  else if (receivedIRmessage.type == 'B')
-  {
-    Serial.print(F("-Bcn-"));
-    
-    //  TODO:  Receive a Beacon
-    //  (TeamID 2 bits, Tag Received 1 bit, Tag Strength 2 bits)
-    //  (if TeamID = 0 in a hosted game, then it is a Medic Beacon)
-
-    
-  }
-    
-  else
-  {
-    badMessageCount++;                // TODO: Is this logical here, or am I off with the fairies.
-    Serial.print(F("\nTagger:188 - bad Message Count"));
-    //TODO: Check for a bad 3/6 Tag packet and then flag as a near miss !!
-  }    
-  ClearIRarray();
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProcessTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
+void ProcessRxTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
 {
     if (teamID == taggedTeamID && friendlyFire == FALSE && teamID != 0)
     {
-      ClearIRarray(); 
+      decodedIRmessage.newMessage = FALSE;
       Serial.print(F("\nFriendlyFire"));
       return;
     }
 
     if (shieldsUp == TRUE)
     {
-      ClearIRarray(); 
+      decodedIRmessage.newMessage = FALSE;
       tft.fillScreen(WHITE);
       lastState = NONE;
       DrawTaggerScreenShieldsUp();
@@ -218,7 +164,7 @@ void ProcessTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
     //DrawTaggerScreen();
     playerHealth = playerHealth - taggedMegaPower;
     if (playerHealth <= 255 && playerHealth >= 250) playerHealth = 0;
-    DrawTextLabel( 170, 155, YELLOW, String(playerHealth), 3, BLACK, 2);
+    if (state == TAGGER) DrawTextLabel( 170, 155, YELLOW, String(playerHealth), 3, BLACK, 2);
 
     //Update the scoreGrid
     byte currentHitIndex;
@@ -256,7 +202,7 @@ void DisplayScores()
     }
   }
 
-  char* Action = GetButtonPress();
+  char const* Action = GetButtonPress();
   if (Action == "EXIT")  { scoresActive = FALSE; state = TAGGER; lastState = NONE; DrawTaggerScreen(); Serial.print(F("ExitScores")); }
 
   

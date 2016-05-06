@@ -1,13 +1,26 @@
 void setup()
 {
   Serial.begin(250000);
-  if (IR_LED != 11) pinMode (IR_LED, OUTPUT); else pinMode (IR_LED, INPUT);
+  pinMode (IR_LED, OUTPUT);
   pinMode (IR_RECEIVE_PIN, INPUT_PULLUP);
   enableInterrupt (IR_RECEIVE_PIN, ISRchange, CHANGE);
-  receivedIRmessage.type = '_';
   Serial.println(F("\nHere we go boys...."));
+
+  #ifdef DEBUG
+    pinMode (DE_BUG_TIMING_PIN, OUTPUT);         // This is my DeBug timing pin, fed to the Logic Analyser
+    digitalWrite(DE_BUG_TIMING_PIN, LOW);
+  #endif
   
-  /////////////////Setup the LCD screen////////////////////////
+  ////---------------------------------------------------------------------------------------------------------
+  //  Set Timer0 interrupt
+  
+  // Timer0 is used for millis(), so this routine piggybacks on that by using a mid-time interupt.
+    OCR0A = 0xAF;
+    TIMSK0 |= _BV(OCIE0A);
+  
+  
+  ////---------------------------------------------------------------------------------------------------------
+  //  Set up the LCD screen
   
   tft.reset();
   uint16_t identifier = tft.readID();
@@ -16,7 +29,9 @@ void setup()
   tft.setRotation(180);
   tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
 
-  //Initialises the EEPROM on first upload/run.
+
+  ////---------------------------------------------------------------------------------------------------------
+  //  Initialises the EEPROM on first upload/run.
   
   if (maxReloads == 255)   { maxReloads =    0;  EEPROM.write(eeMAX_RELOADS, 0);  }
   if (medicDelay == 255)   { medicDelay =   10;  EEPROM.write(eeMEDIC_DELAY, 10); }
@@ -30,12 +45,6 @@ void setup()
                              pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 3);
                              pinCode[3] = 4;     EEPROM.write(eePIN_CODE+3, 4);  }
 
-
-  ////////////////////// TIMER 0 INTERUPT ///////////////////////////
-  
-  // Timer0 is used for mills(), so this routine piggybacks on that by using a mid-time interupt.
-  OCR0A = 0xAF;
-  TIMSK0 |= _BV(OCIE0A);
 
 
   ////////////////////// TIMER 2 38kHz Oscilator/////////////////////
