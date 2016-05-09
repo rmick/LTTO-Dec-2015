@@ -37,6 +37,7 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define  MAGENTA  0xF81F
 #define  YELLOW   0xFFE0
 #define  WHITE    0xFFFF
+#define  GREY     0x5050
 
 //////////////////// Global Constants //////////////////////////////
 
@@ -153,6 +154,7 @@ bool touchGood = 0;
 
     static uint8_t  byteCount = 0;                                   // Used to keep track of which datapacket is what.
 
-
+    uint8_t   assignToTeam = 0;
+    uint8_t   assignToPlayer = 0;
 
     

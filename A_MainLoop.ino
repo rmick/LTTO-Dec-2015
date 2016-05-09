@@ -41,20 +41,20 @@ void loop()
               break;
 
             case 'P':
-              Serial.print(F("\n\t\t------------------\n\t\tPacket - 0x"));
-              Serial.print(decodedIRmessage.PacketByte, HEX);
+              //Serial.print(F("\n\t\t------------------\n\t\tPacket - 0x"));
+              //Serial.print(decodedIRmessage.PacketByte, HEX);
               ProcessRxPacket();
               break;
 
             case 'D':
-              Serial.print(F("\n\t\t\tData - 0x"));
-              Serial.print(decodedIRmessage.DataByte, HEX);
+              //Serial.print(F("\n\t\t\tData - 0x"));
+              //Serial.print(decodedIRmessage.DataByte, HEX);
               ProcessRxDataByte();
               break;
 
             case 'C':
-              Serial.print(F("\n\t\tCheckSum - 0x"));
-              Serial.print(decodedIRmessage.rawDataPacket & B11111111, HEX); 
+              //Serial.print(F("\n\t\tCheckSum - 0x"));
+              //Serial.print(decodedIRmessage.rawDataPacket & B11111111, HEX); 
               ProcessRxCheckSum();
               break;   
         }
@@ -70,17 +70,7 @@ void loop()
     {
       char keyIn = Serial.read();
       switch (keyIn)
-        {
-        case '1' :
-          AnnounceCustomGame();
-          break;
-        case '2' :
-          AssignPlayer();
-          break;
-        case '3' :
-          StartCountDown();
-          break;
-            
+        {   
         case 'b':
           Serial.println();
           Serial.println(F("_____________________________"));
@@ -110,6 +100,8 @@ void loop()
           break;
         case 'g' :
           debugStartHost = TRUE;
+          assignToTeam = 1;
+          assignToPlayer = 1;
           break;
         case 'c' :
           debugStartHost = FALSE;

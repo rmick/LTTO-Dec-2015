@@ -69,7 +69,7 @@ bool DecodeIR()
     decodedIRmessage.PlayerID = (decodedIRmessage.rawDataPacket & B00011100);         // PlayerID = 1 thru 8
     decodedIRmessage.PlayerID = (decodedIRmessage.PlayerID >> 2) + 1;
     // Find tag Power
-    decodedIRmessage.ShotStrength = (decodedIRmessage.rawDataPacket & B00000011)+1;      // Tag strength = 1 to 4
+    decodedIRmessage.ShotStrength = (decodedIRmessage.rawDataPacket & B00000011)+1;   // Tag strength = 1 to 4
     
   }
 
@@ -126,7 +126,6 @@ bool gameIDmatch = FALSE;
 void ProcessRxPacket()
 {
     Serial.print(F("\nProcessRxPacket"));
-    //Serial.print(decodedIRmessage.rawDataPacket);
     CheckSumRx = 0;
     CheckSumRx = CheckSumRx + decodedIRmessage.PacketByte;
     gameIDmatch = FALSE;
@@ -164,7 +163,10 @@ void ProcessRxDataByte()
             Serial.print(F("TaggerID = "));
             Serial.print(taggerID, HEX);
           }
-          if (byteCount == 3)                                                     ; // This is Team Request, do it later ! 
+          if (byteCount == 3)
+          {
+            if(decodedIRmessage.DataByte == 0) TeamAndPlayerAutoSelect();            ; // This is Team Request, do it later ! 
+          }
           
      }
     

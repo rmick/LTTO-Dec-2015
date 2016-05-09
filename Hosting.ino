@@ -11,10 +11,14 @@ void HostMode()
   if(debugStartHost) hostingActive = TRUE;
     
   char const* Action = GetButtonPress();
-  if      (Action == "Host 2 Teams")    hostingActive = TRUE;
-  else if (Action == "Assign Player")   AssignPlayer();
-  else if (Action == "Start Game")      StartCountDown();
-  else if (Action == "EXIT")            state = CONFIG2;
+  if      (Action == "Host 2 Teams")
+  {
+    assignToTeam = 1;
+    assignToPlayer = 1;
+    hostingActive = TRUE;
+  }
+  else if (Action == "Start Game")   AssignPlayer();
+  else if (Action == "EXIT")         state = CONFIG2;
 
 
   if (millis() - hostTimer > 1500 && hostingActive)
@@ -40,8 +44,8 @@ void DrawHostMode()
     #endif
     DrawScreen(HOST, "HOST GAME", MAGENTA, WHITE, 3);
     DrawButton( 20,  50, 200, 55, BLACK,  "Host 2 Teams",   2, WHITE);
-    DrawButton( 20, 120, 200, 55, BLACK,  "Assign Player",  2, WHITE);
-    DrawButton( 20, 210, 200, 55, BLACK,  "Start Game",      2, WHITE);
+    DrawButton( 20, 120, 200, 55, BLACK,  "",               2, WHITE);
+    DrawButton( 20, 210, 200, 55, BLACK,  "Start Game",     2, GREY );
     DrawButton( 70, 290, 100, 30, YELLOW, "EXIT",           2, BLACK);
 
     debugStartHost = FALSE;
@@ -54,7 +58,8 @@ void DrawHostMode()
   //  Hosting variables
 
   uint8_t   checkSumCalc = 0;
-  uint8_t taggerID = 0;
+  uint8_t   taggerID = 0;
+ 
 
   ////--------------------------------------------------
   //  Host 2Teams Game (captured packets from LTTO host)
@@ -87,7 +92,45 @@ void AnnounceCustomGame()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+byte assignToTeamAndPlayer = 0;
 
+void TeamAndPlayerAutoSelect()
+{
+  Serial.print(F("\n\tAssignToTeam = "));
+  Serial.print(assignToTeam);
+  Serial.print(F("\n\n\tAssignToPlayer = "));
+  Serial.print(assignToPlayer);
+  
+  
+  assignToTeamAndPlayer = assignToTeam << 3;
+  Serial.print(F("\n--------------\n\tAssignToTeamAndPlayer = "));          //  TeamID is 1 based
+  Serial.print(assignToTeamAndPlayer, BIN);
+  
+  assignToTeamAndPlayer = assignToTeamAndPlayer + (assignToPlayer-1);       //  PlayerID is 0 based
+  
+  Serial.print(F("\n\tAssignToTeamAndPlayer = "));
+  Serial.print(assignToTeamAndPlayer, BIN);
+  
+ 
+  
+  assignToPlayer++;
+
+  if (assignToPlayer > 8)
+  {
+    if (assignToTeam == 2)  StartCountDown();
+    else
+    {
+      assignToTeam++;
+      assignToPlayer = 1;
+    } 
+  }
+  
+ 
+  
+  
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void AssignPlayer()
 {
@@ -95,7 +138,7 @@ void AssignPlayer()
   SendIR('P', 0x01);
   SendIR('D', hostedGameID);
   SendIR('D', taggerID);
-  SendIR('D', B11010);            // This is the team/player byte !!! ( need to increment this with each join)
+  SendIR('D', assignToTeamAndPlayer);            // This is the team/player byte !!! ( need to increment this with each join)
   SendIR('C', checkSumCalc);
 }
 
@@ -104,8 +147,9 @@ void AssignPlayer()
 void StartCountDown()
 {
   hostingActive = FALSE;
-  static byte CountDownTime = 0x0C;           //TODO: his needs to be BCD not HEX
-  Serial.println(F("\nStartCountDown"));
+  static byte CountDownTime = 0x0A;           //TODO: his needs to be BCD not HEX
+  Serial.print(F("\nCountDown : "));
+  Serial.print(CountDownTime);
   SendIR('P', 0x00);
   SendIR('D', hostedGameID);
   SendIR('D', CountDownTime);
