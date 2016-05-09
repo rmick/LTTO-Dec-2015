@@ -156,5 +156,6 @@ bool touchGood = 0;
 
     uint8_t   assignToTeam = 0;
     uint8_t   assignToPlayer = 0;
+    uint8_t   CheckSumRx = 0;
 
     

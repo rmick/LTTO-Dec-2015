@@ -17,7 +17,7 @@ void HostMode()
     assignToPlayer = 1;
     hostingActive = TRUE;
   }
-  else if (Action == "Start Game")   AssignPlayer();
+  else if (Action == "Start Game")   StartCountDown();
   else if (Action == "EXIT")         state = CONFIG2;
 
 
@@ -26,12 +26,9 @@ void HostMode()
     AnnounceCustomGame();
     hostTimer = millis();
   }
+
+  if (decodedIRmessage.CheckSumOK == TRUE)  ActionCompletePacketandData();
 }
-
-
-
-
-
  
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +73,7 @@ void DrawHostMode()
 ///////////////////////////////////////////////////////////////////////////////
 
 void AnnounceCustomGame()
- {
+{
   Serial.println(F("\nAnnounce 2 Teams Game"));
   SendIR('P', hostedGameType);
   SendIR('D', hostedGameID);
@@ -91,28 +88,58 @@ void AnnounceCustomGame()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+bool gameIDmatch = FALSE; 
 
+
+void ActionRequestJoinGame()
+{
+          Serial.print(F("\n\tActionRequestJoinGame: ")); Serial.print(byteCount);
+          if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)     { gameIDmatch = TRUE; Serial.print(F("\ngameIDmatched")); }
+          else if (byteCount == 2)                                                  { taggerID = decodedIRmessage.DataByte; Serial.print(F("\nTaggerID: ")); Serial.print(taggerID); }
+          else if (byteCount == 3)                                                  if(decodedIRmessage.DataByte == 0) { TeamAndPlayerAutoSelect(); Serial.print(F("\nAutoSelecting")); }
+          // now wait for the CheckSum and then AssignPlayer() 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+
+void ActionCompletePacketandData()
+{
+
+  if (decodedIRmessage.PacketName == "RequestJoinGame" && gameIDmatch == TRUE && taggerID != 0)
+    {
+      Serial.print (F("\nWe have a valid join request"));
+      AssignPlayer();
+      decodedIRmessage.PacketName = "null1";
+    }
+    
+  if (decodedIRmessage.PacketName == "AckPlayerAssign" && gameIDmatch == TRUE && taggerID != 0)
+    {
+      //TODO; ActionAcknowledgePlayerAssign();
+      decodedIRmessage.PacketName = "null2";
+    }
+    //decodedIRmessage.PacketName = "null";
+}    
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+void ActionAcknowledgePlayerAssign()
+{
+  Serial.print(F("\nWTF ~!!!!~"));
+  
+}
+*/
+
+///////////////////////////////////////////////////////////////////////////////
 byte assignToTeamAndPlayer = 0;
 
-void TeamAndPlayerAutoSelect()
+
+void TeamAndPlayerAutoSelect()              //TODO: Need a way to stop Team X assignments via user intervention (eg. Only 4 players on Team 1 instead of 8)
 {
-  Serial.print(F("\n\tAssignToTeam = "));
-  Serial.print(assignToTeam);
-  Serial.print(F("\n\n\tAssignToPlayer = "));
-  Serial.print(assignToPlayer);
-  
-  
-  assignToTeamAndPlayer = assignToTeam << 3;
-  Serial.print(F("\n--------------\n\tAssignToTeamAndPlayer = "));          //  TeamID is 1 based
-  Serial.print(assignToTeamAndPlayer, BIN);
+  assignToTeamAndPlayer = assignToTeam << 3;                                //  TeamID is 1 based
   
   assignToTeamAndPlayer = assignToTeamAndPlayer + (assignToPlayer-1);       //  PlayerID is 0 based
-  
-  Serial.print(F("\n\tAssignToTeamAndPlayer = "));
-  Serial.print(assignToTeamAndPlayer, BIN);
-  
- 
-  
   assignToPlayer++;
 
   if (assignToPlayer > 8)
@@ -123,22 +150,18 @@ void TeamAndPlayerAutoSelect()
       assignToTeam++;
       assignToPlayer = 1;
     } 
-  }
-  
- 
-  
-  
+  } 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AssignPlayer()
+void AssignPlayer()                              // This is the reply to:    0x010 - Request Join Game
 {
   Serial.println(F("\nAssignPlayer - "));
   SendIR('P', 0x01);
   SendIR('D', hostedGameID);
   SendIR('D', taggerID);
-  SendIR('D', assignToTeamAndPlayer);            // This is the team/player byte !!! ( need to increment this with each join)
+  SendIR('D', assignToTeamAndPlayer);
   SendIR('C', checkSumCalc);
 }
 

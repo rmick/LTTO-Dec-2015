@@ -95,6 +95,8 @@ bool DecodeIR()
   {
     byteCount = 0;
     decodedIRmessage.PacketByte = decodedIRmessage.rawDataPacket & B11111111;
+    CheckSumRx = 0;
+    decodedIRmessage.CheckSumOK == FALSE;
   }
 
   else if (decodedIRmessage.type == 'D')
@@ -118,11 +120,6 @@ bool DecodeIR()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t CheckSumRx = 0;
-
-bool gameIDmatch = FALSE; 
-
-
 void ProcessRxPacket()
 {
     Serial.print(F("\nProcessRxPacket"));
@@ -130,16 +127,18 @@ void ProcessRxPacket()
     CheckSumRx = CheckSumRx + decodedIRmessage.PacketByte;
     gameIDmatch = FALSE;
     
-    switch (decodedIRmessage.PacketByte)
+    switch (decodedIRmessage.PacketByte)                      // Currently only implementing messages relating to Hosting and ignoring others.
     {
         case 0x10:
           decodedIRmessage.PacketName = "RequestJoinGame";
-           Serial.print(F("\nRx'd RequestJoinGame"));
+           Serial.print(F("\nRx'd RequestJoinGame : "));
+           Serial.print(decodedIRmessage.PacketName);
           break;
         case 0x11:
           decodedIRmessage.PacketName = "AckPlayerAssign";
           Serial.print(F("\nAckPlayerAssign"));
           break;
+        
     }
 }
 
@@ -148,34 +147,9 @@ void ProcessRxPacket()
 void ProcessRxDataByte()
 {
     CheckSumRx = CheckSumRx + decodedIRmessage.rawDataPacket;
-    
-    if (decodedIRmessage.PacketName == "RequestJoinGame")
-     {
-          Serial.print(F("\nDataByte"));
-          if (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)
-          {
-            gameIDmatch = TRUE;
-            Serial.print(F("gameID matched"));
-          }
-          if (byteCount == 2)
-          {
-            taggerID = decodedIRmessage.DataByte;
-            Serial.print(F("TaggerID = "));
-            Serial.print(taggerID, HEX);
-          }
-          if (byteCount == 3)
-          {
-            if(decodedIRmessage.DataByte == 0) TeamAndPlayerAutoSelect();            ; // This is Team Request, do it later ! 
-          }
-          
-     }
-    
-    
-    switch (decodedIRmessage.rawDataPacket)
-    {
-        //case 
-    }
-    
+    Serial.print(F("\t")); Serial.print(decodedIRmessage.PacketName);
+    if (decodedIRmessage.PacketName == "RequestJoinGame")   ActionRequestJoinGame();
+    //if (decodedIRmessage.PacketName == "AckPlayerAssign")   ActionAcknowledgePlayerAssign();
 }
 
 
@@ -183,27 +157,9 @@ void ProcessRxDataByte()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ProcessRxCheckSum()
-{
-    //TODO: Move this stuff to the HOSTING module !
-    // All this should do is set a flag based on 
-    //if(CheckSumRx == decodedIRmessage.CheckSumRxByte)
-    
-    
-    if (decodedIRmessage.PacketName == "RequestJoinGame" && CheckSumRx == decodedIRmessage.CheckSumRxByte && gameIDmatch == TRUE && taggerID != 0)
-    {
-      Serial.print (F("\nWe have a valid join request"));
-      decodedIRmessage.PacketName = "null";
-      AssignPlayer();
-      
-
-
-      //TODO; Acknowledge Player Assignment
-    }
-    if (decodedIRmessage.PacketName == "AckPlayerAssign" && CheckSumRx == decodedIRmessage.CheckSumRxByte && gameIDmatch == TRUE && taggerID != 0)
-    {
-      //TODO; Acknowledge Player Assignment
-    }
-    
+{  
+    if (CheckSumRx == decodedIRmessage.CheckSumRxByte)  decodedIRmessage.CheckSumOK = TRUE;
+    else                                                decodedIRmessage.CheckSumOK = FALSE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
