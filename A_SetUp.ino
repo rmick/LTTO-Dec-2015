@@ -24,10 +24,16 @@ void setup()
   
   tft.reset();
   uint16_t identifier = tft.readID();
-  //if (deBug) Serial.println(identifier);
-  tft.begin(identifier); 
-  tft.setRotation(180);
+  Serial.print(F("LCD driver : "));
+  Serial.println(identifier);
+  if (identifier == 0x0) identifier = 0x7789;
+  tft.begin(identifier);
+
+  if (identifier == 0x7789) tft.setRotation(2);
+  else tft.setRotation(0);
+
   tft.fillScreen(BLACK);            // It fails first time, so do it here before we start the program
+  
 
 
   ////---------------------------------------------------------------------------------------------------------

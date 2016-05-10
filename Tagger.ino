@@ -8,7 +8,6 @@
 //  void GameOver()
 
 
-/*
 byte tagPower = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,5 +217,3 @@ void GameOver()
   DrawTextLabel ( 0, 180, BLACK, "Over", 6, RED, 0);
 }
 
-
-*/

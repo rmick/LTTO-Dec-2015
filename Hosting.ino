@@ -74,7 +74,7 @@ void DrawHostMode()
 
 void AnnounceCustomGame()
 {
-  Serial.println(F("\nAnnounce 2 Teams Game"));
+  Serial.println(F("\n\tAnnounce 2 Teams Game"));
   SendIR('P', hostedGameType);
   SendIR('D', hostedGameID);
   SendIR('D', hostedGameTime);
@@ -91,13 +91,12 @@ void AnnounceCustomGame()
 bool gameIDmatch = FALSE; 
 
 
-void ActionRequestJoinGame()
+void ActionRequestJoinGameDataByte()
 {
-          Serial.print(F("\n\tActionRequestJoinGame: ")); Serial.print(byteCount);
-          if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)     { gameIDmatch = TRUE; Serial.print(F("\ngameIDmatched")); }
-          else if (byteCount == 2)                                                  { taggerID = decodedIRmessage.DataByte; Serial.print(F("\nTaggerID: ")); Serial.print(taggerID); }
-          else if (byteCount == 3)                                                  if(decodedIRmessage.DataByte == 0) { TeamAndPlayerAutoSelect(); Serial.print(F("\nAutoSelecting")); }
-          // now wait for the CheckSum and then AssignPlayer() 
+    if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)     gameIDmatch = TRUE;
+    else if (byteCount == 2)                                                  taggerID = decodedIRmessage.DataByte;
+    else if (byteCount == 3)                                                  if(decodedIRmessage.DataByte == 0) TeamAndPlayerAutoSelect();
+    // now wait for the CheckSum and then AssignPlayer() 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,32 +105,48 @@ void ActionRequestJoinGame()
 
 void ActionCompletePacketandData()
 {
-
-  if (decodedIRmessage.PacketName == "RequestJoinGame" && gameIDmatch == TRUE && taggerID != 0)
+Serial.print(F("\nCheckSum correct !"));
+  if      (decodedIRmessage.PacketName == "RequestJoinGame" && gameIDmatch == TRUE && taggerID != 0)     AssignPlayer();
+  else if (decodedIRmessage.PacketName == "AckPlayerAssign" && gameIDmatch == TRUE && taggerID != 0)
     {
-      Serial.print (F("\nWe have a valid join request"));
-      AssignPlayer();
-      decodedIRmessage.PacketName = "null1";
+      CheckTaggerAssignedCorrectly();
+      //TOO: Now add it to the list of known taggers for Countdown flags
+      Serial.print(F("\n\tThe tagger has Ack'd our AssignPlayer()"));
+      //SendAckToTagger();
     }
-    
-  if (decodedIRmessage.PacketName == "AckPlayerAssign" && gameIDmatch == TRUE && taggerID != 0)
-    {
-      //TODO; ActionAcknowledgePlayerAssign();
-      decodedIRmessage.PacketName = "null2";
-    }
-    //decodedIRmessage.PacketName = "null";
 }    
 ///////////////////////////////////////////////////////////////////////////////
+bool AckPlayerAssignOK = FALSE;
 
-/*
-void ActionAcknowledgePlayerAssign()
+void ActionAcknowledgePlayerAssignDataByte()
 {
-  Serial.print(F("\nWTF ~!!!!~"));
-  
+   Serial.print(F("\tyep"));
+   if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)
+   {
+    if(hostedGameID == decodedIRmessage.DataByte) gameIDmatch = TRUE;
+    Serial.print(F(" -1"));
+   }
+   else if (byteCount == 2)                                                  
+   {
+    if (taggerID == decodedIRmessage.DataByte) AckPlayerAssignOK = TRUE;
+    Serial.print(F(" -2"));
+   }
+   // now wait for the CheckSum and then CheckTaggerAssignedCorrectly() 
 }
-*/
+
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void CheckTaggerAssignedCorrectly()
+{
+  if (gameIDmatch && AckPlayerAssignOK) Serial.print(F("Got 'im !"));
+  else Serial.print(F("\nNope !!!"));
+}
+
+
+
+
+
 byte assignToTeamAndPlayer = 0;
 
 
@@ -170,15 +185,15 @@ void AssignPlayer()                              // This is the reply to:    0x0
 void StartCountDown()
 {
   hostingActive = FALSE;
-  static byte CountDownTime = 0x0A;           //TODO: his needs to be BCD not HEX
+  static byte CountDownTime = 0x0A;           //  TODO: his needs to be BCD not HEX
   Serial.print(F("\nCountDown : "));
   Serial.print(CountDownTime);
   SendIR('P', 0x00);
   SendIR('D', hostedGameID);
   SendIR('D', CountDownTime);
-  SendIR('D', 0x08);
-  SendIR('D', 0x08);
-  SendIR('D', 0x00);
+  SendIR('D', 0x08);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
+  SendIR('D', 0x08);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
+  SendIR('D', 0x00);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
   SendIR('C', checkSumCalc);
   CountDownTime--;
   delay (1000);

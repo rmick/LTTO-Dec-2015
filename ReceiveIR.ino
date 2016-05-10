@@ -122,17 +122,17 @@ bool DecodeIR()
 
 void ProcessRxPacket()
 {
-    Serial.print(F("\nProcessRxPacket"));
     CheckSumRx = 0;
     CheckSumRx = CheckSumRx + decodedIRmessage.PacketByte;
     gameIDmatch = FALSE;
+    taggerID = 0;
+    AckPlayerAssignOK = FALSE;
     
     switch (decodedIRmessage.PacketByte)                      // Currently only implementing messages relating to Hosting and ignoring others.
     {
         case 0x10:
           decodedIRmessage.PacketName = "RequestJoinGame";
-           Serial.print(F("\nRx'd RequestJoinGame : "));
-           Serial.print(decodedIRmessage.PacketName);
+          Serial.print(F("\nRx'd RequestJoinGame : "));
           break;
         case 0x11:
           decodedIRmessage.PacketName = "AckPlayerAssign";
@@ -147,9 +147,8 @@ void ProcessRxPacket()
 void ProcessRxDataByte()
 {
     CheckSumRx = CheckSumRx + decodedIRmessage.rawDataPacket;
-    Serial.print(F("\t")); Serial.print(decodedIRmessage.PacketName);
-    if (decodedIRmessage.PacketName == "RequestJoinGame")   ActionRequestJoinGame();
-    //if (decodedIRmessage.PacketName == "AckPlayerAssign")   ActionAcknowledgePlayerAssign();
+    if (decodedIRmessage.PacketName == "RequestJoinGame")   ActionRequestJoinGameDataByte();
+    if (decodedIRmessage.PacketName == "AckPlayerAssign")   ActionAcknowledgePlayerAssignDataByte();
 }
 
 

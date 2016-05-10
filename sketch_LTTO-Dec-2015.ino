@@ -5,7 +5,12 @@
 #include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <EEPROM.h>
+
 #include <SWTFT.h>
+SWTFT tft;
+
+//#include <MCUFRIEND_kbv.h>
+//MCUFRIEND_kbv tft;
 
 ////////////////////// Setup Touchscreen ////////////////////////
 
@@ -14,7 +19,7 @@
 #define YM 7
 #define XP 6
 
-SWTFT tft;    //Defines all control and data lines for LCD shield.
+//    //Defines all control and data lines for LCD shield.
 
 // For better pressure precision, we need to know the resistance
 // between X+ and X- Use any multimeter to read it
