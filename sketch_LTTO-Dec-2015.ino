@@ -46,8 +46,8 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 //////////////////// Global Constants //////////////////////////////
 
-const bool TRUE =  1;
-const bool FALSE = 0;
+//const bool true =  1;
+//const bool false = 0;
 
 const byte eeMEDIC_COUNT =   0;
 const byte eeMEDIC_DELAY =   2; 
@@ -76,8 +76,8 @@ byte maxReloads =   EEPROM.read(eeMAX_RELOADS);
 byte shieldsTimer = EEPROM.read(eeSHIELDS_TIMER);
 byte playerHealth = 50;
 byte tagCount = reloadAmount;
-bool shieldsUp = FALSE;
-bool friendlyFire = FALSE;
+bool shieldsUp = false;
+bool friendlyFire = false;
 byte scoreGrid[25];       // One extra so we can ignore base0 issues
 
 const byte IR_LED             = 13;
@@ -106,7 +106,7 @@ const byte DE_BUG_TIMING_PIN  = 12;
      int badMessage_non3_6Header = 0;
 
 
-      bool debugStartHost = FALSE;
+      bool debugStartHost = false;
 
 
 /////////////////////// State machine Constants ////////////////////////////
@@ -138,7 +138,7 @@ bool touchGood = 0;
 
     struct decodedIR             //  Most of these are accessed via ISR so must be declared volatile
     {
-      volatile bool           newMessage;           //  True = Yes there is a new message waiting
+      volatile bool           newMessage;           //  true = Yes there is a new message waiting
       volatile char           type;                 //  T, B, P, D, C
       volatile unsigned int   rawDataPacket;        //  The undecoded datapacket
       volatile unsigned int   messageOverwritten;   //  This counts messages that are overwritten by a new packet before being read by the main loop if(DecodeIR() ) call
@@ -146,13 +146,13 @@ bool touchGood = 0;
       unsigned int            PlayerID;             //  Player 1 thru 8
       unsigned int            ShotStrength;         //  Mega = 1 thru 4
       // TODO: These are yet to be implemented in DecodeIR()
-      bool                    TagReceivedBeacon;    //  True = Beacon sent due to Tagger being tagged (confirmation)
+      bool                    TagReceivedBeacon;    //  true = Beacon sent due to Tagger being tagged (confirmation)
       int                     PacketByte;           //  The undecoded Packet number in Hex
       String                  PacketName;           //  The simple name for the packet (e.g. Announce Game)  - source   wiki.lazerswarm.com
       String                  DataType;             //  What the current DataByte contains (e.g. GameID, TaggerID, ShieldTime, PackedByte1, etc)
       long int                DataByte;             //  Data Byte (in Hex)
       uint8_t                 CheckSumRxByte;       //  CheckSum value (in Hex)
-      bool                    CheckSumOK;           //  True = The Checksum matches the data packets
+      bool                    CheckSumOK;           //  true = The Checksum matches the data packets
     };
 
     decodedIR decodedIRmessage;

@@ -37,7 +37,7 @@ void loop()
               break;
             
             case 'B':
-              BeaconFlash(TRUE);
+              BeaconFlash(true);
               break;
 
             case 'P':
@@ -58,10 +58,10 @@ void loop()
               ProcessRxCheckSum();
               break;   
         }
-        decodedIRmessage.newMessage = FALSE;
+        decodedIRmessage.newMessage = false;
  
     }   
-    BeaconFlash(FALSE);
+    BeaconFlash(false);
 
 
 ////////////////////////////////// DeBug Terminal access /////////////////////////////////////////
@@ -99,12 +99,12 @@ void loop()
           state = HOST;
           break;
         case 'g' :
-          debugStartHost = TRUE;
+          debugStartHost = true;
           assignToTeam = 1;
           assignToPlayer = 1;
           break;
         case 'c' :
-          debugStartHost = FALSE;
+          debugStartHost = false;
           StartCountDown();
           break;  
         case 'm' :

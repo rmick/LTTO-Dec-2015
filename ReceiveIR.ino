@@ -5,7 +5,7 @@ void CreateIRmessage()                              //  TODO: Currently not chec
   if (irPacketLength < 6)                           //  The message was incomplete.
     { 
       decodedIRmessage.type = 's';  
-      decodedIRmessage.newMessage = TRUE;        
+      decodedIRmessage.newMessage = true;        
       return; 
     }       
 
@@ -13,7 +13,7 @@ void CreateIRmessage()                              //  TODO: Currently not chec
   else 
   {
     decodedIRmessage.type = 'h';  
-    decodedIRmessage.newMessage = TRUE;
+    decodedIRmessage.newMessage = true;
     return;
   }
   
@@ -26,7 +26,7 @@ void CreateIRmessage()                              //  TODO: Currently not chec
     else if (irPacketLength > 12 && messageIR[3] == 6 && irPacketLength < 15)  decodedIRmessage.type = 'B';          // Beacon - only beacons have 3/6/6 header !!
     else    {
               decodedIRmessage.type = 'x';  
-              decodedIRmessage.newMessage = TRUE;      
+              decodedIRmessage.newMessage = true;      
               return; 
              }
  
@@ -50,7 +50,7 @@ void CreateIRmessage()                              //  TODO: Currently not chec
   ////---------------------------------------------------------------------------------------------------------
   //  Tidy up and go home
 
-    decodedIRmessage.newMessage = TRUE;                                   // Set the flag to say there is a new message to decode.
+    decodedIRmessage.newMessage = true;                                   // Set the flag to say there is a new message to decode.
     digitalWrite(DE_BUG_TIMING_PIN, LOW);
 }
 
@@ -58,7 +58,7 @@ void CreateIRmessage()                              //  TODO: Currently not chec
 
 bool DecodeIR()
 {
-  if (decodedIRmessage.newMessage == FALSE) return FALSE;
+  if (decodedIRmessage.newMessage == false) return false;
   
   if (decodedIRmessage.type == 'T')
   {
@@ -85,7 +85,7 @@ bool DecodeIR()
     decodedIRmessage.TagReceivedBeacon = (decodedIRmessage.rawDataPacket & B00100);   // Sets flag for whether the beacon was sent because of receiving a tag.
     decodedIRmessage.TagReceivedBeacon = (decodedIRmessage.TagReceivedBeacon >> 2);
     // Find tag Power
-    decodedIRmessage.ShotStrength = (decodedIRmessage.rawDataPacket & B00011)+1;      // Tag strength = 1 to 4  - MUST be Zero if TagBeacon flag above is FALSE.
+    decodedIRmessage.ShotStrength = (decodedIRmessage.rawDataPacket & B00011)+1;      // Tag strength = 1 to 4  - MUST be Zero if TagBeacon flag above is false.
 
     //TODO:  Implement Zone Beacons and LTAR beacons   www.wiki.lazerswarm.com/wiki/Beacon_Signature.html
     //  (if TeamID = 0 in a hosted game, then it is a Medic Beacon)
@@ -96,7 +96,7 @@ bool DecodeIR()
     byteCount = 0;
     decodedIRmessage.PacketByte = decodedIRmessage.rawDataPacket & B11111111;
     CheckSumRx = 0;
-    decodedIRmessage.CheckSumOK == FALSE;
+    decodedIRmessage.CheckSumOK == false;
   }
 
   else if (decodedIRmessage.type == 'D')
@@ -114,8 +114,8 @@ bool DecodeIR()
   else if (decodedIRmessage.type == 'x')   badMessage_InvalidPacketType++;
   else if (decodedIRmessage.type == 'h')   badMessage_non3_6Header++;
 
-  decodedIRmessage.newMessage = FALSE;
-  return TRUE;
+  decodedIRmessage.newMessage = false;
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,9 +124,9 @@ void ProcessRxPacket()
 {
     CheckSumRx = 0;
     CheckSumRx = CheckSumRx + decodedIRmessage.PacketByte;
-    gameIDmatch = FALSE;
+    gameIDmatch = false;
     taggerID = 0;
-    AckPlayerAssignOK = FALSE;
+    AckPlayerAssignOK = false;
     
     switch (decodedIRmessage.PacketByte)                      // Currently only implementing messages relating to Hosting and ignoring others.
     {
@@ -157,8 +157,8 @@ void ProcessRxDataByte()
 
 void ProcessRxCheckSum()
 {  
-    if (CheckSumRx == decodedIRmessage.CheckSumRxByte)  decodedIRmessage.CheckSumOK = TRUE;
-    else                                                decodedIRmessage.CheckSumOK = FALSE;
+    if (CheckSumRx == decodedIRmessage.CheckSumRxByte)  decodedIRmessage.CheckSumOK = true;
+    else                                                decodedIRmessage.CheckSumOK = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

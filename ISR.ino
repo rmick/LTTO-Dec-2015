@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const byte  ARRAY_LENGTH = 28;
+//const byte  ARRAY_LENGTH = 28;
+const byte  ARRAY_LENGTH = 80;
 int8_t      messageIR [ARRAY_LENGTH];
 static int16_t receiveMilliTimer = 32767;
 const byte IR_TIME_OUT = 9;          //  This is the length of break to look for, to indicate end of packet.
@@ -83,7 +84,7 @@ SIGNAL(TIMER0_COMPA_vect)
       #ifdef DEBUG
         digitalWrite(DE_BUG_TIMING_PIN, HIGH);
       #endif
-      if (( decodedIRmessage.newMessage = FALSE) ) decodedIRmessage.messageOverwritten++;
+      if (( decodedIRmessage.newMessage = false) ) decodedIRmessage.messageOverwritten++;
       
       receiveMilliTimer = 32767;
       irPacketLength = countISR;

@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-static bool hostingActive = FALSE;
+static bool hostingActive = false;
 
 
 void HostMode()
@@ -8,14 +8,14 @@ void HostMode()
   
   static unsigned long hostTimer = millis();
 
-  if(debugStartHost) hostingActive = TRUE;
+  if(debugStartHost) hostingActive = true;
     
   char const* Action = GetButtonPress();
   if      (Action == "Host 2 Teams")
   {
     assignToTeam = 1;
     assignToPlayer = 1;
-    hostingActive = TRUE;
+    hostingActive = true;
   }
   else if (Action == "Start Game")   StartCountDown();
   else if (Action == "EXIT")         state = CONFIG2;
@@ -27,7 +27,7 @@ void HostMode()
     hostTimer = millis();
   }
 
-  if (decodedIRmessage.CheckSumOK == TRUE)  ActionCompletePacketandData();
+  if (decodedIRmessage.CheckSumOK == true)  ActionCompletePacketandData();
 }
  
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ void DrawHostMode()
     DrawButton( 20, 210, 200, 55, BLACK,  "Start Game",     2, GREY );
     DrawButton( 70, 290, 100, 30, YELLOW, "EXIT",           2, BLACK);
 
-    debugStartHost = FALSE;
+    debugStartHost = false;
   }
 }
 
@@ -88,12 +88,12 @@ void AnnounceCustomGame()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool gameIDmatch = FALSE; 
+bool gameIDmatch = false; 
 
 
 void ActionRequestJoinGameDataByte()
 {
-    if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)     gameIDmatch = TRUE;
+    if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)     gameIDmatch = true;
     else if (byteCount == 2)                                                  taggerID = decodedIRmessage.DataByte;
     else if (byteCount == 3)                                                  if(decodedIRmessage.DataByte == 0) TeamAndPlayerAutoSelect();
     // now wait for the CheckSum and then AssignPlayer() 
@@ -106,8 +106,8 @@ void ActionRequestJoinGameDataByte()
 void ActionCompletePacketandData()
 {
 Serial.print(F("\nCheckSum correct !"));
-  if      (decodedIRmessage.PacketName == "RequestJoinGame" && gameIDmatch == TRUE && taggerID != 0)     AssignPlayer();
-  else if (decodedIRmessage.PacketName == "AckPlayerAssign" && gameIDmatch == TRUE && taggerID != 0)
+  if      (decodedIRmessage.PacketName == "RequestJoinGame" && gameIDmatch == true && taggerID != 0)     AssignPlayer();
+  else if (decodedIRmessage.PacketName == "AckPlayerAssign" && gameIDmatch == true && taggerID != 0)
     {
       CheckTaggerAssignedCorrectly();
       //TOO: Now add it to the list of known taggers for Countdown flags
@@ -116,19 +116,19 @@ Serial.print(F("\nCheckSum correct !"));
     }
 }    
 ///////////////////////////////////////////////////////////////////////////////
-bool AckPlayerAssignOK = FALSE;
+bool AckPlayerAssignOK = false;
 
 void ActionAcknowledgePlayerAssignDataByte()
 {
    Serial.print(F("\tyep"));
    if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)
    {
-    if(hostedGameID == decodedIRmessage.DataByte) gameIDmatch = TRUE;
+    if(hostedGameID == decodedIRmessage.DataByte) gameIDmatch = true;
     Serial.print(F(" -1"));
    }
    else if (byteCount == 2)                                                  
    {
-    if (taggerID == decodedIRmessage.DataByte) AckPlayerAssignOK = TRUE;
+    if (taggerID == decodedIRmessage.DataByte) AckPlayerAssignOK = true;
     Serial.print(F(" -2"));
    }
    // now wait for the CheckSum and then CheckTaggerAssignedCorrectly() 
@@ -184,7 +184,7 @@ void AssignPlayer()                              // This is the reply to:    0x0
 
 void StartCountDown()
 {
-  hostingActive = FALSE;
+  hostingActive = false;
   static byte CountDownTime = 0x0A;           //  TODO: his needs to be BCD not HEX
   Serial.print(F("\nCountDown : "));
   Serial.print(CountDownTime);

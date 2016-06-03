@@ -142,16 +142,16 @@ void DrawTaggerScreenShieldsUp()
 
 void ProcessRxTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
 {
-    if (teamID == taggedTeamID && friendlyFire == FALSE && teamID != 0)
+    if (teamID == taggedTeamID && friendlyFire == false && teamID != 0)
     {
-      decodedIRmessage.newMessage = FALSE;
+      decodedIRmessage.newMessage = false;
       Serial.print(F("\nFriendlyFire"));
       return;
     }
 
-    if (shieldsUp == TRUE)
+    if (shieldsUp == true)
     {
-      decodedIRmessage.newMessage = FALSE;
+      decodedIRmessage.newMessage = false;
       tft.fillScreen(WHITE);
       lastState = NONE;
       DrawTaggerScreenShieldsUp();
@@ -188,7 +188,7 @@ void DisplayScores()
   {
     tft.fillScreen(BLACK);
     DrawButton( 70, 290,  100, 30, YELLOW, "EXIT", 2, BLACK);
-    scoresActive = TRUE;
+    scoresActive = true;
     tft.setTextColor(YELLOW);
     tft.setTextSize(1);
     for (uint8_t teamPlayerCount = 1; teamPlayerCount <25; teamPlayerCount++)
@@ -204,7 +204,7 @@ void DisplayScores()
   }
 
   char const* Action = GetButtonPress();
-  if (Action == "EXIT")  { scoresActive = FALSE; state = TAGGER; lastState = NONE; DrawTaggerScreen(); Serial.print(F("ExitScores")); }
+  if (Action == "EXIT")  { scoresActive = false; state = TAGGER; lastState = NONE; DrawTaggerScreen(); Serial.print(F("ExitScores")); }
 
   
 }

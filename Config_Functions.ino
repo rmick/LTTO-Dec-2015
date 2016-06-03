@@ -76,8 +76,8 @@ void SetHostile()
 {
   DrawSetHostile();
   char const* Action = GetButtonPress();
-  if      (Action == "Yes")  { hostile =  TRUE; lastState = NONE; }
-  else if (Action ==  "No")  { hostile = FALSE; lastState = NONE; } 
+  if      (Action == "Yes")  { hostile =  true; lastState = NONE; }
+  else if (Action ==  "No")  { hostile = false; lastState = NONE; } 
   else if (Action == "EXIT") { EEPROM.write(eeHOSTILE, hostile); state = CONFIG1; }
 }
 

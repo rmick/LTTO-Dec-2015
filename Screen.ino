@@ -15,27 +15,27 @@ char const* buttonPressed [12];
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool BeaconOn = FALSE;
+bool BeaconOn = false;
 uint32_t startTime = 0;
 uint16_t backColour = 1;
   
 bool BeaconFlash(bool OnOff)
 {
   
-  if (OnOff == TRUE)
+  if (OnOff == true)
   {
     backColour = tft.readPixel(1,1);
-    BeaconOn = TRUE;
+    BeaconOn = true;
     startTime = millis();
-    if (decodedIRmessage.TagReceivedBeacon == FALSE)  DrawTextLabel  ( 225,  295, backColour, "*", 2, RED,    0);
-    if (decodedIRmessage.TagReceivedBeacon == TRUE)   DrawTextLabel  ( 225,  295, backColour, "*", 2, GREEN,  0);     // Indicates Tag was received due a hit on the Tx Tagger.
+    if (decodedIRmessage.TagReceivedBeacon == false)  DrawTextLabel  ( 225,  295, backColour, "*", 2, RED,    0);
+    if (decodedIRmessage.TagReceivedBeacon == true)   DrawTextLabel  ( 225,  295, backColour, "*", 2, GREEN,  0);     // Indicates Tag was received due a hit on the Tx Tagger.
   }
-  else if (OnOff == FALSE)
+  else if (OnOff == false)
   {
     if ( (millis() - startTime) >150 && BeaconOn)
     {
       backColour = tft.readPixel(1,1);
-      BeaconOn = FALSE;
+      BeaconOn = false;
       DrawTextLabel  ( 225,  295, backColour, "*", 2, backColour, 0);
     }
   }
@@ -49,10 +49,10 @@ bool BeaconFlash(bool OnOff)
 void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
                 String Text, byte TextSize, uint16_t TextColour, uint8_t MaxCharacters) 
 {
-  bool Centre = FALSE;
+  bool Centre = false;
   
   // Calculate values if 0 is passed.
-  if (CursorX == 0) { CursorX = (240-((Text.length()*5)+Text.length()-1)*TextSize)/2; Centre = TRUE; }
+  if (CursorX == 0) { CursorX = (240-((Text.length()*5)+Text.length()-1)*TextSize)/2; Centre = true; }
   if (BoxColour == 1) BoxColour = tft.readPixel(CursorX, CursorY);
   if (MaxCharacters == 0) MaxCharacters = Text.length();
 
@@ -61,7 +61,7 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
   uint16_t BoxPosX;
   // Draw the box
   int BoxWidth = (((MaxCharacters*5)+(MaxCharacters-1))*TextSize)+2;
-  if (Centre == TRUE)
+  if (Centre == true)
   {
     BoxPosX = (240-BoxWidth)/2;
   }
@@ -95,7 +95,7 @@ void DrawTextLabel(uint16_t CursorX, uint16_t CursorY, uint16_t BoxColour,
 
 char const* GetButtonPress()
 {
-  if (GetTouch(FALSE))
+  if (GetTouch(false))
   {
     delay (200);  //TODO: fix the debounce properly.
 
@@ -130,7 +130,7 @@ bool GetTouch(bool Touched)
   TouchX = map(p.x, MIN_VAL_TOUCH_X, MAX_VAL_TOUCH_X, 0, tft.width() );
   TouchY = map(p.y, MIN_VAL_TOUCH_Y, MAX_VAL_TOUCH_Y, 0, tft.height());
   
-  if (p.z >10) Touched = TRUE;
+  if (p.z >10) Touched = true;
   return Touched;
 }
 
