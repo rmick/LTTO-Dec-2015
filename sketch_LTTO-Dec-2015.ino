@@ -1,4 +1,4 @@
-
+ 
 ////////////////////// Include libraries ////////////////////////
 
 #include <EnableInterrupt.h>
@@ -45,9 +45,6 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define  GREY     0x5050
 
 //////////////////// Global Constants //////////////////////////////
-
-//const bool true =  1;
-//const bool false = 0;
 
 const byte eeMEDIC_COUNT =   0;
 const byte eeMEDIC_DELAY =   2; 
