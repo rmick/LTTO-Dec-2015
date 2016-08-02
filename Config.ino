@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 //  void ConfigScreen1()
 //  void DrawConfigScreen1()
 //  void ConfigScreen2()

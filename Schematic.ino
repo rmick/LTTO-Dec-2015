@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 /*
 
 Connect an IR LED between Pin 13 and GND

@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 /*
  *  Connect an IR LED up to Digital pin 3 (PWM) for Arduino Uno
  *  Uses Ken Shirrif's IRremote library found at: https://github.com/shirriff/Arduino-IRremote

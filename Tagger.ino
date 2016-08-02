@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 //  void TaggerMode()
 //  void FireLaser(byte megaTag)
 //  void SetShields()
@@ -8,6 +10,10 @@
 //  void GameOver()
 
 
+
+
+
+/*
 byte tagPower = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,14 +53,16 @@ void FireLaser()
   if (tagCount < tagPower) return;    //TODO: Make a failed noise
   tft.fillScreen(YELLOW);
 
-  //Assemble the fireMessage
-  fireMessage = teamID;
-  fireMessage = fireMessage << 3;
-  fireMessage = fireMessage + (playerID-1);
-  fireMessage = fireMessage << 2;
-  fireMessage = fireMessage + (tagPower-1);
-
-  SendIR('T', fireMessage);
+  ltto.sendTag(teamID, playerID, tagPower);
+  
+//  //Assemble the fireMessage
+//  fireMessage = teamID;
+//  fireMessage = fireMessage << 3;
+//  fireMessage = fireMessage + (playerID-1);
+//  fireMessage = fireMessage << 2;
+//  fireMessage = fireMessage + (tagPower-1);
+//
+//  ltto.sendIR('T', fireMessage);
   
   tagCount = tagCount - (tagPower);
   if (tagCount >= 250 && tagCount <= 255) tagCount = 0;
@@ -216,4 +224,9 @@ void GameOver()
   DrawTextLabel ( 0, 100, BLACK, "Game", 6, RED, 0);
   DrawTextLabel ( 0, 180, BLACK, "Over", 6, RED, 0);
 }
+
+
+*/
+
+
 

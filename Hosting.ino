@@ -1,63 +1,314 @@
-//////////////////////////////////////////////////////////////////////
-static bool hostingActive = false;
+#include <Arduino.h>
 
+////--------------------------------------------------
+//  Hosting variables
+
+uint8_t	taggerToJoinID			= 0;
+byte	assignToTeam			= 1;
+byte	assignToPlayer			= 1;
+byte	assignToTeamAndPlayer	= 8;		// Team 1, Player 1, as per defaults above.
+byte	currentSelectedTeam		= 0;
+
+bool	gameIDmatch				= false; 
+byte	numberOfTeams			= 2;
+char	teamTags				= 'N';
+char	slowTags				= 'N';
+bool	toggleTeamsMode			= true;
+byte	countDownTime			= 10;
+
+
+
+const byte arraySize			= 10;
+int dataPacket[arraySize];					// an array to store a Packet, XX dataBytes and CheckSum: Max length = 15?
+byte dataPacketArrayIndex		= 0;
+
+
+////--------------------------------------------------
+//  Host 2TeamRespawn Roonka Game (captured packets from LTTO host)
+byte hostedGameType			= 0x0C;
+byte hostedGameID			= 0x42;
+byte hostedGameTime			= 0x15;
+byte hostedTagsAvailable	= 0x99;
+byte hostedReloadsAvailable = 0xFF;
+byte hostedShieldTime		= 0x60;
+byte hostedMegaTags			= 0x15;
+byte hostedPackedFlags1		= 0xA8;
+byte hostedPackedFlags2		= 0x32;
+byte name1					= 0x32;
+byte name2					= 0x54;
+byte name3					= 0x52;
+byte name4					= 0x53;
+byte checkSum				= 0x00;
+
+//////////////////////////////////////////////////////////////
 
 void HostMode()
 {
-  DrawHostMode();
-  
-  static unsigned long hostTimer = millis();
+    DrawHostMode();
 
-  if(debugStartHost) hostingActive = true;
-    
-  char const* Action = GetButtonPress();
-  if      (Action == "Host 2 Teams")
-  {
-    assignToTeam = 1;
-    assignToPlayer = 1;
-    hostingActive = true;
-  }
-  else if (Action == "Start Game")   StartCountDown();
-  else if (Action == "EXIT")         state = CONFIG2;
-
-
-  if (millis() - hostTimer > 1500 && hostingActive)
-  {
-    AnnounceCustomGame();
-    hostTimer = millis();
-  }
-
-  if (decodedIRmessage.CheckSumOK == true)  ActionCompletePacketandData();
+    char const* Action = GetButtonPress();
+	if (Action == "Start")
+	{
+		assignToPlayer = 1;
+		state = ANNOUNCE_GAME;
+	}
+	else if (Action == "# of Teams : ")
+	{
+		numberOfTeams++;
+		if (numberOfTeams >  3) numberOfTeams = 0;
+		if (numberOfTeams == 1) numberOfTeams = 2;
+		DrawTextLabel(195, 55, BLACK, String(numberOfTeams), 3, WHITE, 1);
+		if (numberOfTeams == 0)
+		{
+			assignToTeam = 0;
+			assignToTeamAndPlayer = 1;
+		}
+		else
+		{
+			assignToTeam = 1;
+			assignToTeamAndPlayer = 8;
+		}
+	}
+	else if (Action == "TeamTags ? : ")
+	{
+		if		(teamTags == 'Y') teamTags = 'N';
+		else if (teamTags == 'N') teamTags = 'Y';
+		DrawTextLabel(195, 115, BLACK, String(teamTags), 3, WHITE, 1);
+	}
+	else if (Action == "SlowTags ? : ")
+	{
+		if		(slowTags == 'Y') slowTags = 'N';
+		else if (slowTags == 'N') slowTags = 'Y';
+		DrawTextLabel(195, 175, BLACK, String(slowTags), 3, WHITE, 1);
+	}
+    else if (Action == "EXIT")         state = CONFIG2;
 }
- 
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void DrawHostMode()
 {
-  if (lastState != state)
-  {
-    #ifdef DEBUG
-      Serial.println(F("HostMode Screen"));
-    #endif
-    DrawScreen(HOST, "HOST GAME", MAGENTA, WHITE, 3);
-    DrawButton( 20,  50, 200, 55, BLACK,  "Host 2 Teams",   2, WHITE);
-    DrawButton( 20, 120, 200, 55, BLACK,  "",               2, WHITE);
-    DrawButton( 20, 210, 200, 55, BLACK,  "Start Game",     2, GREY );
-    DrawButton( 70, 290, 100, 30, YELLOW, "EXIT",           2, BLACK);
+	if (lastState != state)
+	{
+		#ifdef DEBUG
+		  Serial.println(F("HostMode Screen"));
+		#endif
+		DrawScreen(HOST, "HOST GAME", MAGENTA, WHITE, 3);
+		DrawButton	 ( 20,  40, 200, 55, BLACK, "# of Teams : ",		2, WHITE	);
+		DrawTextLabel(195,  55,			 BLACK,  String(numberOfTeams),	3, WHITE, 1	);
+		DrawButton	 ( 20, 100, 200, 55, BLACK,  "TeamTags ? : ",		2, WHITE	);
+		DrawTextLabel(195, 115,			 BLACK,	 String(teamTags),		3, WHITE, 1	);
+		DrawButton	 ( 20, 160, 200, 55, BLACK,  "SlowTags ? : ",		2, WHITE	);
+		DrawTextLabel(195, 175,			 BLACK,  String(slowTags),		3, WHITE, 1	);
+		DrawButton	 ( 20, 220, 200, 55, BLACK,  "Start",				2, WHITE	);  
+		DrawButton	 ( 70, 290, 100, 30, YELLOW, "EXIT",				2,BLACK		);
+	}
+}
 
-    debugStartHost = false;
-  }
+///////////////////////////////////////////////////////////////////////////////
+unsigned long hostTimer = millis();
+
+void AnnounceGame()
+{
+	DrawAnnounceGame();
+
+	char const* Action = GetButtonPress();
+	if (Action == "Set Team : ")
+	{
+		if (numberOfTeams == 0) return;	//ignore as there are no teams
+		assignToTeam++;
+		if (assignToTeam > numberOfTeams) assignToTeam = 1;
+		DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
+	}
+	else if (Action == "ToggleTeams?  ")
+	{
+		if (toggleTeamsMode)
+		{
+			toggleTeamsMode = false;
+			DrawTextLabel(195, 115, BLACK, "N", 3, WHITE, 1);
+		}
+		else
+		{
+			toggleTeamsMode = true;
+			DrawTextLabel(195, 115, BLACK, "Y", 3, WHITE, 1);
+		}
+	}
+	else if (Action == "Play Game")
+	{
+		StartCountDown();
+	}
+	else if (Action == "EXIT") state = HOST;
+
+
+	// Start the hosting activity
+	AdvertiseGame();
+	if (ltto.available() )
+	{
+		switch (ltto.readMessageType() )                        // readMessageType() returns the type of Message (TAG, BEACON, PACKET, DATA, CHECKSUM)
+		{
+		case PACKET:
+			dataPacketArrayIndex = 0;
+			if (ltto.readPacketName() == "REQUEST_JOIN_GAME")	dataPacket[dataPacketArrayIndex] = REQUEST_JOIN_GAME;
+			if (ltto.readPacketName() == "ACK_PLAYER_ASSIGN")	dataPacket[dataPacketArrayIndex] = ACK_PLAYER_ASSIGN;
+			break;
+
+		case DATA:
+			dataPacket[++dataPacketArrayIndex] = ltto.readDataByte();
+			break;
+
+		case CHECKSUM:
+			if (ltto.readCheckSumOK() )
+			{
+				if (dataPacket[0] == REQUEST_JOIN_GAME) ProcessJoinRequest();
+				if (dataPacket[0] == ACK_PLAYER_ASSIGN)	AddPlayerToList();
+			}
+			dataPacketArrayIndex = 0;
+			break;
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-////--------------------------------------------------
-  //  Hosting variables
+void DrawAnnounceGame()
+{
+	if (lastState != state)
+	{
+		#ifdef DEBUG
+			Serial.println(F("AnnounceGame Screen"));
+		#endif
+		DrawScreen(HOST, "JOIN TAGGERS", MAGENTA, WHITE, 3);
+		if (numberOfTeams != 0)
+		{
+			DrawButton(20,  40, 200, 55, BLACK, "Set Team : ",	  2, WHITE);
+			DrawButton(20, 100, 200, 55, BLACK, "ToggleTeams?  ", 2, WHITE);
+			DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
+			if (toggleTeamsMode) DrawTextLabel(195, 115, BLACK, "Y", 3, WHITE, 1);
+			else				 DrawTextLabel(195, 115, BLACK, "N", 3, WHITE, 1);
+		}
+		DrawButton(20, 220, 200, 55, BLACK, "Play Game", 2, WHITE);
+		DrawButton(70, 290, 100, 30, YELLOW, "EXIT",	2, BLACK);
+	}
+}
 
-  uint8_t   checkSumCalc = 0;
-  uint8_t   taggerID = 0;
- 
+///////////////////////////////////////////////////////////////////////////////
 
+void ProcessJoinRequest()
+{
+	
+		//Serial.print("\nRespnd to JoinRequest");
+		if (dataPacket[1] == hostedGameID)
+		{
+			taggerToJoinID = dataPacket[2];
+			byte teamRequest = (dataPacket[3] && B000011);
+			//if ( teamRequest != 0) assignToTeam = teamRequest;		//else assignToTeam = whatever it already is.
+			AssignPlayer();
+		}
+		return;
+		for (byte x = 0; x < arraySize; x++)
+		{
+			dataPacket[x] = 0;
+		}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AssignPlayer()                              // This is the reply to:    0x010 - Request Join Game
+{
+	Serial.print(F("\nAssignTeam - "));
+	Serial.print(assignToTeam);
+	Serial.print(F(" : Player - "));
+	Serial.println(assignToPlayer);
+	DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
+
+	AssignToPlayerAndTeam();
+
+	//TODO: Set up a callback to the main loop between each data byte.
+	delay(100);
+	ltto.sendIR(PACKET,		ASSIGN_PLAYER);
+	loop();
+	ltto.sendIR(DATA,		hostedGameID);
+	loop();
+	ltto.sendIR(DATA,		taggerToJoinID);
+	loop();
+	ltto.sendIR(DATA,		assignToTeamAndPlayer);
+	loop();
+	ltto.sendIR(CHECKSUM,	0x00);
+
+	SelectNextPlayerAndTeam();
+}
+
+void AddPlayerToList()
+{
+	//TODO:	Check for ACK_PLAYER_ASSIGN from Tagger in response to ASSIGN_PLAYER)
+	//TODO:	Now add it to the list of known taggers for Countdown flags
+}
+
+void AssignToPlayerAndTeam()
+{
+	assignToTeamAndPlayer = assignToTeam << 3;                                //  TeamID is 1 based
+	assignToTeamAndPlayer = assignToTeamAndPlayer + (assignToPlayer - 1);       //  PlayerID is 0 based
+	//ltto.printBinary(assignToTeamAndPlayer, 8);
+}
+
+void SelectNextPlayerAndTeam()
+{
+	if (toggleTeamsMode)
+	{
+		//Serial.print(F("\nToggleTeamsMode = Y  - "));
+		//Serial.print(assignToTeam);
+		assignToTeam++;
+		
+		if (assignToTeam > numberOfTeams)
+		{
+			if (assignToPlayer == 8) CheckIfGameIsFull();
+			else
+			{
+				assignToPlayer++;
+				assignToTeam = 1;
+			}
+		}
+		//Serial.print(assignToTeam);
+		DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
+		CheckIfGameIsFull();
+	}
+	else
+	{
+		//Serial.print(F("ToggleTeamsMode = N")); 
+		assignToPlayer++;
+		if (assignToPlayer > 8)
+		{
+			assignToPlayer = 1;
+			assignToTeam++;
+		}
+		CheckIfGameIsFull();
+		DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
+	}
+}
+
+void CheckIfGameIsFull()
+{
+	bool fullSteamAhead = false;
+	if (numberOfTeams == 0 && assignToPlayer > 24)	fullSteamAhead = true;
+	if (toggleTeamsMode)
+	{
+		if (numberOfTeams != 0 && (assignToTeam > numberOfTeams) && assignToPlayer == 8)
+			fullSteamAhead = true;
+	}
+	else
+	{
+		if (numberOfTeams != 0 && (assignToTeam > numberOfTeams) && assignToPlayer == 8)
+			fullSteamAhead = true;
+	}
+	if (fullSteamAhead)
+	{
+		delay(1500);
+		StartCountDown();
+	}
+}
+
+/*
   ////--------------------------------------------------
   //  Host 2Teams Game (captured packets from LTTO host)
   byte hostedGameType           = 0x03;
@@ -67,152 +318,66 @@ void DrawHostMode()
   byte hostedReloadsAvailable   = 0xFF;
   byte hostedShieldTime         = 0x15;
   byte hostedMegaTags           = 0x10;
-  byte hostedPackedFlags1       = 0x38;
+  byte hostedPackedFlags1       = 0xCC;
   byte hostedPackedFlags2       = 0x02;
+*/
 
-///////////////////////////////////////////////////////////////////////////////
-
-void AnnounceCustomGame()
-{
-  Serial.println(F("\n\tAnnounce 2 Teams Game"));
-  SendIR('P', hostedGameType);
-  SendIR('D', hostedGameID);
-  SendIR('D', hostedGameTime);
-  SendIR('D', hostedTagsAvailable);
-  SendIR('D', hostedReloadsAvailable);
-  SendIR('D', hostedShieldTime);
-  SendIR('D', hostedMegaTags);
-  SendIR('D', hostedPackedFlags1);
-  SendIR('D', hostedPackedFlags2);
-  SendIR('C', checkSumCalc);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-bool gameIDmatch = false; 
-
-
-void ActionRequestJoinGameDataByte()
-{
-    if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)     gameIDmatch = true;
-    else if (byteCount == 2)                                                  taggerID = decodedIRmessage.DataByte;
-    else if (byteCount == 3)                                                  if(decodedIRmessage.DataByte == 0) TeamAndPlayerAutoSelect();
-    // now wait for the CheckSum and then AssignPlayer() 
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-
-
-void ActionCompletePacketandData()
-{
-Serial.print(F("\nCheckSum correct !"));
-  if      (decodedIRmessage.PacketName == "RequestJoinGame" && gameIDmatch == true && taggerID != 0)     AssignPlayer();
-  else if (decodedIRmessage.PacketName == "AckPlayerAssign" && gameIDmatch == true && taggerID != 0)
-    {
-      CheckTaggerAssignedCorrectly();
-      //TOO: Now add it to the list of known taggers for Countdown flags
-      Serial.print(F("\n\tThe tagger has Ack'd our AssignPlayer()"));
-      //SendAckToTagger();
-    }
-}    
-///////////////////////////////////////////////////////////////////////////////
-bool AckPlayerAssignOK = false;
-
-void ActionAcknowledgePlayerAssignDataByte()
-{
-   Serial.print(F("\tyep"));
-   if      (byteCount == 1 && decodedIRmessage.DataByte == hostedGameID)
-   {
-    if(hostedGameID == decodedIRmessage.DataByte) gameIDmatch = true;
-    Serial.print(F(" -1"));
-   }
-   else if (byteCount == 2)                                                  
-   {
-    if (taggerID == decodedIRmessage.DataByte) AckPlayerAssignOK = true;
-    Serial.print(F(" -2"));
-   }
-   // now wait for the CheckSum and then CheckTaggerAssignedCorrectly() 
-}
+ 
 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CheckTaggerAssignedCorrectly()
+void AdvertiseGame()
 {
-  if (gameIDmatch && AckPlayerAssignOK) Serial.print(F("Got 'im !"));
-  else Serial.print(F("\nNope !!!"));
-}
+	if (millis() - hostTimer > 1500)
+	{
+		//Serial.println(F("\n\tAnnounce 2 Teams Game"));
+		ltto.sendIR(PACKET, hostedGameType);
+		ltto.sendIR(DATA, hostedGameID);
+		ltto.sendIR(DATA, hostedGameTime);
+		ltto.sendIR(DATA, hostedTagsAvailable);
+		ltto.sendIR(DATA, hostedReloadsAvailable);
+		ltto.sendIR(DATA, hostedShieldTime);
+		ltto.sendIR(DATA, hostedMegaTags);
+		ltto.sendIR(DATA, hostedPackedFlags1);
+		ltto.sendIR(DATA, hostedPackedFlags2);
+		ltto.sendIR(DATA, name1);
+		ltto.sendIR(DATA, name2);
+		ltto.sendIR(DATA, name3);
+		ltto.sendIR(DATA, name4);
+		ltto.sendIR(CHECKSUM, checkSum);
 
-
-
-
-
-byte assignToTeamAndPlayer = 0;
-
-
-void TeamAndPlayerAutoSelect()              //TODO: Need a way to stop Team X assignments via user intervention (eg. Only 4 players on Team 1 instead of 8)
-{
-  assignToTeamAndPlayer = assignToTeam << 3;                                //  TeamID is 1 based
-  
-  assignToTeamAndPlayer = assignToTeamAndPlayer + (assignToPlayer-1);       //  PlayerID is 0 based
-  assignToPlayer++;
-
-  if (assignToPlayer > 8)
-  {
-    if (assignToTeam == 2)  StartCountDown();
-    else
-    {
-      assignToTeam++;
-      assignToPlayer = 1;
-    } 
-  } 
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void AssignPlayer()                              // This is the reply to:    0x010 - Request Join Game
-{
-  Serial.println(F("\nAssignPlayer - "));
-  SendIR('P', 0x01);
-  SendIR('D', hostedGameID);
-  SendIR('D', taggerID);
-  SendIR('D', assignToTeamAndPlayer);
-  SendIR('C', checkSumCalc);
+		hostTimer = millis();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void StartCountDown()
 {
-  hostingActive = false;
-  static byte CountDownTime = 0x0A;           //  TODO: his needs to be BCD not HEX
-  Serial.print(F("\nCountDown : "));
-  Serial.print(CountDownTime);
-  SendIR('P', 0x00);
-  SendIR('D', hostedGameID);
-  SendIR('D', CountDownTime);
-  SendIR('D', 0x08);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
-  SendIR('D', 0x08);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
-  SendIR('D', 0x00);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
-  SendIR('C', checkSumCalc);
-  CountDownTime--;
-  delay (1000);
-  if (CountDownTime >0) StartCountDown();
-}
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-void RequestJoinGame()
-{
-  Serial.println(F("\nRequest Join Game"));
-  SendIR('P', 0x10);
-  SendIR('D', 0x7A);
-  SendIR('D', 0x42);
-  SendIR('D', 0x00);
-  SendIR('C', checkSumCalc);
+	#ifdef DEBUG
+		Serial.println(F("CountDown Screen"));
+	#endif
+	DrawScreen(HOST, "COUNT DOWN", RED, WHITE, 3);
+	while (countDownTime > 0)
+	{
+		Serial.print(F("\nCountDown : "));
+		Serial.print(countDownTime);
+		ltto.sendIR(PACKET,	0x00);
+		ltto.sendIR(DATA,		hostedGameID);
+		ltto.sendIR(DATA,		ConvertDecToBCD(countDownTime) );
+		ltto.sendIR(DATA,		0x08);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
+		ltto.sendIR(DATA,		0x08);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
+		ltto.sendIR(DATA,		0x00);                          //  TODO: This is packed byte of valid Team1 Player ID's  - Needs to be real data eventually.
+		ltto.sendIR(CHECKSUM, 0x00);
+		DrawTextLabel(0, 140, RED,String(countDownTime), 8, WHITE, 2);
+		countDownTime--;
+		delay (600);
+	}
+	// Resest the Respawn count
+	EEPROM.write(eeMEDIC_COUNT, 0);
+	medicCount = 0;
+	state = MEDIC;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,16 +393,16 @@ byte ConvertBCDtoDec(byte bcd)
   if (bcd == 0xff) return bcd;
   return (byte) (((bcd >> 4) & 0xF) *10) + (bcd & 0xF);
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void SendText()
 {
-  SendIR('P', 0x80);
-  SendIR('D', 0x48);
-  SendIR('D', 0x45);
-  SendIR('D', 0x4C);
-  SendIR('D', 0x4C);
-  SendIR('D', 0x4F);
-  SendIR('C', 0xF4);
+  ltto.sendIR(PACKET, 0x80);
+  ltto.sendIR(DATA, 0x48);
+  ltto.sendIR(DATA, 0x45);
+  ltto.sendIR(DATA, 0x4C);
+  ltto.sendIR(DATA, 0x4C);
+  ltto.sendIR(DATA, 0x4F);
+  ltto.sendIR(CHECKSUM, 0xF4);
 }
-

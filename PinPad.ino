@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 
 //  void ClearPin()
 //  void PinPadMode()
@@ -9,6 +11,7 @@
 byte pinCodeEntered[4];
 byte newPin[4];
 
+
 void ClearPin()
 {
   for (uint8_t x = 0; x<4; x++)
@@ -17,6 +20,7 @@ void ClearPin()
     newPin[x] = -1;
   }                                 
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -126,6 +130,7 @@ void DrawPinPadScreen()
 
 /////////////////////////////////////////////////////////////////////
 
+/*
 void DrawChangePinScreen(byte runNumber)
 { 
   if (lastState != state)
@@ -285,3 +290,4 @@ void StoreNewPin()
   }
 }
 
+*/

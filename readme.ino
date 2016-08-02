@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 /*
 
 This is the Start of a Medic Station to work with LTTO/LTX/LTAR (Hasbro/Nerf) laser tag systems
@@ -51,3 +53,4 @@ Lazerswarm - makers of a nice LTTO hosting system, whose WIKI was invaluable for
 
 Dejan Deletic - a great software engineer who answered numerous questions and always pointed me in the right direction.
 
+*/

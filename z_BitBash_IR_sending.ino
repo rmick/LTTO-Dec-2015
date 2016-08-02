@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 /*
 
 Adventures In Silicon LTTO

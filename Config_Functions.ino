@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 //  void SetTeam()
 //  void DrawSetTeam()
 //  void SetMedicDelay()

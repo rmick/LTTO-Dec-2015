@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 
 /* Arduino based example of lazertag protocol.
  * Based on the sample code by Kevin Osborn & Nick Hollander
