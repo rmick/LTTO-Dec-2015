@@ -29,7 +29,7 @@ void loop()
 
  uint8_t         taggerID = 0;
 
-	if (state == MEDIC) GetData();
+	//if (state == MEDIC) GetData();
     BeaconFlash(false);
 
 

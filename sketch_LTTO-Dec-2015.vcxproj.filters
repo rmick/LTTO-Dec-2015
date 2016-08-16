@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="sketch_LTTO-July2016.ino" />
+    <None Include="sketch_LTTO-Dec-2015.ino" />
     <None Include="A_MainLoop.ino" />
     <None Include="A_SetUp.ino" />
     <None Include="Config.ino" />
@@ -34,7 +34,7 @@
     <None Include="z_Using_IRLIB.ino" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.sketch_LTTO-July2016.vsarduino.h">
+    <ClInclude Include="__vm\.sketch_LTTO-Dec-2015.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
