@@ -36,3 +36,9 @@ Release/sketch_LTTO-Dec-2015.cpp.o
 Release/board.buildinfo
 
 .vs/sketch_LTTO-Dec-2015/v14/.suo
+
+*.xml
+
+__vm/Configuration.Release.vmps.xml
+
+__vm/Compile.vmps.xml
