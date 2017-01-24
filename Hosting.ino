@@ -9,17 +9,18 @@ byte	assignToPlayer			= 1;
 byte	assignToTeamAndPlayer	= 8;		// Team 1, Player 1, as per defaults above.
 byte	currentSelectedTeam		= 0;
 
-bool	gameIDmatch				= false; 
+bool	isGameIDmatched			= false; 
 byte	numberOfTeams			= 2;
 char	teamTags				= 'N';
 char	slowTags				= 'N';
-bool	toggleTeamsMode			= true;
+bool	isToggleTeamsModeActive	= true;
 byte	countDownTime			= 10;
 
 
 
 const byte arraySize			= 10;
 int dataPacket[arraySize];					// an array to store a Packet, XX dataBytes and CheckSum: Max length = 15?
+//int dataPacketArray [24] [arraySize];		// 24 is the max number of taggers in a game.
 byte dataPacketArrayIndex		= 0;
 
 
@@ -47,12 +48,12 @@ void HostMode()
     DrawHostMode();
 
     char const* Action = GetButtonPress();
-	if (Action == "Start")
+	if		(strcmp(Action, "Start") == 0)
 	{
 		assignToPlayer = 1;
 		state = ANNOUNCE_GAME;
 	}
-	else if (Action == "# of Teams : ")
+	else if (strcmp(Action, "# of Teams : ") == 0)
 	{
 		numberOfTeams++;
 		if (numberOfTeams >  3) numberOfTeams = 0;
@@ -69,21 +70,20 @@ void HostMode()
 			assignToTeamAndPlayer = 8;
 		}
 	}
-	else if (Action == "TeamTags ? : ")
+	else if (strcmp(Action, "TeamTags ? : ") == 0)
 	{
 		if		(teamTags == 'Y') teamTags = 'N';
 		else if (teamTags == 'N') teamTags = 'Y';
 		DrawTextLabel(195, 115, BLACK, String(teamTags), 3, WHITE, 1);
 	}
-	else if (Action == "SlowTags ? : ")
+	else if (strcmp(Action, "SlowTags ? : ") == 0)
 	{
 		if		(slowTags == 'Y') slowTags = 'N';
 		else if (slowTags == 'N') slowTags = 'Y';
 		DrawTextLabel(195, 175, BLACK, String(slowTags), 3, WHITE, 1);
 	}
-    else if (Action == "EXIT")         state = CONFIG2;
+    else if (strcmp(Action, "EXIT")	== 0)        state = CONFIG2;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -108,49 +108,68 @@ void DrawHostMode()
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned long hostTimer = millis();
+bool isAdvertiseGameDisabled = false;
+
+void SetisAdvertiseGameDisabled(bool state)		//TODO Debug only
+{
+	isAdvertiseGameDisabled = state;
+}
+
 
 void AnnounceGame()
 {
 	DrawAnnounceGame();
 
 	char const* Action = GetButtonPress();
-	if (Action == "Set Team : ")
+	if (strcmp(Action, "Set Team : ")	==0)
 	{
 		if (numberOfTeams == 0) return;	//ignore as there are no teams
 		assignToTeam++;
 		if (assignToTeam > numberOfTeams) assignToTeam = 1;
 		DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
 	}
-	else if (Action == "ToggleTeams?  ")
+	else if (strcmp(Action, "ToggleTeams?  ")	== 0)
 	{
-		if (toggleTeamsMode)
+		if (isToggleTeamsModeActive)
 		{
-			toggleTeamsMode = false;
+			isToggleTeamsModeActive = false;
 			DrawTextLabel(195, 115, BLACK, "N", 3, WHITE, 1);
 		}
 		else
 		{
-			toggleTeamsMode = true;
+			isToggleTeamsModeActive = true;
 			DrawTextLabel(195, 115, BLACK, "Y", 3, WHITE, 1);
 		}
 	}
-	else if (Action == "Play Game")
+	else if (strcmp(Action, "Play Game")	== 0)
 	{
 		StartCountDown();
 	}
-	else if (Action == "EXIT") state = HOST;
-
+	else if (strcmp(Action, "EXIT")	== 0) state = HOST;
 
 	// Start the hosting activity
 	AdvertiseGame();
+
 	if (ltto.available() )
 	{
-		switch (ltto.readMessageType() )                        // readMessageType() returns the type of Message (TAG, BEACON, PACKET, DATA, CHECKSUM)
+		switch (ltto.readMessageType())                        // readMessageType() returns the type of Message (TAG, BEACON, PACKET, DATA, CHECKSUM)
 		{
 		case PACKET:
+			//if (ltto.readPacketName() != "ANNOUNCE_GAME")	digitalWrite(13, HIGH);
+			
 			dataPacketArrayIndex = 0;
-			if (ltto.readPacketName() == "REQUEST_JOIN_GAME")	dataPacket[dataPacketArrayIndex] = REQUEST_JOIN_GAME;
-			if (ltto.readPacketName() == "ACK_PLAYER_ASSIGN")	dataPacket[dataPacketArrayIndex] = ACK_PLAYER_ASSIGN;
+			if (ltto.readPacketName() == "REQUEST_JOIN_GAME")
+			{
+				dataPacket[dataPacketArrayIndex] = REQUEST_JOIN_GAME;
+				isAdvertiseGameDisabled = true;
+				digitalWrite(13, HIGH);
+			}
+			if (ltto.readPacketName() == "ACK_PLAYER_ASSIGN")
+			{
+				dataPacket[dataPacketArrayIndex] = ACK_PLAYER_ASSIGN;
+				isAdvertiseGameDisabled = true;
+				digitalWrite(13,  HIGH);
+			}
 			break;
 
 		case DATA:
@@ -160,8 +179,18 @@ void AnnounceGame()
 		case CHECKSUM:
 			if (ltto.readCheckSumOK() )
 			{
-				if (dataPacket[0] == REQUEST_JOIN_GAME) ProcessJoinRequest();
-				if (dataPacket[0] == ACK_PLAYER_ASSIGN)	AddPlayerToList();
+				if (dataPacket[0] == REQUEST_JOIN_GAME)
+				{
+					isAdvertiseGameDisabled = false;
+					digitalWrite(13, LOW);
+					ProcessJoinRequest();
+				}
+				if (dataPacket[0] == ACK_PLAYER_ASSIGN)
+				{
+					isAdvertiseGameDisabled = false;
+					digitalWrite(13, LOW);
+					AddPlayerToList();
+				}
 			}
 			dataPacketArrayIndex = 0;
 			break;
@@ -184,7 +213,7 @@ void DrawAnnounceGame()
 			DrawButton(20,  40, 200, 55, BLACK, "Set Team : ",	  2, WHITE);
 			DrawButton(20, 100, 200, 55, BLACK, "ToggleTeams?  ", 2, WHITE);
 			DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
-			if (toggleTeamsMode) DrawTextLabel(195, 115, BLACK, "Y", 3, WHITE, 1);
+			if (isToggleTeamsModeActive) DrawTextLabel(195, 115, BLACK, "Y", 3, WHITE, 1);
 			else				 DrawTextLabel(195, 115, BLACK, "N", 3, WHITE, 1);
 		}
 		DrawButton(20, 220, 200, 55, BLACK, "Play Game", 2, WHITE);
@@ -197,12 +226,14 @@ void DrawAnnounceGame()
 void ProcessJoinRequest()
 {
 	
-		//Serial.print("\nRespnd to JoinRequest");
+	//	TODO: Add each new unique TaggerID to the array to enable tracking multiples at once.
+
+		//Serial.print(F("\nRespnd to JoinRequest"));
 		if (dataPacket[1] == hostedGameID)
 		{
-			taggerToJoinID = dataPacket[2];
+			taggerToJoinID = dataPacket[2];	// datapacket becomes dataPacket [24] [X]
 			byte teamRequest = (dataPacket[3] && B000011);
-			//if ( teamRequest != 0) assignToTeam = teamRequest;		//else assignToTeam = whatever it already is.
+			if ( teamRequest != 0) assignToTeam = teamRequest;		//else assignToTeam = whatever it already is.
 			AssignPlayer();
 		}
 		return;
@@ -216,24 +247,21 @@ void ProcessJoinRequest()
 
 void AssignPlayer()                              // This is the reply to:    0x010 - Request Join Game
 {
-	Serial.print(F("\nAssignTeam - "));
-	Serial.print(assignToTeam);
-	Serial.print(F(" : Player - "));
-	Serial.println(assignToPlayer);
+	#ifdef DEBUG
+		Serial.print(F("\nAssignTeam - "));
+		Serial.print(assignToTeam);
+		Serial.print(F(" : Player - "));
+		Serial.println(assignToPlayer);
+	#endif
 	DrawTextLabel(195, 55, BLACK, String(assignToTeam), 3, WHITE, 1);
 
 	AssignToPlayerAndTeam();
 
-	//TODO: Set up a callback to the main loop between each data byte.
 	delay(100);
 	ltto.sendIR(PACKET,		ASSIGN_PLAYER);
-	loop();
 	ltto.sendIR(DATA,		hostedGameID);
-	loop();
 	ltto.sendIR(DATA,		taggerToJoinID);
-	loop();
 	ltto.sendIR(DATA,		assignToTeamAndPlayer);
-	loop();
 	ltto.sendIR(CHECKSUM,	0x00);
 
 	SelectNextPlayerAndTeam();
@@ -247,14 +275,14 @@ void AddPlayerToList()
 
 void AssignToPlayerAndTeam()
 {
-	assignToTeamAndPlayer = assignToTeam << 3;                                //  TeamID is 1 based
-	assignToTeamAndPlayer = assignToTeamAndPlayer + (assignToPlayer - 1);       //  PlayerID is 0 based
+	assignToTeamAndPlayer = assignToTeam << 3;									//  TeamID is 1 based
+	assignToTeamAndPlayer = assignToTeamAndPlayer + (assignToPlayer - 1);		//  PlayerID is 0 based
 	//ltto.printBinary(assignToTeamAndPlayer, 8);
 }
 
 void SelectNextPlayerAndTeam()
 {
-	if (toggleTeamsMode)
+	if (isToggleTeamsModeActive)
 	{
 		//Serial.print(F("\nToggleTeamsMode = Y  - "));
 		//Serial.print(assignToTeam);
@@ -289,50 +317,38 @@ void SelectNextPlayerAndTeam()
 
 void CheckIfGameIsFull()
 {
-	bool fullSteamAhead = false;
-	if (numberOfTeams == 0 && assignToPlayer > 24)	fullSteamAhead = true;
-	if (toggleTeamsMode)
+	bool isGameFull = false;
+	if (numberOfTeams == 0 && assignToPlayer > 24)	isGameFull = true;
+	if (isToggleTeamsModeActive)
 	{
 		if (numberOfTeams != 0 && (assignToTeam > numberOfTeams) && assignToPlayer == 8)
-			fullSteamAhead = true;
+			isGameFull = true;
 	}
 	else
 	{
 		if (numberOfTeams != 0 && (assignToTeam > numberOfTeams) && assignToPlayer == 8)
-			fullSteamAhead = true;
+			isGameFull = true;
 	}
-	if (fullSteamAhead)
+	if (isGameFull)
 	{
 		delay(1500);
 		StartCountDown();
 	}
 }
 
-/*
-  ////--------------------------------------------------
-  //  Host 2Teams Game (captured packets from LTTO host)
-  byte hostedGameType           = 0x03;
-  byte hostedGameID             = 0xED;
-  byte hostedGameTime           = 0x10;
-  byte hostedTagsAvailable      = 0x99;
-  byte hostedReloadsAvailable   = 0xFF;
-  byte hostedShieldTime         = 0x15;
-  byte hostedMegaTags           = 0x10;
-  byte hostedPackedFlags1       = 0xCC;
-  byte hostedPackedFlags2       = 0x02;
-*/
-
- 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void AdvertiseGame()
 {
-	if (millis() - hostTimer > 1500)
+	unsigned long currentMillis = millis();
+	if ((unsigned long)(currentMillis - hostTimer) >= 1500)
 	{
-		//Serial.println(F("\n\tAnnounce 2 Teams Game"));
+		if (isAdvertiseGameDisabled) return;
+
+		noInterrupts();
+		Serial.print("\nAnnounce");
 		ltto.sendIR(PACKET, hostedGameType);
+		//hostedGameID = (rand() % 100) + 1;					// TODO: Convert to Hex and check the range of valid numbers
 		ltto.sendIR(DATA, hostedGameID);
 		ltto.sendIR(DATA, hostedGameTime);
 		ltto.sendIR(DATA, hostedTagsAvailable);
@@ -346,7 +362,7 @@ void AdvertiseGame()
 		ltto.sendIR(DATA, name3);
 		ltto.sendIR(DATA, name4);
 		ltto.sendIR(CHECKSUM, checkSum);
-
+		interrupts();
 		hostTimer = millis();
 	}
 }
@@ -361,8 +377,6 @@ void StartCountDown()
 	DrawScreen(HOST, "COUNT DOWN", RED, WHITE, 3);
 	while (countDownTime > 0)
 	{
-		Serial.print(F("\nCountDown : "));
-		Serial.print(countDownTime);
 		ltto.sendIR(PACKET,	0x00);
 		ltto.sendIR(DATA,		hostedGameID);
 		ltto.sendIR(DATA,		ConvertDecToBCD(countDownTime) );
@@ -372,7 +386,12 @@ void StartCountDown()
 		ltto.sendIR(CHECKSUM, 0x00);
 		DrawTextLabel(0, 140, RED,String(countDownTime), 8, WHITE, 2);
 		countDownTime--;
-		delay (600);
+		for (byte i = 0; i < 7; i++)
+		{
+			ltto.available();									//	Read messages (and ignore them) to clear the RxFIFO and stop it from overflowing. 
+		}
+		delay (900);
+		
 	}
 	// Resest the Respawn count
 	EEPROM.write(eeMEDIC_COUNT, 0);
@@ -396,6 +415,7 @@ byte ConvertBCDtoDec(byte bcd)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
 void SendText()
 {
   ltto.sendIR(PACKET, 0x80);
@@ -406,3 +426,4 @@ void SendText()
   ltto.sendIR(DATA, 0x4F);
   ltto.sendIR(CHECKSUM, 0xF4);
 }
+*/

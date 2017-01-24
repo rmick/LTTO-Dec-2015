@@ -9,78 +9,78 @@
 //  void DecodeTagIR()
 //  void GameOver()
 
-
-
-
-
-/*
 byte tagPower = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void TaggerMode()
 { 
-  DrawTaggerScreen();
+	DrawTaggerScreen();
   
-  char const* Action = GetButtonPress();
-  if      (Action == "Team")      { teamID++;   if (teamID == 4)    teamID = 0;   DrawTextLabel(50, 90,  GREEN, String(teamID),   2, BLACK, 1); }
-  else if (Action == "Player")    { playerID++; if (playerID == 9)  playerID = 1; DrawTextLabel(50, 175, GREEN, String(playerID), 2, BLACK, 1); }
-  else if (Action == "TagPower")  { tagPower++; if (tagPower == 5)  tagPower = 1; DrawTextLabel(50, 260, GREEN, String(tagPower), 2, BLACK, 1); }
-  else if (Action == "Fire")      FireLaser();
-  else if (Action == "Shields")   SetShields();
-  else if (Action == "ReLoad")    Reload();
-  else if (Action == "Scores")    state = SCORES;                    
-  else if (Action == "EXIT")      state = CONFIG1;
+	char const* Action = GetButtonPress();
+	if      (strcmp(Action, "Team")		== 0)	{ teamID++;   if (teamID == 4)    teamID = 0;   DrawTextLabel(50, 90,  GREY, String(teamID),   2, WHITE, 1); }
+	else if (strcmp(Action, "Player")	== 0)	{ playerID++; if (playerID == 9)  playerID = 1; DrawTextLabel(50, 175, GREY, String(playerID), 2, WHITE, 1); }
+	else if (strcmp(Action, "TagPower")	== 0)	{ tagPower++; if (tagPower == 5)  tagPower = 1; DrawTextLabel(50, 260, GREY, String(tagPower), 2, WHITE, 1); }
+	else if (strcmp(Action, "Fire")		== 0)	FireLaser();
+	else if (strcmp(Action, "Shields")	== 0)	SetShields();
+	else if (strcmp(Action, "ReLoad")	== 0)	Reload();
+	else if (strcmp(Action, "Scores")	== 0)	state = SCORES;                    
+	else if (strcmp(Action, "EXIT")		== 0)	state = CONFIG1;
 
-  if (shieldsUp) UpdateShieldsTimer();
+	if (shieldsUp) UpdateShieldsTimer();
+
+	CheckIR();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+uint32_t shieldsRunningTime;
+
 void UpdateShieldsTimer()
 {
-  static uint16_t shieldsTimer = micros();
-  
-  //Start a timer           // TODO:
-  //check if 1 second has expired and then update display and variable
+	if ((shieldsRunningTime + 1000) < millis() )		// TODO: Allow for rollover
+	{
+		Serial.print(F(" -- "));
+		shieldsTimer--;
+		shieldsRunningTime = millis();
+		DrawTextLabel(165, 260, GREY, String(shieldsTimer), 3, RED, 2);
+		if (shieldsTimer == 0)
+		{
+			Serial.print(F("\nZero"));
+			shieldsUp = false;
+			lastState = NONE;
+			DrawTaggerScreen();
+		}
+	}
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void FireLaser()
-{
-  unsigned int fireMessage;
-  
-  if (tagCount == 0) return;          //TODO: Make a click noise
-  if (tagCount < tagPower) return;    //TODO: Make a failed noise
-  tft.fillScreen(YELLOW);
-
-  ltto.sendTag(teamID, playerID, tagPower);
-  
-//  //Assemble the fireMessage
-//  fireMessage = teamID;
-//  fireMessage = fireMessage << 3;
-//  fireMessage = fireMessage + (playerID-1);
-//  fireMessage = fireMessage << 2;
-//  fireMessage = fireMessage + (tagPower-1);
-//
-//  ltto.sendIR('T', fireMessage);
-  
-  tagCount = tagCount - (tagPower);
-  if (tagCount >= 250 && tagCount <= 255) tagCount = 0;
-  lastState = NONE;
-  DrawTaggerScreen();
+{  
+	if (tagCount == 0) return;          //TODO: Make a click noise
+	if (tagCount < tagPower) return;    //TODO: Make a failed noise
+	ltto.sendTag(teamID, playerID, tagPower);
+	tagCount = tagCount - (tagPower);
+	if (tagCount >= 250 && tagCount <= 255) tagCount = 0;
+	lastState = NONE;
+	DrawTaggerScreen();
 }
 ///////////////////////////////////////////////////////////////////////////////
-uint16_t shieldsTimeMicros;
 
 void SetShields()
 {
-//  if (remainingShields) ;    // Need to add some smarts here.  //TODO:
-  shieldsUp = !shieldsUp;
-  lastState = NONE;
-  if (!shieldsUp) DrawTaggerScreen();
-  else if (shieldsUp) DrawTaggerScreenShieldsUp();
-
-                                                                  //TODO: Shields countdown timer.
+	if (shieldsTimer == 0) return;
+	else
+	{
+		shieldsUp = !shieldsUp;
+		lastState = NONE;
+		if (!shieldsUp) DrawTaggerScreen();
+		else if (shieldsUp)
+		{
+			shieldsRunningTime = millis();
+			DrawTaggerScreenShieldsUp();
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,14 +88,13 @@ void SetShields()
 void Reload()
 {
   static uint8_t remainingReloads = maxReloads;
-  // if maxReloads is 0 then unlimited reloads, else keep count.
-  
-  //if (remainingReloads >0)
+
+  if (remainingReloads >0 || maxReloads == 0)			 // if maxReloads is 0 then unlimited reloads, else keep count.
   {
     tft.fillScreen(BLACK);
     delay (500);
     tagCount = reloadAmount;
-    remainingReloads--;
+    if (remainingReloads > 0)  remainingReloads--;
     lastState = NONE;
     DrawTaggerScreen();
   }
@@ -110,24 +109,24 @@ void DrawTaggerScreen()
     #ifdef DEBUG
       Serial.println(F("\nDrawTaggerScreen"));
     #endif
-    DrawScreen(TAGGER, "TAG MODE", GREEN, BLUE, 3);
+    DrawScreen(TAGGER, "TAG MODE", GREY, BLUE, 3);
     lastState = state;
-    DrawButton(  5,  30,  100, 55, WHITE,  "Team",     2, BLACK);
-    DrawButton(  5, 115,  100, 55, WHITE,  "Player",   2, BLACK);
-    DrawButton(  5, 200,  100, 55, WHITE,  "TagPower", 2, BLACK);
-    DrawButton(135,  30,  100, 55, BLACK,  "ReLoad",   2, WHITE);
-    DrawButton(135, 125,  100, 55, YELLOW, "Fire",     2, YELLOW);
-    DrawButton(135, 200,  100, 55, RED,    "Shields",  2, GREEN);
-    DrawButton(  5, 290,   50, 30, YELLOW, "Scores",   1, BLACK);
-    DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",     2, BLACK);
+    DrawButton(  5,  30,  100, 55, WHITE,  "Team",		2, BLACK);
+    DrawButton(  5, 115,  100, 55, WHITE,  "Player",	2, BLACK);
+    DrawButton(  5, 200,  100, 55, WHITE,  "TagPower",	2, BLACK);
+    DrawButton(135,  30,  100, 55, BLACK,  "ReLoad",	2, WHITE);
+    DrawButton(135, 125,  100, 55, YELLOW, "Fire",		2, YELLOW);
+    DrawButton(135, 200,  100, 55, RED,    "Shields",	2, GREEN);
+    DrawButton(  5, 290,   50, 30, YELLOW, "Scores",	1, BLACK);
+    DrawButton( 70, 290,  100, 30, YELLOW, "EXIT",		2, BLACK);
 
-    DrawTextLabel(  50, 90,  GREEN,  String(teamID),       2, BLACK, 1);
-    DrawTextLabel(  50, 175, GREEN,  String(playerID),     2, BLACK, 1);
-    DrawTextLabel(  50, 260, GREEN,  String(tagPower),     2, BLACK, 1);
-    DrawTextLabel( 165,  88, GREEN,  String(tagCount),     3, BLACK, 2);
-    DrawTextLabel( 150, 130, YELLOW, "Health",             2, BLACK, 0);
-    DrawTextLabel( 170, 155, YELLOW, String(playerHealth), 3, BLACK, 2);
-    DrawTextLabel( 165, 260, GREEN,  String(shieldsTimer), 3, RED,   2);
+    DrawTextLabel(  50, 90,  GREY,  String(teamID),       2, WHITE, 1);
+    DrawTextLabel(  50, 175, GREY,  String(playerID),     2, WHITE, 1);
+    DrawTextLabel(  50, 260, GREY,  String(tagPower),     2, WHITE, 1);
+    DrawTextLabel( 165,  88, GREY,  String(tagCount),     3, WHITE, 2);
+	DrawTextLabel( 165, 130, YELLOW,"Tag",				  2, BLACK, 0);
+    DrawTextLabel( 170, 155, YELLOW,String(playerHealth), 3, BLACK, 2);
+    DrawTextLabel( 165, 260, GREY,  String(shieldsTimer), 3, RED,   2);
   }
 }
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,53 +138,99 @@ void DrawTaggerScreenShieldsUp()
     #ifdef DEBUG
       Serial.println(F("DrawTaggerScreen-ShieldsUp"));
     #endif
-    DrawScreen(TAGGER, "TAG MODE", GREEN, BLUE, 3);
+    DrawScreen(TAGGER, "TAG MODE", GREY, BLUE, 3);
     lastState = state;
     DrawButton(135, 200,  100, 55, RED,    "Shields",  2, GREEN);
-    DrawTextLabel( 165, 260, GREEN,  String(shieldsTimer), 3, RED,   2);
+    DrawTextLabel( 165, 260, GREY,  String(shieldsTimer), 3, RED,   2);
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProcessRxTag(byte taggedTeamID, byte taggedPlayerID, byte taggedMegaPower)
+void CheckIR()
 {
-    if (teamID == taggedTeamID && friendlyFire == false && teamID != 0)
-    {
-      decodedIRmessage.newMessage = false;
-      Serial.print(F("\nFriendlyFire"));
-      return;
-    }
+	if (ltto.available())										// available() checks if there is a message to receive. (1 = true, 0 = false)
+	{
+		switch (ltto.readMessageType())                        // readMessageType() returns the type of Message (TAG, BEACON, PACKET, DATA, CHECKSUM)
+		{
+		case TAG:
+			if (teamID == ltto.readTeamID() && friendlyFire == false && teamID != 0)
+			{
+				ShowFriendlyFire();
+				return;
+			}
+			if (shieldsUp == true)
+			{
+				TakeHitShieldsUp();
+				return;
+			}
+			else
+			{
+				TakeHit();
+				UpdateScoreGrid();
+				CheckIfDead();
+			}
+			break;
 
-    if (shieldsUp == true)
-    {
-      decodedIRmessage.newMessage = false;
-      tft.fillScreen(WHITE);
-      lastState = NONE;
-      DrawTaggerScreenShieldsUp();
-      Serial.print(F("\nShields Blocked A Shot"));
-      return;
-      }
+		case BEACON:
+			BeaconFlash(true);
+			break;
+		}
+	}
+}
 
-    //Take the hit
-    //tft.fillScreen(RED);
-    //lastState = NONE;
-    //DrawTaggerScreen();
-    playerHealth = playerHealth - taggedMegaPower;
-    if (playerHealth <= 255 && playerHealth >= 250) playerHealth = 0;
-    if (state == TAGGER) DrawTextLabel( 170, 155, YELLOW, String(playerHealth), 3, BLACK, 2);
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void TakeHitShieldsUp()
+{
+	DrawButton(135, 200, 100, 55, RED, "Shields Blocked", 2, GREEN);
+	delay(500);
+	lastState = NONE;
+	DrawTaggerScreenShieldsUp();
+#ifdef DEBUG
+	Serial.print(F("\nShields Blocked A Shot"));
+#endif
+}
 
-    //Update the scoreGrid
-    byte currentHitIndex;
-    currentHitIndex = taggedPlayerID;
-    if (teamID != 0)  currentHitIndex = currentHitIndex + (teamID * 8);
-    scoreGrid[currentHitIndex] = scoreGrid[currentHitIndex] + taggedMegaPower;
-    
-    //Check if they are dead !
-    if (playerHealth == 0)
-      {
-        state = GAME_OVER;
-      }
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void UpdateScoreGrid()
+{
+	byte currentHitIndex;
+	currentHitIndex = ltto.readPlayerID();
+	if (teamID != 0)  currentHitIndex = currentHitIndex + (teamID * 8);
+	scoreGrid[currentHitIndex] = scoreGrid[currentHitIndex] + ltto.readShotStrength();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void CheckIfDead()
+{
+	if (playerHealth == 0)
+	{
+		state = GAME_OVER;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void TakeHit()
+{
+	tft.fillScreen(RED);
+	lastState = NONE;
+	DrawTaggerScreen();
+	playerHealth = playerHealth - ltto.readShotStrength();
+	if (playerHealth <= 255 && playerHealth >= 250) playerHealth = 0;
+	DrawTextLabel(170, 155, YELLOW, String(playerHealth), 3, BLACK, 2);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void ShowFriendlyFire()
+{
+	DrawButton(135, 200, 100, 55, RED, "Friendly Fire", 2, GREEN);
+	delay(500);
+	lastState = NONE;
+	DrawTaggerScreen();
+#ifdef DEBUG
+	Serial.print(F("\nFriendlyFire"));
+#endif
+	return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -203,16 +248,13 @@ void DisplayScores()
     {
       tft.setCursor(60, (teamPlayerCount*11)+5);
       byte displayPlayerID = teamPlayerCount%8; if (displayPlayerID == 0) displayPlayerID = 8;
-      tft.print("Team "); tft.print(teamPlayerCount/8); tft.print(", Player "); tft.print(displayPlayerID); tft.print(": ");
+      tft.print("Team "); tft.print(((teamPlayerCount-1)/8)+1); tft.print(", Player "); tft.print(displayPlayerID); tft.print(": ");
       tft.println(scoreGrid[teamPlayerCount]);
-
-      //Serial.print(F("Team ")); Serial.print(teamPlayerCount/8); Serial.print(F(", Player ")); Serial.print(displayPlayerID); Serial.print((F": "));
-      //Serial.println(scoreGrid[teamPlayerCount]);
     }
   }
 
   char const* Action = GetButtonPress();
-  if (Action == "EXIT")  { scoresActive = false; state = TAGGER; lastState = NONE; DrawTaggerScreen(); Serial.print(F("ExitScores")); }
+  if (strcmp(Action, "EXIT")	== 0)  { scoresActive = false; state = TAGGER; lastState = NONE; DrawTaggerScreen(); }
 
   
 }
@@ -224,9 +266,4 @@ void GameOver()
   DrawTextLabel ( 0, 100, BLACK, "Game", 6, RED, 0);
   DrawTextLabel ( 0, 180, BLACK, "Over", 6, RED, 0);
 }
-
-
-*/
-
-
 

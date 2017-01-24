@@ -42,3 +42,5 @@ Release/board.buildinfo
 __vm/Configuration.Release.vmps.xml
 
 __vm/Compile.vmps.xml
+
+Release/board.buildinfo

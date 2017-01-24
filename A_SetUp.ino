@@ -2,11 +2,13 @@
 
 void setup()
 {
-	Serial.begin(115200);
+	Serial.begin(250000);
 	delay(500);
 	Serial.println(F("\nHere we go boys...."));
-    ltto.begin(13,11);
+    ltto.begin(10,11);
   
+	pinMode(13, OUTPUT);						//TODO: Remove this DEBUG code (heartbeat LED)
+
 	////---------------------------------------------------------------------------------------------------------
 	//  Set up the LCD screen
   
@@ -36,4 +38,8 @@ void setup()
                              pinCode[1] = 2,     EEPROM.write(eePIN_CODE+1, 2);
                              pinCode[2] = 3;     EEPROM.write(eePIN_CODE+2, 3);
                              pinCode[3] = 4;     EEPROM.write(eePIN_CODE+3, 4);  }
+
+	maxReloads = 4;		//TODO: temporary assignment
+
+
 }

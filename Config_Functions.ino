@@ -12,14 +12,14 @@
 
 void SetTeam()
 {
-  DrawSetTeam();
+	DrawSetTeam();
  
-  char const* Action = GetButtonPress();
-  if      (Action == "No Team")  { teamID = 0; lastState = NONE; }
-  else if (Action == "Team 1")   { teamID = 1; lastState = NONE; }
-  else if (Action == "Team 2")   { teamID = 2; lastState = NONE; }
-  else if (Action == "Team 3")   { teamID = 3; lastState = NONE; }
-  else if (Action == "EXIT")     { EEPROM.write(eeTEAM_ID, teamID); state = CONFIG1; }
+	char const* Action = GetButtonPress();
+	if      (strcmp(Action, "No Team")	== 0)	{ teamID = 0; lastState = NONE; }
+	else if (strcmp(Action, "Team 1")	== 0)	{ teamID = 1; lastState = NONE; }
+	else if (strcmp(Action, "Team 2")	== 0)	{ teamID = 2; lastState = NONE; }
+	else if (strcmp(Action, "Team 3")	== 0)	{ teamID = 3; lastState = NONE; }
+	else if (strcmp(Action, "EXIT")		== 0)	{ EEPROM.write(eeTEAM_ID, teamID); state = CONFIG1; }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -47,40 +47,40 @@ void DrawSetTeam()
 
 void SetMedicDelay()
 {
-  DrawMedicDelay();
-  
-  char const* Action = GetButtonPress();
-  if      (Action == "Up")      { medicDelay++; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
-  else if (Action == "Down")    { medicDelay--; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
-  else if (Action == "EXIT")    { EEPROM.write(eeMEDIC_DELAY, medicDelay); state = CONFIG1; }
+	DrawMedicDelay();
+	char const* Action = GetButtonPress();
+	if      (strcmp(Action, "Up")	== 0)	{ medicDelay++; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
+	else if (strcmp(Action, "Down")	== 0)	{ medicDelay--; DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3); }
+	else if (strcmp(Action, "EXIT")	== 0)	{ EEPROM.write(eeMEDIC_DELAY, medicDelay); state = CONFIG1; }
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void DrawMedicDelay()
 {
-  if (lastState != state)
-  {
-    #ifdef DEBUG Serial.println(F("SetMedicDelayScreen"));
-    #endif
-    DrawScreen(SET_MEDIC_DELAY, "MEDIC DELAY", MAGENTA, WHITE, 3);
-    DrawButton( 20,  50, 200, 55, BLACK,  "Up",   2, WHITE);
-    DrawButton( 20, 210, 200, 55, BLACK,  "Down", 2, WHITE);
-    DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
+	if (lastState != state)
+	{
+		#ifdef DEBUG
+			Serial.println(F("SetMedicDelayScreen"));
+		#endif
+		DrawScreen(SET_MEDIC_DELAY, "MEDIC DELAY", MAGENTA, WHITE, 3);
+		DrawButton( 20,  50, 200, 55, BLACK,  "Up",   2, WHITE);
+		DrawButton( 20, 210, 200, 55, BLACK,  "Down", 2, WHITE);
+		DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
     
-    DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3);
-  }
+		DrawTextLabel( 0,  140, MAGENTA, String(medicDelay), 4, BLACK, 3);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void SetHostile()
 {
-  DrawSetHostile();
-  char const* Action = GetButtonPress();
-  if      (Action == "Yes")  { hostile =  true; lastState = NONE; }
-  else if (Action ==  "No")  { hostile = false; lastState = NONE; } 
-  else if (Action == "EXIT") { EEPROM.write(eeHOSTILE, hostile); state = CONFIG1; }
+	DrawSetHostile();
+	char const* Action = GetButtonPress();
+	if      (strcmp(Action, "Yes")	== 0)	{ hostile =  true; lastState = NONE; }
+	else if (strcmp(Action, "No")	== 0)	{ hostile = false; lastState = NONE; } 
+	else if (strcmp(Action, "EXIT")	== 0)	{ EEPROM.write(eeHOSTILE, hostile); state = CONFIG1; }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -91,7 +91,8 @@ void DrawSetHostile()
   {
     if (lastState != state)
     {
-      #ifdef DEBUG Serial.println(F("DrawSetHostileScreen"));
+      #ifdef DEBUG
+		Serial.println(F("DrawSetHostileScreen"));
       #endif
       DrawScreen(SET_HOSTILE, "NOT VALID", MAGENTA, WHITE, 3);
       DrawButton( 70, 290, 100, 30, YELLOW, "EXIT", 2, BLACK);
@@ -106,7 +107,8 @@ void DrawSetHostile()
   else
   if (lastState != state)
   {
-    #ifdef DEBUG Serial.println(F("SetHostileScreen"));
+    #ifdef DEBUG
+	  Serial.println(F("SetHostileScreen"));
     #endif
     DrawScreen(SET_HOSTILE, "HOSTILE ?", MAGENTA, WHITE, 3);
     DrawButton( 20,  80, 200, 55, BLACK,  "Yes", 2, WHITE);
@@ -123,10 +125,9 @@ void DrawSetHostile()
 void ClearScore()
 {
     DrawClearScore();
- 
-  char const* Action = GetButtonPress();
-  if      (Action == "Yes")  { EEPROM.write(eeMEDIC_COUNT, 0); medicCount = 0; tft.fillScreen(BLACK); state = CONFIG1; }
-  else if (Action == "No")   state = CONFIG1;
+	char const* Action = GetButtonPress();
+	if      (strcmp(Action, "Yes")	== 0)	{ EEPROM.write(eeMEDIC_COUNT, 0); medicCount = 0; tft.fillScreen(BLACK); state = CONFIG1; }
+	else if (strcmp(Action, "No")	== 0)	state = CONFIG1;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -135,7 +136,8 @@ void DrawClearScore()
 {
   if (lastState != state)
   {
-    #ifdef DEBUG Serial.println(F("ClearScoreScreen"));
+    #ifdef DEBUG
+	  Serial.println(F("ClearScoreScreen"));
     #endif
     DrawScreen(SET_TEAM, "ARE YOU SURE", MAGENTA, WHITE, 3);
     DrawButton( 20,  80, 200, 55, BLACK,  "No", 2, WHITE);

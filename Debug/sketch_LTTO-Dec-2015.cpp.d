@@ -15,11 +15,11 @@ C:\Users\lighting\AppData\Local\Temp\VMicroBuilds\sketch_LTTO-Dec-2015\mega_atme
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
  W:\Arduino\libraries\EnableInterrupt/utility/ei_PinChange2560.h \
  W:\Arduino\libraries\EnableInterrupt/utility/ei_External2560.h \
- W:\Arduino\libraries\Adafruit_GFX_Library/Adafruit_GFX.h \
- C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Print.h \
- W:\Arduino\libraries\Adafruit_GFX_Library/gfxfont.h \
  W:\Arduino\libraries\Touch-Screen/TouchScreen.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\libraries\EEPROM\src/EEPROM.h \
  W:\Arduino\libraries\LTTO/LTTO.h W:\Arduino\libraries\LTTO/HashDefines.h \
- C:\Program\ Files\ (x86)\Microsoft\ Visual\ Studio\ 14.0\Common7\IDE\Extensions\n35wnuk5.sum\Micro\ Platforms\default\debuggers/VM_DBG/VM_DBG.h \
- W:\Arduino\libraries\SWTFT-Shield/SWTFT.h
+ C:\Program\ Files\ (x86)\Microsoft\ Visual\ Studio\ 14.0\Common7\IDE\Extensions\p24cgt5u.13b\Micro\ Platforms\default\debuggers\VM_DBG/VM_DBG.h \
+ W:\Arduino\libraries\Mcufriend_kbv/MCUFRIEND_kbv.h \
+ W:\Arduino\libraries\Adafruit_GFX_Library/Adafruit_GFX.h \
+ C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Print.h \
+ W:\Arduino\libraries\Adafruit_GFX_Library/gfxfont.h

@@ -17,16 +17,16 @@ char const* buttonPressed [12];
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool BeaconOn = false;
+bool isBeaconOn = false;
 uint32_t startTime = 0;
 uint16_t backColour = 1;
   
-bool BeaconFlash(bool OnOff)
+void BeaconFlash(bool isOnOff)
 {
-	if (OnOff == true)
+	if (isOnOff == true)
 	{
 		backColour = tft.readPixel(1, 1);
-		BeaconOn = true;
+		isBeaconOn = true;
 		startTime = millis();
 
 		if (ltto.readTeamID() == teamID)				DrawTextLabel(225, 295, backColour, "*", 2, GREEN, 0);
@@ -36,12 +36,12 @@ bool BeaconFlash(bool OnOff)
 			if (ltto.readTagReceivedBeacon() == true)   DrawTextLabel(225, 295, backColour, "*", 2, BLUE,  0);     // Indicates Tag was received due a hit on the Tx Tagger.
 		}
 	}
-	else if (OnOff == false)
+	else if (isOnOff == false)
 	{
-		if ( (millis() - startTime) >150 && BeaconOn)
+		if ( (millis() - startTime) >150 && isBeaconOn)
 		{
 			backColour = tft.readPixel(1,1);
-			BeaconOn = false;
+			isBeaconOn = false;
 			DrawTextLabel  ( 225,  295, backColour, "*", 2, backColour, 0);
 		}
 	}
@@ -106,23 +106,22 @@ char const* GetButtonPress()
     delay (200);  //TODO: fix the debounce properly.
 
     // Match it to a button
-
     for (byte row=0; row<12; row++) 
     {
       if (TouchX > Buttons [row] [0] && TouchX < Buttons [row] [2])
       {
         if (TouchY > Buttons [row] [1] && TouchY < Buttons [row] [3])
         {
-          #ifdef DEBUG
-            Serial.print(F("Button Pressed: "));
-            Serial.println(buttonPressed [row]);
-          #endif
+			#ifdef DEBUG
+				Serial.print(F("\nButton Pressed: "));
+				Serial.println(buttonPressed [row]);
+			#endif
         return buttonPressed [row];    
         }
       }  
     }
   } 
-  else return "42"; 
+  return "42";		// Needs this dummy return to stop Warning in the Compilier
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -145,48 +144,49 @@ bool GetTouch(bool Touched)
 #define MINPRESSURE 10
 #define MAXPRESSURE 1000
 
-//TSPoint getPressPosition()
-//{
-// 
-//   TSPoint p, q;
-//   int upCount = 0;
-// 
-//   // Wait for screen press
-//   do
-//   {
-//      q = ts.getPoint();
-//      delay(10);
-//   } while( q.z < MINPRESSURE || q.z > MAXPRESSURE );
-// 
-//   // Save initial touch point
-//   p.x = q.x; p.y = q.y; p.z = q.z;
-// 
-//   // Wait for finger to come up
-//   do
-//   {
-//      q = ts.getPoint();
-//      if ( q.z < MINPRESSURE || q.z > MAXPRESSURE  )
-//      {
-//         upCount++;
-//      }
-//      else
-//      {
-//         upCount = 0;
-//         p.x = q.x; p.y = q.y; p.z = q.z;
-//      }
-// 
-//      delay(10);             // Try varying this delay
-// 
-//   } while( upCount < 10 );  // and this count for different results.
-// 
-//   TouchX = map(p.x, MIN_VAL_TOUCH_X, MAX_VAL_TOUCH_X, 0, tft.width() );
-//   TouchY = map(p.y, MIN_VAL_TOUCH_Y, MAX_VAL_TOUCH_Y, 0, tft.height());
-// 
-//  pinMode(XM, OUTPUT);
-//  pinMode(YP, OUTPUT);
-// 
-//   return p;
-//}
+TSPoint getPressPosition()			//TOTO: Start uisng this function (with deBounce) instead of GetTouch()
+{
+ 
+   TSPoint p, q;
+   int upCount = 0;
+ 
+   // Wait for screen press
+   do
+   {
+      q = ts.getPoint();
+      delay(10);
+   } while( q.z < MINPRESSURE || q.z > MAXPRESSURE );
+ 
+   // Save initial touch point
+   p.x = q.x; p.y = q.y; p.z = q.z;
+ 
+   // Wait for finger to come up
+   do
+   {
+      q = ts.getPoint();
+      if ( q.z < MINPRESSURE || q.z > MAXPRESSURE  )
+      {
+         upCount++;
+      }
+      else
+      {
+         upCount = 0;
+         p.x = q.x; p.y = q.y; p.z = q.z;
+      }
+ 
+      delay(10);             // Try varying this delay
+ 
+   } 
+   while( upCount < 10 );  // and this count for different results.
+
+   TouchX = map(p.x, MIN_VAL_TOUCH_X, MAX_VAL_TOUCH_X, 0, tft.width() );
+   TouchY = map(p.y, MIN_VAL_TOUCH_Y, MAX_VAL_TOUCH_Y, 0, tft.height());
+
+  pinMode(XM, OUTPUT);
+  pinMode(YP, OUTPUT);
+ 
+   return p;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

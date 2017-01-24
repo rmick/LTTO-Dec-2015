@@ -12,8 +12,8 @@ void MedicMode()
   DrawMedicScreen();   
   static int count;
   char const* Action = GetButtonPress();
-  if      (Action == "Heal")   ReCharge(medicDelay);
-  else if (Action == "CONFIG")   state = PINPAD;
+  if      (strcmp(Action, "Heal")	== 0)   ReCharge(medicDelay);
+  else if (strcmp(Action, "CONFIG")	== 0)   state = PINPAD;
 
   count++;
  
@@ -33,7 +33,8 @@ void DrawMedicScreen()
 {
   if (lastState != state)
   {
-    #ifdef DEBUG Serial.println(F("DrawMedicScreen"));
+    #ifdef DEBUG
+	  Serial.println(F("DrawMedicScreen"));
     #endif
     DrawScreen(MEDIC, "MEDIC STATION", BLACK, RED, 3);
     DrawButton  (40,   40, 160, 160, BLACK,  "Heal", 4, BLACK);      // Draw a huge 'hidden' button behind the Red Cross

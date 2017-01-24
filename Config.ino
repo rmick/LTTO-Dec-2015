@@ -8,18 +8,17 @@
 
 void ConfigScreen1()
 {
-  DrawConfigScreen1();
+	DrawConfigScreen1();
 
-  char const* Action = GetButtonPress();
-  if      (Action == "Set Team")              state = SET_TEAM;
-  else if (Action == "Set Medic Delay")       state = SET_MEDIC_DELAY;
-  else if (Action == "Set Hostile")           state = SET_HOSTILE;
-  else if (Action == "Clear Score")           state = CLEAR_SCORE;
-  else if (Action == "More...")               state = CONFIG2;
-  else if (Action == "EXIT")                  state = MEDIC;
+	char const* Action = GetButtonPress();
+	if      (strcmp(Action, "Set Team")			== 0)	state = SET_TEAM;
+	else if (strcmp(Action, "Set Medic Delay")	== 0)	state = SET_MEDIC_DELAY;
+	else if (strcmp(Action, "Set Hostile")		== 0)	state = SET_HOSTILE;
+	else if (strcmp(Action, "Clear Score")		== 0)	state = CLEAR_SCORE;
+	else if (strcmp(Action, "More...")			== 0)	state = CONFIG2;
+	else if (strcmp(Action, "EXIT")				== 0)	state = MEDIC;
 
 ////////////////  Later on add MODES
-////////////////  Simple Host
 ////////////////  Capture the flag
 ////////////////  Own the Zone
 ////////////////  Ammo supply base
@@ -52,10 +51,10 @@ void ConfigScreen2()
   DrawConfigScreen2();
   
   char const* Action = GetButtonPress();
-  if      (Action == "Change PIN")  state = CHANGE_PIN;
-  else if (Action == "Tagger")      state = TAGGER;
-  else if (Action == "Host Game")   state = HOST;
-  else if (Action == "EXIT")        state = CONFIG1;
+  if      (strcmp(Action, "Change PIN")	== 0)	state = CHANGE_PIN;
+  else if (strcmp(Action, "Tagger")		== 0)	state = TAGGER;
+  else if (strcmp(Action, "Host Game")	== 0)	state = HOST;
+  else if (strcmp(Action, "EXIT")		== 0)	state = CONFIG1;
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -3,17 +3,17 @@
 
 #define  EI_ARDUINO_INTERRUPTED_PIN
 #include <EnableInterrupt.h>
-#include <Adafruit_GFX.h>
 #include <TouchScreen.h>
 #include <EEPROM.h>
 #include <LTTO.h>
 LTTO ltto;
 
-#include <SWTFT.h>
-SWTFT tft;
+//#include <SWTFT.h>
+//#include <Adafruit_GFX.h>
+//SWTFT tft;
 
-//#include <MCUFRIEND_kbv.h>
-//MCUFRIEND_kbv tft;
+#include <MCUFRIEND_kbv.h>
+MCUFRIEND_kbv tft;
 
 ////////////////////// Setup Touchscreen ////////////////////////
 
@@ -100,8 +100,12 @@ const char HOST             = 'H';
 const char ANNOUNCE_GAME    = 'a';
 const char COUNT_DOWN_TMR	= 'c';
 
-char state = MEDIC;
+char state = CONFIG2;
 char lastState = NONE;
 
 byte buttonCount;
 bool touchGood = 0;
+
+
+#define TERMINAL_INTERFACE
+#define TEST

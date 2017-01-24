@@ -32,6 +32,7 @@
     <None Include="z_Hostile_Field_Emitter.ino" />
     <None Include="z_Spare_Stuff.ino" />
     <None Include="z_Using_IRLIB.ino" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.sketch_LTTO-Dec-2015.vsarduino.h">

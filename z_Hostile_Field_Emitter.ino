@@ -4,8 +4,6 @@
 
 #include <IRremoteHFE.h>
 
-/*
-
 HOSTILE FIELD EMITTER (HFE)- A Lazer Tag Landmine
 
 Created August 2013 by James Scott
